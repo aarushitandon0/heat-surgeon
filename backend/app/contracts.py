@@ -58,6 +58,11 @@ def _check_cost_range(low: float, high: float) -> None:
         raise ValueError(f"cost_inr_low {low} exceeds cost_inr_high {high}")
 
 
+def _check_band(low: float, high: float, name: str) -> None:
+    if low > high:
+        raise ValueError(f"{name}_low {low} exceeds {name}_high {high}")
+
+
 # --- Provenance ----------------------------------------------------------------
 
 class Provenance(Contract):
@@ -174,18 +179,29 @@ class CalibrationRequest(Contract):
 
 
 class CalibrationResult(Contract):
+    """Baseline surface temperature model fitted on calibration cells (90 m blocks), plus the
+    published albedo coefficient range used for albedo interventions, which is not fitted."""
+
     street_id: str
     bbox_window: BBoxWGS84
+    calibration_resolution_m: float = Field(gt=0)
+    t_base_c: float = Field(description="Modelled surface temperature of a fully paved cell.")
     k_canopy_c_per_fraction: float
-    k_albedo_c_per_unit_albedo: float
-    k_impervious_c_per_fraction: float
-    t_base_c: float
+    k_built_c_per_fraction: float
+    k_bare_c_per_fraction: float
+    k_albedo_low_c_per_unit_albedo: float = Field(ge=0, description="Published measurement, not fitted.")
+    k_albedo_high_c_per_unit_albedo: float = Field(ge=0, description="Published measurement, not fitted.")
     rmse_holdout_c: float = Field(ge=0)
     rmse_mean_baseline_c: float = Field(ge=0)
     r2_holdout: float
-    n_pixels_fit: int = Field(gt=0)
-    n_pixels_holdout: int = Field(gt=0)
+    n_cells_fit: int = Field(gt=0)
+    n_cells_holdout: int = Field(gt=0)
     provenance: list[Provenance] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _albedo_band(self):
+        _check_band(self.k_albedo_low_c_per_unit_albedo, self.k_albedo_high_c_per_unit_albedo, "k_albedo")
+        return self
 
 
 # --- Optimization --------------------------------------------------------------
@@ -220,7 +236,8 @@ class OptimizeProgress(Contract):
     best_fitness_score: float = Field(
         description="Dimensionless scalarized objective (SPEC.md §6.3). Not a physical quantity; never displayed as one."
     )
-    best_temp_delta_c: float
+    best_temp_delta_c_low: float
+    best_temp_delta_c_high: float
     best_cost_inr_low: float = Field(ge=0)
     best_cost_inr_high: float = Field(ge=0)
     layout_preview: list[Intervention] | None = Field(
@@ -228,8 +245,9 @@ class OptimizeProgress(Contract):
     )
 
     @model_validator(mode="after")
-    def _cost_range(self):
+    def _ranges(self):
         _check_cost_range(self.best_cost_inr_low, self.best_cost_inr_high)
+        _check_band(self.best_temp_delta_c_low, self.best_temp_delta_c_high, "best_temp_delta_c")
         return self
 
 
@@ -255,13 +273,15 @@ class ModelError(Contract):
 
 
 class ComparisonArm(Contract):
-    temp_delta_c: float
+    temp_delta_c_low: float
+    temp_delta_c_high: float
     cost_inr_low: float = Field(ge=0)
     cost_inr_high: float = Field(ge=0)
 
     @model_validator(mode="after")
-    def _cost_range(self):
+    def _ranges(self):
         _check_cost_range(self.cost_inr_low, self.cost_inr_high)
+        _check_band(self.temp_delta_c_low, self.temp_delta_c_high, "temp_delta_c")
         return self
 
 
@@ -296,6 +316,7 @@ class DesignGrid(Contract):
 
 class Resolution(Contract):
     measurement_resolution_m: float = Field(gt=0)
+    calibration_resolution_m: float = Field(gt=0)
     design_resolution_m: float = Field(gt=0)
     output_kind: Literal["model_output_at_design_resolution"]
 
@@ -304,8 +325,10 @@ class OptimizationResult(Contract):
     job_id: str
     street: StreetRef
     baseline_temp_c: float
-    optimized_temp_c: float
-    temp_delta_c: float
+    optimized_temp_c_low: float
+    optimized_temp_c_high: float
+    temp_delta_c_low: float = Field(description="More-cooling end of the band from the published albedo coefficient range.")
+    temp_delta_c_high: float = Field(description="Less-cooling end. Equal to temp_delta_c_low when no albedo intervention is used.")
     cost_inr_low: float = Field(ge=0)
     cost_inr_high: float = Field(ge=0)
     model: ModelError
@@ -313,15 +336,19 @@ class OptimizationResult(Contract):
     interventions: list[Intervention]
     design_grid: DesignGrid
     before_lst_c: list[list[float | None]]
-    after_lst_c: list[list[float | None]]
+    after_lst_c_low: list[list[float | None]]
+    after_lst_c_high: list[list[float | None]]
     resolution: Resolution
     provenance: list[Provenance] = Field(min_length=1)
 
     @model_validator(mode="after")
     def _consistent(self):
         _check_cost_range(self.cost_inr_low, self.cost_inr_high)
+        _check_band(self.temp_delta_c_low, self.temp_delta_c_high, "temp_delta_c")
+        _check_band(self.optimized_temp_c_low, self.optimized_temp_c_high, "optimized_temp_c")
         _check_grid(self.before_lst_c, self.design_grid.shape, "before_lst_c")
-        _check_grid(self.after_lst_c, self.design_grid.shape, "after_lst_c")
+        _check_grid(self.after_lst_c_low, self.design_grid.shape, "after_lst_c_low")
+        _check_grid(self.after_lst_c_high, self.design_grid.shape, "after_lst_c_high")
         rows, cols = self.design_grid.shape
         for intervention in self.interventions:
             for row, col in intervention.cells:

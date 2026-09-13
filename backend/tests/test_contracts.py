@@ -22,9 +22,11 @@ from app.contracts import (
 
 TS_CONTRACTS = Path(__file__).resolve().parents[2] / "frontend" / "src" / "types" / "contracts.ts"
 
-UNIT_SUFFIX = re.compile(r"_(c|m|deg|inr|inr_low|inr_high|inr_max|c_per_fraction|c_per_unit_albedo|c_per_inr)$")
+UNIT_SUFFIX = re.compile(
+    r"_(c|c_low|c_high|m|deg|inr|inr_low|inr_high|inr_max|c_per_fraction|c_per_unit_albedo|c_per_inr)$"
+)
 DIMENSIONLESS = {
-    "scene_count", "valid_pixels", "n_pixels_fit", "n_pixels_holdout", "generation", "generations",
+    "scene_count", "valid_pixels", "n_cells_fit", "n_cells_holdout", "generation", "generations",
     "generations_total", "population", "cells", "states_per_cell", "seed",
     "holdout_fraction", "r2_holdout", "best_fitness_score",
 }
@@ -67,7 +69,7 @@ def thermal_grid(**overrides):
 
 
 def arm(delta_c, low, high):
-    return {"temp_delta_c": delta_c, "cost_inr_low": low, "cost_inr_high": high}
+    return {"temp_delta_c_low": delta_c, "temp_delta_c_high": delta_c, "cost_inr_low": low, "cost_inr_high": high}
 
 
 def optimization_result(**overrides):
@@ -75,8 +77,10 @@ def optimization_result(**overrides):
         "job_id": "job-1",
         "street": {"id": "test-street", "name": "Test Street"},
         "baseline_temp_c": 36.0,
-        "optimized_temp_c": 35.0,
-        "temp_delta_c": -1.0,
+        "optimized_temp_c_low": 34.8,
+        "optimized_temp_c_high": 35.0,
+        "temp_delta_c_low": -1.2,
+        "temp_delta_c_high": -1.0,
         "cost_inr_low": 100.0,
         "cost_inr_high": 200.0,
         "model": {"rmse_holdout_c": 0.5, "rmse_mean_baseline_c": 2.0},
@@ -87,9 +91,10 @@ def optimization_result(**overrides):
             "bearing_deg": 37.4, "cell_size_m": 2.0, "shape": [2, 2],
         },
         "before_lst_c": [[36.0, 36.1], [None, 36.2]],
-        "after_lst_c": [[35.0, 36.1], [None, 35.2]],
+        "after_lst_c_low": [[34.8, 36.1], [None, 35.0]],
+        "after_lst_c_high": [[35.0, 36.1], [None, 35.2]],
         "resolution": {
-            "measurement_resolution_m": 30, "design_resolution_m": 2,
+            "measurement_resolution_m": 30, "calibration_resolution_m": 90, "design_resolution_m": 2,
             "output_kind": "model_output_at_design_resolution",
         },
         "provenance": [provenance(), provenance(product="land_cover")],
@@ -149,13 +154,18 @@ def test_intervention_outside_design_grid_is_rejected():
 
 def test_cost_range_must_be_ordered():
     with pytest.raises(ValidationError):
-        ComparisonArm(temp_delta_c=-1.0, cost_inr_low=300, cost_inr_high=200)
+        ComparisonArm(temp_delta_c_low=-1.0, temp_delta_c_high=-1.0, cost_inr_low=300, cost_inr_high=200)
+
+
+def test_temperature_band_must_be_ordered():
+    with pytest.raises(ValidationError, match="temp_delta_c_low"):
+        ComparisonArm(temp_delta_c_low=-0.5, temp_delta_c_high=-1.0, cost_inr_low=100, cost_inr_high=200)
 
 
 def test_websocket_message_discriminates_on_type():
     message = TypeAdapter(OptimizeMessage).validate_python({
         "type": "progress", "job_id": "job-1", "generation": 3, "generations_total": 400,
-        "best_fitness_score": 1.2, "best_temp_delta_c": -0.8,
+        "best_fitness_score": 1.2, "best_temp_delta_c_low": -0.9, "best_temp_delta_c_high": -0.8,
         "best_cost_inr_low": 100, "best_cost_inr_high": 200, "layout_preview": None,
     })
     assert isinstance(message, OptimizeProgress)

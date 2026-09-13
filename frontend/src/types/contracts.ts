@@ -124,18 +124,28 @@ export interface CalibrationRequest {
   seed: number
 }
 
+/**
+ * Baseline surface temperature model fitted on calibration cells (90 m blocks), plus the
+ * published albedo coefficient range used for albedo interventions, which is not fitted.
+ */
 export interface CalibrationResult {
   street_id: string
   bbox_window: BBoxWGS84
-  k_canopy_c_per_fraction: number
-  k_albedo_c_per_unit_albedo: number
-  k_impervious_c_per_fraction: number
+  calibration_resolution_m: number
+  /** Modelled surface temperature of a fully paved cell. */
   t_base_c: number
+  k_canopy_c_per_fraction: number
+  k_built_c_per_fraction: number
+  k_bare_c_per_fraction: number
+  /** Published measurement, not fitted. */
+  k_albedo_low_c_per_unit_albedo: number
+  /** Published measurement, not fitted. */
+  k_albedo_high_c_per_unit_albedo: number
   rmse_holdout_c: number
   rmse_mean_baseline_c: number
   r2_holdout: number
-  n_pixels_fit: number
-  n_pixels_holdout: number
+  n_cells_fit: number
+  n_cells_holdout: number
   provenance: Provenance[]
 }
 
@@ -170,7 +180,8 @@ export interface OptimizeProgress {
   generations_total: number
   /** Dimensionless scalarized objective. Not a physical quantity; never display it as one. */
   best_fitness_score: number
-  best_temp_delta_c: number
+  best_temp_delta_c_low: number
+  best_temp_delta_c_high: number
   best_cost_inr_low: number
   best_cost_inr_high: number
   /** Sent only when the best individual improves; null otherwise. */
@@ -198,7 +209,8 @@ export interface ModelError {
 }
 
 export interface ComparisonArm {
-  temp_delta_c: number
+  temp_delta_c_low: number
+  temp_delta_c_high: number
   cost_inr_low: number
   cost_inr_high: number
 }
@@ -225,6 +237,7 @@ export interface DesignGrid {
 
 export interface Resolution {
   measurement_resolution_m: number
+  calibration_resolution_m: number
   design_resolution_m: number
   output_kind: 'model_output_at_design_resolution'
 }
@@ -233,8 +246,12 @@ export interface OptimizationResult {
   job_id: string
   street: StreetRef
   baseline_temp_c: number
-  optimized_temp_c: number
-  temp_delta_c: number
+  optimized_temp_c_low: number
+  optimized_temp_c_high: number
+  /** More-cooling end of the band from the published albedo coefficient range. */
+  temp_delta_c_low: number
+  /** Less-cooling end. Equal to temp_delta_c_low when no albedo intervention is used. */
+  temp_delta_c_high: number
   cost_inr_low: number
   cost_inr_high: number
   model: ModelError
@@ -244,7 +261,9 @@ export interface OptimizationResult {
   /** Model output at design resolution, not a measurement. */
   before_lst_c: (number | null)[][]
   /** Model output at design resolution, not a measurement. */
-  after_lst_c: (number | null)[][]
+  after_lst_c_low: (number | null)[][]
+  /** Model output at design resolution, not a measurement. */
+  after_lst_c_high: (number | null)[][]
   resolution: Resolution
   provenance: Provenance[]
 }

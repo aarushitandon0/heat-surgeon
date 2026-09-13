@@ -2,11 +2,11 @@
 
     python -m app.model.validate --street pune-fc-road
 
-Fits the heat model on a random (1 - holdout_fraction) share of the neighbourhood
-window's usable pixels, predicts the rest, and reports rmse_holdout_c,
-rmse_mean_baseline_c and r2_holdout. The mean baseline predicts every held-out pixel as
-the mean of the fitting pixels, so neither error sees held-out data during fitting.
-Runs offline from fixtures.
+Calibration cells are 90 m blocks (3 x 3 Landsat cells), close to the thermal band's 100 m
+native resolution. Surface temperature is the mean of the block's measured cells; surface
+cover fractions are exact area shares. The baseline model is fitted on a random
+(1 - holdout_fraction) share of usable blocks and scored on the rest. The mean baseline
+predicts every held-out block as the mean of the fitting blocks. Runs offline from fixtures.
 """
 
 import argparse
@@ -18,8 +18,8 @@ import numpy as np
 
 from app import config
 from app.contracts import CalibrationRequest, CalibrationResult
-from app.data.fixtures import load_window
-from app.data.landcover import land_cover_fractions
+from app.data.fixtures import CachedWindow, load_window
+from app.data.landcover import SurfaceCover, block_fractions, block_mean, classify_surfaces
 from app.model.heat import HeatModel, fit
 
 REPO_DIR = config.BACKEND_DIR.parent
@@ -40,9 +40,29 @@ def holdout_split(n: int, holdout_fraction: float, seed: int) -> tuple[np.ndarra
     """Deterministic random split of range(n) into (fit, holdout) index arrays."""
     n_holdout = int(round(n * holdout_fraction))
     if not 0 < n_holdout < n:
-        raise ValueError(f"holdout of {n_holdout} from {n} pixels leaves nothing to fit or to test")
+        raise ValueError(f"holdout of {n_holdout} from {n} cells leaves nothing to fit or to test")
     order = np.random.default_rng(seed).permutation(n)
     return np.sort(order[n_holdout:]), np.sort(order[:n_holdout])
+
+
+def window_surfaces(window: CachedWindow) -> tuple[np.ndarray, object]:
+    """Surface class codes on the 1 m sub-grid of the whole window."""
+    s2 = window.sentinel2
+    return classify_surfaces(s2.arrays["red"], s2.arrays["nir"], tuple(s2.metadata["transform"]),
+                             s2.metadata["boa_add_offset_applied"], window.osm, window.bbox.bounds)
+
+
+def calibration_cells(window: CachedWindow, classes: np.ndarray | None = None) -> tuple[SurfaceCover, np.ndarray, np.ndarray]:
+    """(surface cover fractions, mean surface temperature, mean albedo) per 90 m calibration cell."""
+    if classes is None:
+        classes, _ = window_surfaces(window)
+    block_px = round(config.CALIBRATION_BLOCK_CELLS * config.LANDSAT_CELL_SIZE_M / config.SURFACE_SUBGRID_M)
+    cover = block_fractions(classes, block_px)
+    lst_c = block_mean(window.landsat.arrays["lst_c"], config.CALIBRATION_BLOCK_CELLS)
+    albedo = block_mean(window.landsat.arrays["albedo"], config.CALIBRATION_BLOCK_CELLS)
+    if cover.canopy_fraction.shape != lst_c.shape:
+        raise ValueError(f"surface cover blocks {cover.canopy_fraction.shape} do not match thermal blocks {lst_c.shape}")
+    return cover, lst_c, albedo
 
 
 @dataclass
@@ -56,22 +76,17 @@ class CalibrationRun:
     observed_holdout_c: np.ndarray
     predicted_holdout_c: np.ndarray
     excluded: dict[str, int]
-    regressors: dict[str, np.ndarray]
+    cells: dict[str, np.ndarray]
+    albedo_correlation: dict[str, tuple[int, float]]
 
 
 def calibrate(street_id: str, request: CalibrationRequest | None = None) -> CalibrationRun:
     request = request or CalibrationRequest()
     window = load_window(street_id)
-    landsat, s2 = window.landsat, window.sentinel2
-    lst_c = landsat.arrays["lst_c"].astype(np.float64)
-    albedo = landsat.arrays["albedo"].astype(np.float64)
-    cover = land_cover_fractions(
-        s2.arrays["red"], s2.arrays["nir"], tuple(s2.metadata["transform"]), s2.metadata["boa_add_offset_applied"],
-        tuple(landsat.metadata["transform"]), lst_c.shape,
-    )
+    cover, lst_c, albedo = calibration_cells(window)
 
     measured = np.isfinite(lst_c) & np.isfinite(albedo)
-    covered = cover.valid_fraction == 1.0  # every part of the 30 m cell observed by Sentinel-2
+    covered = cover.observed_fraction == 1.0
     dry = cover.water_fraction <= config.WATER_FRACTION_MAX_FOR_FIT
     usable = measured & covered & dry
     excluded = {
@@ -79,35 +94,47 @@ def calibrate(street_id: str, request: CalibrationRequest | None = None) -> Cali
         "incomplete Sentinel-2 cover": int((measured & ~covered).sum()),
         "water": int((measured & covered & ~dry).sum()),
     }
-
     index = np.flatnonzero(usable)
-    observed = lst_c.ravel()[index]
-    regressors = {
+    cells = {
         "canopy_fraction": cover.canopy_fraction.ravel()[index],
+        "built_fraction": cover.built_fraction.ravel()[index],
+        "paved_fraction": cover.paved_fraction.ravel()[index],
+        "bare_fraction": cover.bare_fraction.ravel()[index],
         "albedo": albedo.ravel()[index],
-        "impervious_fraction": cover.impervious_fraction.ravel()[index],
+        "lst_c": lst_c.ravel()[index],
     }
+    observed = cells["lst_c"]
     fit_i, holdout_i = holdout_split(len(index), request.holdout_fraction, request.seed)
 
     def subset(i):
-        return regressors["canopy_fraction"][i], regressors["albedo"][i], regressors["impervious_fraction"][i]
+        return cells["canopy_fraction"][i], cells["built_fraction"][i], cells["bare_fraction"][i]
 
     model, standard_errors = fit(observed[fit_i], *subset(fit_i))
     predicted_fit, predicted_holdout = model.predict_c(*subset(fit_i)), model.predict_c(*subset(holdout_i))
     baseline = np.full(len(holdout_i), observed[fit_i].mean())
 
+    albedo_correlation = {}
+    for name in ("built_fraction", "paved_fraction", "bare_fraction", "canopy_fraction"):
+        members = cells[name] >= config.BUILT_DOMINANT_FRACTION
+        n = int(members.sum())
+        corr = float(np.corrcoef(cells["albedo"][members], observed[members])[0, 1]) if n >= 3 else float("nan")
+        albedo_correlation[name] = (n, corr)
+
     result = CalibrationResult(
         street_id=street_id,
         bbox_window=window.manifest["bbox_window"],
-        k_canopy_c_per_fraction=model.k_canopy_c_per_fraction,
-        k_albedo_c_per_unit_albedo=model.k_albedo_c_per_unit_albedo,
-        k_impervious_c_per_fraction=model.k_impervious_c_per_fraction,
+        calibration_resolution_m=config.CALIBRATION_BLOCK_CELLS * config.LANDSAT_CELL_SIZE_M,
         t_base_c=model.t_base_c,
+        k_canopy_c_per_fraction=model.k_canopy_c_per_fraction,
+        k_built_c_per_fraction=model.k_built_c_per_fraction,
+        k_bare_c_per_fraction=model.k_bare_c_per_fraction,
+        k_albedo_low_c_per_unit_albedo=config.K_ALBEDO_LOW_C_PER_UNIT_ALBEDO,
+        k_albedo_high_c_per_unit_albedo=config.K_ALBEDO_HIGH_C_PER_UNIT_ALBEDO,
         rmse_holdout_c=rmse_c(observed[holdout_i], predicted_holdout),
         rmse_mean_baseline_c=rmse_c(observed[holdout_i], baseline),
         r2_holdout=r2_score(observed[holdout_i], predicted_holdout),
-        n_pixels_fit=len(fit_i),
-        n_pixels_holdout=len(holdout_i),
+        n_cells_fit=len(fit_i),
+        n_cells_holdout=len(holdout_i),
         provenance=[window.landsat_provenance, window.sentinel2_provenance],
     )
     return CalibrationRun(
@@ -115,7 +142,7 @@ def calibrate(street_id: str, request: CalibrationRequest | None = None) -> Cali
         rmse_fit_c=rmse_c(observed[fit_i], predicted_fit),
         observed_fit_c=observed[fit_i], predicted_fit_c=predicted_fit,
         observed_holdout_c=observed[holdout_i], predicted_holdout_c=predicted_holdout,
-        excluded=excluded, regressors={**regressors, "lst_c": observed},
+        excluded=excluded, cells=cells, albedo_correlation=albedo_correlation,
     )
 
 
@@ -126,19 +153,20 @@ def save_scatter(run: CalibrationRun, street_name: str, path: Path) -> None:
 
     r = run.result
     fig, ax = plt.subplots(figsize=(6.5, 6.8), dpi=150)
-    ax.scatter(run.observed_fit_c, run.predicted_fit_c, s=5, color="#BBBBBB", linewidths=0,
-               label=f"Fitting pixels (n = {r.n_pixels_fit})")
-    ax.scatter(run.observed_holdout_c, run.predicted_holdout_c, s=7, color="#1B4B57", linewidths=0,
-               label=f"Held-out pixels (n = {r.n_pixels_holdout})")
+    ax.scatter(run.observed_fit_c, run.predicted_fit_c, s=12, color="#BBBBBB", linewidths=0,
+               label=f"Fitting cells (n = {r.n_cells_fit})")
+    ax.scatter(run.observed_holdout_c, run.predicted_holdout_c, s=16, color="#1B4B57", linewidths=0,
+               label=f"Held-out cells (n = {r.n_cells_holdout})")
     values = np.concatenate([run.observed_fit_c, run.predicted_fit_c, run.observed_holdout_c, run.predicted_holdout_c])
     low, high = np.floor(values.min()), np.ceil(values.max())
     ax.plot([low, high], [low, high], color="#444444", linewidth=1, label="Modelled equals observed")
     ax.set_xlim(low, high)
     ax.set_ylim(low, high)
     ax.set_aspect("equal")
-    ax.set_xlabel("Observed land surface temperature (°C)\nLandsat per-pixel median, March to May 2024 to 2026, 30 m")
+    ax.set_xlabel("Observed land surface temperature (°C)\nLandsat per-pixel median, March to May 2024 to 2026, "
+                  "mean over 90 m cells")
     ax.set_ylabel("Modelled land surface temperature (°C)")
-    ax.set_title(f"{street_name}: 2 km neighbourhood window, modelled against observed", loc="left", fontsize=10)
+    ax.set_title(f"{street_name}: baseline model on 90 m cells, modelled against observed", loc="left", fontsize=10)
     ax.text(0.03, 0.97,
             f"Hold-out RMSE {r.rmse_holdout_c:.2f} °C\nMean-prediction baseline {r.rmse_mean_baseline_c:.2f} °C\n"
             f"Hold-out R² {r.r2_holdout:.2f}",
@@ -151,7 +179,7 @@ def save_scatter(run: CalibrationRun, street_name: str, path: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Calibrate the heat model on a street's cached neighbourhood window.")
+    parser = argparse.ArgumentParser(description="Calibrate the baseline heat model on a street's cached window.")
     parser.add_argument("--street", required=True)
     parser.add_argument("--holdout-fraction", type=float, default=CalibrationRequest().holdout_fraction)
     parser.add_argument("--seed", type=int, default=CalibrationRequest().seed)
@@ -164,38 +192,43 @@ def main(argv: list[str] | None = None) -> None:
     figure = REPO_DIR / "docs" / "figures" / f"{args.street}-calibration.png"
     save_scatter(run, name, figure)
 
-    total = sum(run.excluded.values()) + r.n_pixels_fit + r.n_pixels_holdout
-    print(f"Calibration  {args.street} ({name}), 2 km neighbourhood window, surface temperature")
-    print(f"Pixels       {r.n_pixels_fit + r.n_pixels_holdout} usable of {total}; excluded "
+    total = sum(run.excluded.values()) + r.n_cells_fit + r.n_cells_holdout
+    print(f"Calibration  {args.street} ({name}), baseline surface temperature model, 90 m cells")
+    print(f"Cells        {r.n_cells_fit + r.n_cells_holdout} usable of {total}; excluded "
           + ", ".join(f"{k} {v}" for k, v in run.excluded.items()))
-    print(f"             fit {r.n_pixels_fit}, held out {r.n_pixels_holdout} "
+    print(f"             fit {r.n_cells_fit}, held out {r.n_cells_holdout} "
           f"(holdout_fraction {args.holdout_fraction}, seed {args.seed})")
     print()
-    print("Model        lst_pred_c = t_base_c - k_canopy * canopy - k_albedo * (albedo - reference) + k_impervious * impervious")
-    print(f"  t_base_c                     {m.t_base_c:8.3f} °C                       (se {se[0]:.3f})")
-    print(f"  k_canopy_c_per_fraction      {m.k_canopy_c_per_fraction:8.3f} °C per unit canopy fraction  (se {se[1]:.3f})")
-    print(f"  k_albedo_c_per_unit_albedo   {m.k_albedo_c_per_unit_albedo:8.3f} °C per unit albedo          (se {se[2]:.3f})")
-    print(f"  k_impervious_c_per_fraction  {m.k_impervious_c_per_fraction:8.3f} °C per unit impervious fraction (se {se[3]:.3f})")
-    print(f"  albedo reference             {m.albedo_reference:8.4f} (mean albedo of fitting pixels)")
+    print("Model        lst_pred_c = t_base_c - k_canopy * canopy + k_built * built + k_bare * bare   (paved is the reference)")
+    print(f"  t_base_c                     {m.t_base_c:8.3f} °C (fully paved cell)   (se {se[0]:.3f})")
+    print(f"  k_canopy_c_per_fraction      {m.k_canopy_c_per_fraction:8.3f}                           (se {se[1]:.3f})")
+    print(f"  k_built_c_per_fraction       {m.k_built_c_per_fraction:8.3f}                           (se {se[2]:.3f})")
+    print(f"  k_bare_c_per_fraction        {m.k_bare_c_per_fraction:8.3f}                           (se {se[3]:.3f})")
+    print(f"  k_albedo (published, fixed)  {r.k_albedo_low_c_per_unit_albedo:.1f} to {r.k_albedo_high_c_per_unit_albedo:.1f} °C per unit albedo")
     print()
-    print("Error, held-out pixels")
+    print("Error, held-out cells")
     print(f"  rmse_holdout_c               {r.rmse_holdout_c:8.3f} °C")
     print(f"  rmse_mean_baseline_c         {r.rmse_mean_baseline_c:8.3f} °C")
     print(f"  r2_holdout                   {r.r2_holdout:8.3f}")
-    print(f"  rmse on fitting pixels       {run.rmse_fit_c:8.3f} °C")
+    print(f"  rmse on fitting cells        {run.rmse_fit_c:8.3f} °C")
     print()
-    names = ["canopy_fraction", "albedo", "impervious_fraction", "lst_c"]
-    stack = np.vstack([run.regressors[n] for n in names])
-    print("Regressors over usable pixels (mean, standard deviation)")
-    for n, row in zip(names, stack):
-        print(f"  {n:20s} {row.mean():8.4f} {row.std():8.4f}")
-    print("Correlation   " + "  ".join(f"{n[:10]:>10s}" for n in names))
-    for n, row in zip(names, np.corrcoef(stack)):
-        print(f"  {n[:10]:10s}  " + "  ".join(f"{v:10.3f}" for v in row))
+    names = ["canopy_fraction", "built_fraction", "paved_fraction", "bare_fraction", "albedo", "lst_c"]
+    print("Cells (mean, standard deviation)")
+    for n in names:
+        print(f"  {n:16s} {run.cells[n].mean():8.4f} {run.cells[n].std():8.4f}")
+    print("Correlation      " + " ".join(f"{n[:9]:>9s}" for n in names))
+    for n, row in zip(names, np.corrcoef(np.vstack([run.cells[n] for n in names]))):
+        print(f"  {n[:14]:14s} " + " ".join(f"{v:9.3f}" for v in row))
+    print()
+    print(f"Albedo against surface temperature within cells at least {config.BUILT_DOMINANT_FRACTION:.0%} of one class")
+    for n, (count, corr) in run.albedo_correlation.items():
+        print(f"  {n:16s} n={count:4d}  r={corr:+.3f}")
+    built_n, built_r = run.albedo_correlation["built_fraction"]
+    escalate = built_n >= 3 and built_r > config.ALBEDO_BUILT_CORRELATION_ESCALATION
+    print(f"  escalation to Sentinel-2 B11: {'YES' if escalate else 'no'} "
+          f"(rule: built-class r above {config.ALBEDO_BUILT_CORRELATION_ESCALATION:+.2f})")
     print()
     print(f"Scatter      {figure.relative_to(REPO_DIR).as_posix()}")
-    print("Note         Standard errors assume independent residuals. Neighbouring 30 m pixels share a 100 m "
-          "thermal footprint, so they are optimistic.")
 
 
 if __name__ == "__main__":

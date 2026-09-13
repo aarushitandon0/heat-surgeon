@@ -96,6 +96,72 @@ WINDOW_CELLS = 67
 # Indian Standard Time, UTC+05:30, no daylight saving. Used only to state overpass clock time.
 LOCAL_UTC_OFFSET_MINUTES = 330
 
+# --- OpenStreetMap ------------------------------------------------------------------------
+
+# The Overpass snapshot date used in OSM cache keys. Overpass serves current data, so the key
+# names the day it was pulled; the exact database timestamp is stored with the cached result.
+OSM_SNAPSHOT_DATE = "2026-09-14"
+
+# --- Surface cover and calibration cells (docs/methodology.md) ---------------------------
+
+# Rasterisation resolution for exact area shares. Not a physical constant: it only needs to nest
+# every input grid (10 m Sentinel-2, 30 m Landsat, 2 m design cells).
+SURFACE_SUBGRID_M = 1.0
+
+# Calibration cells are 3 x 3 Landsat cells (90 m), close to the 100 m native thermal resolution.
+CALIBRATION_BLOCK_CELLS = 3
+
+FOOTWAY_HIGHWAYS = ("footway", "pedestrian", "cycleway", "path", "steps")
+
+# ASSUMPTION: carriageway lane width when OSM gives lanes but no width. See docs/methodology.md.
+LANE_WIDTH_M = 3.5
+
+# ASSUMPTION: carriageway width by highway class when OSM gives neither width nor lanes.
+DEFAULT_CARRIAGEWAY_WIDTH_M = {
+    "trunk": 14.0, "primary": 14.0, "secondary": 10.5, "tertiary": 7.0, "unclassified": 6.0,
+    "residential": 6.0, "living_street": 5.0, "service": 4.0,
+    "trunk_link": 7.0, "primary_link": 7.0, "secondary_link": 7.0, "tertiary_link": 7.0,
+}
+
+# ASSUMPTION: an OSM sidewalk with no width tag takes the IRC:103 minimum walkway for commercial areas.
+SIDEWALK_WIDTH_M = 2.5
+
+# ASSUMPTION: any other footway with no width tag takes the IRC:103 minimum clear pathway.
+FOOTWAY_WIDTH_M = 1.8
+
+# Albedo escalation test (project decision, Day 3). Within calibration cells at least this
+# built, if albedo still correlates with surface temperature above the escalation threshold,
+# OSM footprints are too sparse here and Sentinel-2 B11 (NDBI/BSI) is needed.
+BUILT_DOMINANT_FRACTION = 0.5
+ALBEDO_BUILT_CORRELATION_ESCALATION = 0.2
+
+# --- Albedo effect on surface temperature: published field measurement, not fitted ---------
+
+# Ko et al. (2022): raising pavement albedo from 0.08 to 0.26 cut surface temperature by 0.9 C at
+# 09:00 and by 5 C at 15:00, stated as 2.7 C per 0.1 albedo. Our 10:57 overpass lies between.
+K_ALBEDO_LOW_C_PER_UNIT_ALBEDO = 5.0     # 0.9 C / 0.18 albedo, 09:00
+K_ALBEDO_HIGH_C_PER_UNIT_ALBEDO = 27.0   # 2.7 C per 0.1 albedo, 15:00 peak
+
+# --- Street design grid (docs/sources.md, Street design; docs/methodology.md) -------------
+
+# SPEC.md §6.1: 2 m design cells.
+DESIGN_CELL_SIZE_M = 2.0
+
+# ASSUMPTION: a 200 m segment centred on the street's longest straight OSM way, 40 m across
+# (20 m either side of the centreline, reaching the building line on FC Road). 100 x 20 = 2,000 cells.
+DESIGN_SEGMENT_LENGTH_M = 200.0
+DESIGN_CORRIDOR_WIDTH_M = 40.0
+
+# IRC:SP:21-2009 §11.14.1: shade trees planted 8-12 m apart. The minimum is used.
+TREE_MIN_SPACING_M = 8.0
+
+# ASSUMPTION: mature crown diameter equal to the minimum spacing, so neighbouring crowns just meet.
+TREE_CROWN_DIAMETER_M = 8.0
+
+# IRC:103-2012: 2.5 m minimum walkway for commercial areas (Table 2) plus a 1.8 m minimum
+# multi-functional zone for tree planting (6.10). A narrower sidewalk cannot take a tree.
+MIN_SIDEWALK_WIDTH_FOR_TREES_M = 4.3
+
 # --- Land cover from NDVI (docs/sources.md, Land cover) ---------------------------------
 
 # Sobrino et al. (2004) NDVI thresholds: below 0.2 bare soil, 0.5 and above full vegetation.

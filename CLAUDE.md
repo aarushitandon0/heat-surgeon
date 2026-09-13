@@ -44,7 +44,7 @@ This applies to Python fields, TypeScript fields, and variable names in numeric 
 Every albedo value, cooling coefficient, NDVI threshold, QA cut-off, and cost figure lives in `backend/app/config.py`. Each one is either cited in `docs/sources.md`, or marked in `config.py` with an `# ASSUMPTION:` comment and logged in `docs/methodology.md` with its value, the reasoning, and what changing it would change. No magic numbers inline. Never invent a source to avoid writing an assumption down.
 
 ### 8. Calibrate on the neighbourhood, apply to the street
-Never fit the four model parameters on a single street segment's handful of pixels — a 150 m street is ~5 delivered pixels and 1–2 independent measurements. Fit on a 1.5–2 km window (hundreds of pixels), then apply at street resolution. See `SPEC.md §5.2`.
+Never fit the four model parameters on a single street segment's handful of pixels — a 150 m street is ~5 delivered pixels and 1–2 independent measurements. Fit on 90 m calibration cells across a 1.5–2 km window, then apply at street resolution. The albedo coefficient is never fitted: it comes from published field measurement, as a low/high band. See `SPEC.md §5.1–5.2`.
 
 ### 9. Always report error
 Any calibration returns `rmse_holdout_c` alongside `rmse_mean_baseline_c`, and the UI displays both. A prediction shipped without its error bar is not finished.
@@ -53,10 +53,10 @@ Any calibration returns `rmse_holdout_c` alongside `rmse_mean_baseline_c`, and t
 The GA result is meaningless alone. `random_layout()` and `greedy_layout()` run at matched budget, and all three appear in the result payload and on screen.
 
 ### 11. Label measured vs modelled, everywhere
-Three resolutions coexist: 30 m measured, 2 km calibration window, 2 m design. The rendered before/after surface is a **model output at design resolution, not a measurement**. Every view that shows it says so. `OptimizationResult.resolution` carries the fields so the frontend cannot forget. See `SPEC.md §5.3`.
+Three resolutions coexist: 30 m delivered (100 m native) measured, 90 m calibration cells across a 2 km window, 2 m design. The rendered before/after surface is a **model output at design resolution, not a measurement**. Every view that shows it says so. `OptimizationResult.resolution` carries the fields so the frontend cannot forget. See `SPEC.md §5.3`.
 
 ### 12. Surface temperature, mid-morning
-Landsat measures land surface temperature at roughly 10:30 local overpass. Label it as surface temperature in every string, comment, and doc. Never write copy implying a person will feel that delta, and never imply it is afternoon peak heat.
+Landsat measures land surface temperature at a 10:57 IST overpass (measured median over Pune). Label it as surface temperature in every string, comment, and doc. Never write copy implying a person will feel that delta, and never imply it is afternoon peak heat.
 
 ### 13. Composites have provenance, not a date
 We composite per-pixel medians across multiple scenes and collections, so there is no single `capture_date` or `source`. Use the `Provenance` object: `date_range`, `capture_dates[]`, `scene_ids[]`, `collections[]`, `platforms[]`, `scene_count`, `compositing`, `cloud_masking`. `collections` holds each adapter's native IDs verbatim, never normalised. Never display a single scene ID as if it were the whole dataset.

@@ -4,12 +4,12 @@
   "city": "Pune",
   "profile": "dense_commercial",
   "bbox_street": [
-    73.8401,
-    18.5181,
-    73.8437,
-    18.5228
+    73.84097,
+    18.51446,
+    73.84453,
+    18.53118
   ],
-  "bbox_street_verified": false,
+  "bbox_street_verified": true,
   "bbox_window": [
     73.83233,
     18.51131,
@@ -41,6 +41,9 @@
   "source_adapter": "planetary_computer",
   "cache": {
     "surface_temperature": "fixtures/cache/planetary_computer/landsat_c2_l2_composite/05d579dcec54618e",
-    "land_cover": "fixtures/cache/planetary_computer/sentinel_2_l2a_composite/504761a61d44e741"
-  }
+    "land_cover": "fixtures/cache/planetary_computer/sentinel_2_l2a_composite/504761a61d44e741",
+    "osm": "fixtures/cache/overpass/osm_buildings_highways/616f07e32b513e86"
+  },
+  "bbox_street_source": "OSM ways named Gopal Krushna Gokhale Path (alt_name FC Road / Ferguson College Road), Overpass 2026-09-13T19:08:06Z. The 2 km window was centred on the earlier placeholder extent; about 180 m of the road's north end lies outside it.",
+  "osm_name": "Gopal Krushna Gokhale Path"
 }

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from app import config
 from app.contracts import Provenance
 from app.data.cache import BBox, CachedResult, CacheKey, DateRange, get_or_fetch
+from app.data.osm import load_osm
 
 LANDSAT_PRODUCT = "landsat_c2_l2_composite"
 S2_PRODUCT = "sentinel_2_l2a_composite"
@@ -16,6 +17,11 @@ class CachedWindow:
     manifest: dict
     landsat: CachedResult
     sentinel2: CachedResult
+    osm: dict
+
+    @property
+    def bbox(self) -> BBox:
+        return BBox(crs=self.manifest["window"]["crs"], bounds=tuple(self.manifest["window"]["bounds_m"]))
 
     @property
     def landsat_provenance(self) -> Provenance:
@@ -54,4 +60,5 @@ def load_window(street_id: str) -> CachedWindow:
         manifest=manifest,
         landsat=get_or_fetch(landsat_key, _never_fetch, allow_network=False),
         sentinel2=get_or_fetch(s2_key, _never_fetch, allow_network=False),
+        osm=load_osm(landsat_key.bbox, allow_network=False),
     )

@@ -83,6 +83,31 @@ Both pervious concrete studies find it 0.05–0.20 *less* reflective than conven
 - **[M2]** Lu, Y., Qin, Y., Huang, C., & Pang, X. (2023). Albedo of pervious concrete and its implications for mitigating urban heat island. *Sustainability*, 15(10), 8222. https://doi.org/10.3390/su15108222 — abstract verified via Crossref.
 - **[M3]** Zhang, R., Jiang, G., & Liang, J. (2015). The albedo of pervious cement concrete linearly decreases with porosity. *Advances in Materials Science and Engineering*, 2015, 746592. https://doi.org/10.1155/2015/746592 — abstract verified via Crossref.
 
+## Albedo effect on surface temperature (published, not fitted)
+
+| Constant | Value | Source |
+|---|---|---|
+| `K_ALBEDO_LOW_C_PER_UNIT_ALBEDO` | 5.0 °C per unit albedo | [K1]: 0.9 °C reduction for a 0.18 albedo increase at 09:00 (0.9 / 0.18) |
+| `K_ALBEDO_HIGH_C_PER_UNIT_ALBEDO` | 27.0 °C per unit albedo | [K1]: "2.7 °C per 0.1 increase in pavement albedo" (5 °C peak at 15:00); [K2] corroborates, summarising "close to 2.5 K" per 0.1 |
+
+- **[K1]** Ko, J., Schlaerth, H., Bruce, A., Sanders, K., & Ban-Weiss, G. (2022). Measuring the impacts of a real-world neighborhood-scale cool pavement deployment on albedo and temperatures in Los Angeles. *Environmental Research Letters*, 17(4), 044027. https://doi.org/10.1088/1748-9326/ac58a8 — full text read. Field measurement: mean pavement albedo rose from 0.08 to 0.26. Surface temperature from mobile and stationary infrared radiometers, with a difference-in-differences design against a control site. The reduction was smallest at 09:00 (0.9 °C) and largest at 15:00 (5 °C). Our 10:57 overpass lies between the two ends.
+- **[K2]** Santamouris, M. (2013). Using cool pavements as a mitigation strategy to fight urban heat island — a review of the actual developments. *Renewable and Sustainable Energy Reviews*, 26, 224–240. Full text read (via the Cool Roof Toolkit copy). The per-0.1 summary comes from a Japanese field test of high-albedo asphalt coatings reported in the review.
+
+## Street design
+
+| Constant | Value | Source |
+|---|---|---|
+| `TREE_MIN_SPACING_M` | 8.0 m | [D1] §11.14.1: shade trees "8-12 m" apart |
+| `MIN_SIDEWALK_WIDTH_FOR_TREES_M` | 4.3 m | [D2] Table 2: 2.5 m minimum obstacle-free walkway, commercial/mixed use; plus 6.10: multi-functional (planting) zone "a minimum of 1.8 m wide" |
+| `SIDEWALK_WIDTH_M`, `FOOTWAY_WIDTH_M` | 2.5 m, 1.8 m | [D2] minimums, used only where OSM has no width (logged as assumptions) |
+
+- **[D1]** Indian Roads Congress. *IRC:SP:21-2009, Guidelines on Landscaping and Tree Plantation*. https://archive.org/details/govlawircy2009sp21 — read via the Internet Archive full text.
+- **[D2]** Indian Roads Congress. *IRC:103-2012, Guidelines for Pedestrian Facilities*. https://law.resource.org/pub/in/bis/irc/irc.gov.in.103.2012.pdf — full text read.
+
+## OpenStreetMap
+
+Building footprints and highway geometry: © OpenStreetMap contributors, available under the Open Database License (ODbL 1.0), https://www.openstreetmap.org/copyright. Pulled via the Overpass API (https://overpass-api.de); database timestamp 2026-09-13T19:08:06Z, stored with the cached result.
+
 ## Physical constants
 
 | Constant | Value | Source |

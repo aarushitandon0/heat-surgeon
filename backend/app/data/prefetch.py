@@ -26,6 +26,7 @@ from rasterio.warp import transform_bounds
 from app import config
 from app.data.cache import BBox, CachedResult, CacheKey, DateRange, cache_path, get_or_fetch, load
 from app.data.fixtures import LANDSAT_PRODUCT, S2_PRODUCT
+from app.data.osm import load_osm, osm_key
 
 
 def utm_epsg(lon: float, lat: float) -> str:
@@ -127,6 +128,7 @@ def main(argv: list[str] | None = None) -> None:
     source = None if all(was_cached.values()) else make_source(args.adapter)
     landsat = get_or_fetch(landsat_key, fetch_landsat(source, window, date_range), allow_network=True)
     s2 = get_or_fetch(s2_key, fetch_sentinel2(source, window, date_range), allow_network=True)
+    osm = load_osm(window, allow_network=True)
 
     manifest.update({
         "bbox_window": [round(v, 5) for v in transform_bounds(window.crs, "EPSG:4326", *window.bounds)],
@@ -136,6 +138,7 @@ def main(argv: list[str] | None = None) -> None:
         "cache": {
             "surface_temperature": str(cache_path(landsat_key).relative_to(config.BACKEND_DIR).as_posix()),
             "land_cover": str(cache_path(s2_key).relative_to(config.BACKEND_DIR).as_posix()),
+            "osm": str(cache_path(osm_key(window)).relative_to(config.BACKEND_DIR).as_posix()),
         },
     })
     config.STREETS_DIR.mkdir(parents=True, exist_ok=True)
@@ -172,6 +175,11 @@ def main(argv: list[str] | None = None) -> None:
     print(f"  collections          {sp['collections']} platforms {sp['platforms']}")
     print(f"  BOA_ADD_OFFSET       applied={s2.metadata['boa_add_offset_applied']}, "
           f"values seen {s2.metadata['boa_add_offsets_seen']}")
+    print()
+    print("OpenStreetMap, Overpass")
+    print(f"  database timestamp   {osm['osm_base']}")
+    print(f"  buildings            {len(osm['buildings'])}")
+    print(f"  highway ways         {len(osm['highways'])}")
 
 
 if __name__ == "__main__":
