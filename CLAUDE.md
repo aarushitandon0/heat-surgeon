@@ -1,0 +1,108 @@
+# CLAUDE.md
+
+Working agreement for this repo. Read `SPEC.md` (revision 2) for the full specification — this file is the operating rules.
+
+## What this is
+
+**Heat Surgeon** — takes one real street, pulls its real satellite surface temperature, calibrates a heat model to that street's own neighbourhood, searches thousands of redesign layouts under real space and budget constraints, and returns the best one in 3D with a modelled temperature drop and a cost range.
+
+Hackathon project. 10-day build. NextStep Hacks 2026, theme "Earth Forward."
+
+## Stack
+
+**Python 3.11** (not 3.14 — geospatial wheel availability is not worth gambling on; 3.12 acceptable), FastAPI, pydantic v2, numpy, scipy, DEAP, rasterio, uvicorn, plus `earthengine-api` and/or `pystac-client` + `planetary-computer` depending on active adapter.
+
+Frontend: React 18 + TypeScript + Vite, three.js via @react-three/fiber + drei, MapLibre GL, zustand, recharts.
+
+## Rules that override convenience
+
+### 1. Real data or clearly-labelled nothing
+Never fabricate, simulate, mock, or interpolate a temperature, cost, or land-cover value into anything that reaches the UI or a demo. If data is unavailable, surface the failure and say which street's cached data is being used instead. A fake number in a demo is the one unrecoverable failure mode of this project.
+
+Test fixtures in `tests/` may use synthetic arrays. Anything under `backend/fixtures/streets/` must be really pulled data.
+
+### 2. The scope contract is binding
+`SPEC.md §1` defines Tier 1 / 2 / 3. Do not start work in a tier until the previous tier runs end to end. If asked to add something from Tier 3 while Tier 1 is incomplete, say so and finish Tier 1 first.
+
+### 3. Satellite access is an interface, not a vendor
+All satellite reads go through the `SurfaceTemperatureSource` / `LandCoverSource` protocols in `app/data/sources.py`. Never call `ee` directly from a router, the model layer, or the optimizer. Two implementations exist: `EarthEngineSource` (preferred, needs a registered GCP project and browser auth) and `PlanetaryComputerSource` (public STAC, anonymous signing, no account). Switching between them must be a config change.
+
+### 4. Fixtures first, network second
+`USE_LIVE_DATA` defaults to `false`. Every external call goes through `app/data/cache.py`, keyed on `(source_adapter, product, bbox, date_range)`. Re-running the same street must never re-hit the network. `prefetch` caches the full 2 km window — Landsat and Sentinel-2 together, in one run. The demo path is the offline path.
+
+### 5. Contracts are frozen
+All request/response shapes live in `backend/app/contracts.py`, mirrored in `frontend/src/types/contracts.ts`. Changing a shape means changing both in the same commit, and saying so explicitly.
+
+### 6. Every numeric field carries its unit suffix
+`temp_delta_c`, `cost_inr_low`, `rmse_holdout_c`, `cell_size_m`, `width_m`, `t_base_c`. No bare `temp`, `cost`, or `rmse` anywhere in a contract, ever. This applies to Python fields, TypeScript fields, and variable names in numeric code.
+
+### 7. Constants are cited
+Every albedo value, cooling coefficient, NDVI threshold, and cost figure lives in `backend/app/config.py` with a corresponding entry in `docs/sources.md`. No magic numbers inline. If a constant can't be sourced, it doesn't go in.
+
+### 8. Calibrate on the neighbourhood, apply to the street
+Never fit the four model parameters on a single street segment's handful of pixels — a 150 m street is ~5 delivered pixels and 1–2 independent measurements. Fit on a 1.5–2 km window (hundreds of pixels), then apply at street resolution. See `SPEC.md §5.2`.
+
+### 9. Always report error
+Any calibration returns `rmse_holdout_c` alongside `rmse_mean_baseline_c`, and the UI displays both. A prediction shipped without its error bar is not finished.
+
+### 10. Always report baselines
+The GA result is meaningless alone. `random_layout()` and `greedy_layout()` run at matched budget, and all three appear in the result payload and on screen.
+
+### 11. Label measured vs modelled, everywhere
+Three resolutions coexist: 30 m measured, 2 km calibration window, 2 m design. The rendered before/after surface is a **model output at design resolution, not a measurement**. Every view that shows it says so. `OptimizationResult.resolution` carries the fields so the frontend cannot forget. See `SPEC.md §5.3`.
+
+### 12. Surface temperature, mid-morning
+Landsat measures land surface temperature at roughly 10:30 local overpass. Label it as surface temperature in every string, comment, and doc. Never write copy implying a person will feel that delta, and never imply it is afternoon peak heat.
+
+### 13. Composites have provenance, not a date
+We composite per-pixel medians across multiple scenes and collections, so there is no single `capture_date` or `source`. Use the `Provenance` object: `date_range`, `capture_dates[]`, `scene_ids[]`, `collections[]`, `scene_count`, `compositing`, `cloud_masking`. Never display a single scene ID as if it were the whole dataset.
+
+### 14. Pune's calendar, not a generic summer
+Default date window is 1 March – 31 May across 3 years. June–September is monsoon and cloud filtering leaves nothing usable. Mask per pixel on `QA_PIXEL` (cloud, shadow, cirrus, dilated cloud), drop fill pixels and `ST_QA` outliers. Scene-level cloud filtering alone is not sufficient.
+
+## Design rules
+
+Full spec in `SPEC.md §9`. The short version:
+
+- Read design tokens from `frontend/src/styles/tokens.css`. Never hardcode a hex value in a component.
+- The five-stop thermal ramp (`--t-00` … `--t-100`) is for **measured or modelled data only**. If it appears on anything else, it's a bug.
+- `--signal` (#7FD1DE) appears exactly once in the whole app: the final temperature delta readout.
+- IBM Plex Mono is for numeric values only — temperatures, coordinates, costs, scene counts, generation counters. Never for labels, buttons, or headings.
+- The acquisition decode resolves a **provenance stack** (scene count, seasons, collections, compositing method), never a single fabricated scene ID.
+- Exactly two motion moments exist: the acquisition decode (stage 01) and the before→after reveal (stage 03). Do not add a third. No section entrance animations, no hover lifts, no scroll reveals.
+- `prefers-reduced-motion` skips both and jumps to the final state.
+- Cost is always shown as a range, never a midpoint, always labelled an estimate.
+- Sentence case everywhere. No all-caps labels, no middle-dot meta strings, no arrows in button text, no emoji, no glassmorphism, no gradient decoration.
+- Copy is plain and instrument-like: "Searching layouts. Generation 142 of 400." not "Optimizing your green future."
+
+## Working style
+
+- Before writing code for a new module, state the plan in two or three sentences and the files you'll touch. Then write it.
+- Small commits, conventional prefixes (`feat:`, `fix:`, `data:`, `ui:`, `docs:`).
+- When you make an assumption (building heights, a missing OSM tag, an unsourced cost), write it into `docs/methodology.md` in the same commit. That doc is a judging asset, not an afterthought.
+- Prefer boring, working code over clever code. This ships in 10 days and gets read on a projector.
+- Every numeric function gets a test with a hand-checked expected value. Especially the Landsat Kelvin→Celsius scaling — if that is wrong, every number in the product is wrong.
+- If something in `SPEC.md` turns out to be wrong or infeasible once real data lands, say so directly and propose the alternative. The spec is a plan, not scripture — revision 2 exists because revision 1 had four contract bugs and the wrong months for Pune.
+
+## Commands
+
+```bash
+# backend
+cd backend && uvicorn app.main:app --reload --port 8000
+cd backend && pytest -q
+cd backend && python -m app.data.prefetch --street pune-fc-road   # caches the 2km window
+
+# frontend
+cd frontend && npm run dev
+cd frontend && npm run typecheck
+```
+
+## Current state
+
+Update this section as tiers complete.
+
+- [ ] Tier 1 — real data → calibrated model → GA → 2D result, offline from fixtures
+- [ ] Tier 2 — 3D scene, reveal moment, live WS streaming, street picker
+- [ ] Tier 3 — NSGA-II Pareto front, thermal sharpening, ward-scale batch
+
+Active satellite adapter: `earth_engine` / `planetary_computer` — record which, and why, when decided.

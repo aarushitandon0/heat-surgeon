@@ -1,0 +1,17 @@
+/* Design tokens (SPEC.md §9.4). Components read these; no hex values elsewhere. */
+:root {
+  --base: #131a22; /* deep blue-slate console */
+  --panel: #1b242e; /* raised surfaces */
+  --rule: #2c3945; /* hairlines, graticule */
+  --paper: #e9e4d9; /* body text, warm off-white */
+  --paper-dim: #8c96a1; /* secondary text */
+
+  /* thermal ramp — measured or modelled data only */
+  --t-00: #1b4b57;
+  --t-25: #3e7c8c;
+  --t-50: #c9b58a;
+  --t-75: #c56a35;
+  --t-100: #a3341f;
+
+  --signal: #7fd1de; /* final delta readout only */
+}
