@@ -1,3 +1,62 @@
 # Sources
 
-Every constant in `backend/app/config.py` has an entry here with its citation. A constant without a source does not go into config.
+Every cited constant in `backend/app/config.py` and where it comes from. Constants that cannot be cited are marked `# ASSUMPTION:` in config and logged in [methodology.md](methodology.md) instead (CLAUDE.md rule 7).
+
+"Verified" means the value was read from that source during the build. Where a primary document was not opened, that is said, and the cross-check that was done instead is named.
+
+## Landsat 8/9 Collection 2 Level 2
+
+| Constant | Value | Source |
+|---|---|---|
+| `LANDSAT_ST_B10_SCALE_K_PER_DN` | 0.00341802 | [L2], [L4] verified; [L1] |
+| `LANDSAT_ST_B10_OFFSET_K` | 149.0 | [L2], [L4] verified; [L1] |
+| `LANDSAT_ST_QA_SCALE_K_PER_DN` | 0.01 | [L3], [L4] verified |
+| `LANDSAT_ST_QA_NODATA_DN` | −9999 | [L3], [L4] verified |
+| `LANDSAT_SR_SCALE_PER_DN` | 0.0000275 | [L4] verified; [L1] |
+| `LANDSAT_SR_OFFSET` | −0.2 | [L4] verified; [L1] |
+| `LANDSAT_FILL_DN` | 0 | [L4] verified (`nodata: 0` on ST and SR assets) |
+| `LANDSAT_QA_PIXEL_REJECT_BITS` | 0 fill, 1 dilated cloud, 2 cirrus, 3 cloud, 4 cloud shadow | [L3] verified; [L1] |
+| `LANDSAT_CELL_SIZE_M` | 30 | [L4] verified |
+| `LANDSAT_TIRS_NATIVE_RESOLUTION_M` | 100 | [L1] |
+| `LANDSAT_COLLECTION_CATEGORY` | T1 | [L1] (Tier 1 is the highest-quality, terrain-corrected tier) |
+
+The ST_B10 conversion test (`backend/tests/test_landsat_scaling.py`) uses the worked example from [L2]: DN 44,947 → 302.6 K.
+
+- **[L1]** U.S. Geological Survey. *Landsat 8-9 Collection 2 (C2) Level 2 Science Product Guide*, LSDS-1619. https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-1619_Landsat8-9-Collection2-Level2-Science-Product-Guide-v6.pdf — primary document; not opened during the build, values cross-checked against [L2]–[L4].
+- **[L2]** U.S. Geological Survey. *How do I use a scale factor with Landsat Level-2 science products?* https://www.usgs.gov/faqs/how-do-i-use-a-scale-factor-landsat-level-2-science-products
+- **[L3]** Digital Earth Africa. *Landsat Collection 2 Level-2 Surface Temperature* product specification (QA_PIXEL bit table, ST_QA band). https://docs.digitalearthafrica.org/en/latest/data_specs/Landsat_C2_ST_specs.html
+- **[L4]** Microsoft Planetary Computer, `landsat-c2-l2` STAC item metadata (`raster:bands` scale, offset, nodata, unit; `proj:transform`). Read from item `LC09_L2SP_147047_20250529_02_T1` on 2026-09-14.
+
+## Broadband albedo
+
+| Constant | Value | Source |
+|---|---|---|
+| `LIANG_2001_OLI_COEFFICIENTS` | 0.356 blue, 0.130 red, 0.373 NIR, 0.085 SWIR1, 0.072 SWIR2, −0.0018 | [A1] |
+
+- **[A1]** Liang, S. (2001). Narrowband to broadband conversions of land surface albedo I: Algorithms. *Remote Sensing of Environment*, 76(2), 213–238. https://doi.org/10.1016/S0034-4257(00)00205-4 — citation metadata verified via Crossref. The coefficients were derived for Landsat TM/ETM+ bands 1, 3, 4, 5, 7; applying them to the equivalent OLI bands is an approximation, logged in methodology.md.
+
+## Sentinel-2 L2A
+
+| Constant | Value | Source |
+|---|---|---|
+| `S2_SCL_REJECT_CLASSES` | 0 no data, 3 cloud shadows, 8 cloud medium probability, 9 cloud high probability, 10 cirrus | [S1] verified |
+| `S2_NODATA_DN` | 0 | [S1] (SCL 0 = no data); [S2] |
+| `S2_CELL_SIZE_M`, `S2_SCL_CELL_SIZE_M` | 10, 20 | [S3] verified (`gsd`, `proj:transform` on B04, B08, SCL) |
+| `S2_HARMONIZED_QUANTIFICATION_VALUE` | 10000 | [S4] (Earth Engine adapter only) |
+
+`BOA_ADD_OFFSET` and `BOA_QUANTIFICATION_VALUE` are deliberately **not** constants. They are read from each product's `MTD_MSIL2A.xml`. On 2026-09-14 the tile 43QCA products at baseline 05.11 carried −1000 and 10000 respectively [S3]. The offset was introduced with processing baseline 04.00 in January 2022 [S1], [S2].
+
+Planetary Computer does not apply the offset to its COGs. This was checked directly, not assumed. Over the same 6 km area around FC Road, a baseline 02.12 scene (2021-03-05) and a baseline 05.11 scene (2025-03-14) differ by roughly +1000 DN at every percentile: B04 median 951 vs 1970, B08 median 1854 vs 2914. The request to harmonise it on Planetary Computer is open and unanswered [S5].
+
+- **[S1]** Sinergise / Sentinel Hub. *Sentinel-2 L2A* data documentation (SCL classes; baseline 04.00). https://docs.sentinel-hub.com/api/latest/data/sentinel-2-l2a/
+- **[S2]** ESA. *Sentinel-2 MSI Level-2A Processing Overview*. https://sentinel.esa.int/web/sentinel/technical-guides/sentinel-2-msi/level-2a-algorithms-products — not opened during the build.
+- **[S3]** Microsoft Planetary Computer, `sentinel-2-l2a` STAC item metadata and product metadata XML. Read from item `S2C_MSIL2A_20250428T052711_R105_T43QCA_20250428T103005` on 2026-09-14.
+- **[S4]** Google Earth Engine Data Catalog. *Harmonized Sentinel-2 MSI: MultiSpectral Instrument, Level-2A* (`COPERNICUS/S2_SR_HARMONIZED`). https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED — not opened during the build.
+- **[S5]** Bunting, P. (2022). *Sentinel-2 BOA_ADD_OFFSET harmonisation*. microsoft/PlanetaryComputer issue #134. https://github.com/microsoft/PlanetaryComputer/issues/134
+
+## Physical constants
+
+| Constant | Value | Source |
+|---|---|---|
+| `KELVIN_AT_ZERO_CELSIUS` | 273.15 | Definition of the degree Celsius in the SI: BIPM, *The International System of Units (SI)*, 9th edition, 2019. |
+| `LOCAL_UTC_OFFSET_MINUTES` | 330 | Indian Standard Time is UTC+05:30 with no daylight saving. |
