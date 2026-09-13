@@ -54,6 +54,35 @@ Planetary Computer does not apply the offset to its COGs. This was checked direc
 - **[S4]** Google Earth Engine Data Catalog. *Harmonized Sentinel-2 MSI: MultiSpectral Instrument, Level-2A* (`COPERNICUS/S2_SR_HARMONIZED`). https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED — not opened during the build.
 - **[S5]** Bunting, P. (2022). *Sentinel-2 BOA_ADD_OFFSET harmonisation*. microsoft/PlanetaryComputer issue #134. https://github.com/microsoft/PlanetaryComputer/issues/134
 
+## Land cover
+
+| Constant | Value | Source |
+|---|---|---|
+| `NDVI_BARE_SOIL_MAX` | 0.2 | [V1] |
+| `NDVI_FULL_VEGETATION_MIN` | 0.5 | [V1] |
+
+- **[V1]** Sobrino, J. A., Jiménez-Muñoz, J. C., & Paolini, L. (2004). Land surface temperature retrieval from LANDSAT TM 5. *Remote Sensing of Environment*, 90(4), 434–440. https://doi.org/10.1016/j.rse.2004.02.003 — citation metadata verified via Crossref. The 0.2 and 0.5 thresholds were confirmed from summaries of the paper and its reuse in later LST studies; the paper itself was not opened during the build. Sobrino et al. set these thresholds to separate soil from vegetation for emissivity estimation. Reusing them as land-cover class boundaries is our choice, logged in methodology.md.
+
+## Material albedo
+
+`ALBEDO_BY_MATERIAL`, as (low, high) broadband albedo. Solar reflectance and albedo are treated as the same quantity.
+
+| Key | Value | Source |
+|---|---|---|
+| `asphalt_new` | 0.05 | [M1] "new SR 5%" |
+| `asphalt_aged` | 0.10–0.20 | [M1] "aged SR 10-20%" |
+| `concrete_new` | 0.30–0.50 | [M1] "new SR 30-50%" |
+| `concrete_aged` | 0.20–0.35 | [M1] "aged SR 20-35%" |
+| `high_albedo_coating` | 0.50 | [M1] "coatings for asphalt concrete pavements that reflect about 50% of sunlight" |
+| `permeable_concrete_dry` | 0.20–0.35 | [M2]; [M3] reports 0.25–0.35 |
+| `permeable_concrete_wet` | 0.15 | [M2] |
+
+Both pervious concrete studies find it 0.05–0.20 *less* reflective than conventional concrete. Permeable pavement is not a cooling intervention through albedo; any cooling has to come from evaporation, which this model does not represent. See methodology.md.
+
+- **[M1]** Lawrence Berkeley National Laboratory, Heat Island Group. *Cool Pavements*. https://heatisland.lbl.gov/coolscience/cool-pavements — read 2026-09-14.
+- **[M2]** Lu, Y., Qin, Y., Huang, C., & Pang, X. (2023). Albedo of pervious concrete and its implications for mitigating urban heat island. *Sustainability*, 15(10), 8222. https://doi.org/10.3390/su15108222 — abstract verified via Crossref.
+- **[M3]** Zhang, R., Jiang, G., & Liang, J. (2015). The albedo of pervious cement concrete linearly decreases with porosity. *Advances in Materials Science and Engineering*, 2015, 746592. https://doi.org/10.1155/2015/746592 — abstract verified via Crossref.
+
 ## Physical constants
 
 | Constant | Value | Source |

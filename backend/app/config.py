@@ -95,3 +95,29 @@ WINDOW_CELLS = 67
 
 # Indian Standard Time, UTC+05:30, no daylight saving. Used only to state overpass clock time.
 LOCAL_UTC_OFFSET_MINUTES = 330
+
+# --- Land cover from NDVI (docs/sources.md, Land cover) ---------------------------------
+
+# Sobrino et al. (2004) NDVI thresholds: below 0.2 bare soil, 0.5 and above full vegetation.
+NDVI_BARE_SOIL_MAX = 0.2
+NDVI_FULL_VEGETATION_MIN = 0.5
+
+# ASSUMPTION: NDVI below 0 is treated as water. See docs/methodology.md.
+NDVI_WATER_MAX = 0.0
+
+# ASSUMPTION: cells more than a quarter water by area are left out of calibration. See docs/methodology.md.
+WATER_FRACTION_MAX_FOR_FIT = 0.25
+
+# --- Surface albedo by material (docs/sources.md, Material albedo) -----------------------
+
+# (low, high) broadband albedo, dimensionless. Used when an intervention replaces a surface;
+# calibration uses measured Landsat albedo instead.
+ALBEDO_BY_MATERIAL = {
+    "asphalt_new": (0.05, 0.05),
+    "asphalt_aged": (0.10, 0.20),
+    "concrete_new": (0.30, 0.50),
+    "concrete_aged": (0.20, 0.35),
+    "high_albedo_coating": (0.50, 0.50),
+    "permeable_concrete_dry": (0.20, 0.35),
+    "permeable_concrete_wet": (0.15, 0.15),
+}

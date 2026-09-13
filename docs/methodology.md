@@ -53,3 +53,88 @@ Each entry gives the value, the reasoning, and what changing it would change.
 ### Sentinel-2 SCL classes kept
 - **Reasoning.** Only classes 0 (no data), 3 (cloud shadow), 8 and 9 (cloud medium and high probability) and 10 (cirrus) are masked, per SPEC.md §4.3. Class 1 (saturated or defective), 2 (dark area) and 7 (low-probability cloud or unclassified) are kept.
 - **What it changes.** Class 2 includes building shadow in dense areas, so masking it would bias against dense built-up pixels. Class 7 is kept to avoid over-masking bright roofs, which the scene classifier sometimes confuses with cloud.
+
+### Water in NDVI: `NDVI_WATER_MAX = 0.0`
+- **Reasoning.** Open water is the common surface with NDVI below zero, and it has to be kept out of the "impervious" class.
+- **What it changes.** In the FC Road window only 0.2% of 10 m pixels fall below zero, so moving this threshold moves almost nothing into or out of the impervious class.
+
+### Water cells left out of calibration: `WATER_FRACTION_MAX_FOR_FIT = 0.25`
+- **Reasoning.** This was chosen from the land-cover distribution alone, before any model was fitted. 52 of the 4,489 cells contain any NDVI-below-zero pixel. Those cells are scattered across the whole window, and 36 of them hold at most one 10 m pixel's worth. Their mean surface temperature is 42.4 °C against a window mean of 41.0 °C, so they are not open water, which would be cooler. More likely they are isolated dark roofs or deep shadow. Only 9 cells are more than a quarter "water", and those are excluded as possible real water.
+- **What it changes.** Excluding every cell with any water would drop 52 cells on the strength of single noisy pixels. Excluding none would let a few possible water cells into the fit. Either way it is under 1.2% of the window.
+
+### NDVI thresholds used as land-cover classes
+- **Reasoning.** The model needs canopy and impervious fractions. Sentinel-2 NDVI at 10 m is the only land-cover measurement in Tier 1. The Sobrino et al. (2004) thresholds (0.2, 0.5) are well established, but they were set to separate soil from vegetation for emissivity estimation; using them as class boundaries is our choice.
+- **What it changes.** See the land-cover limitations below. Moving the canopy threshold down counts sparser or drier vegetation as canopy. Moving the bare-soil threshold up counts more sparse vegetation as impervious.
+
+## What is measured and what is modelled
+
+Three resolutions coexist, and the rendered result is not a measurement.
+
+| Layer | Resolution | What it is |
+|---|---|---|
+| Measurement | 30 m delivered, 100 m native | Real Landsat land surface temperature: a per-pixel median of 30 scenes. |
+| Calibration | 2 km window (67 × 67 cells, 4,489 pixels) | Where the model's four coefficients are fitted. |
+| Intervention design | 2 m cells | The resolution at which a tree or a coating is physically placed. |
+| Rendered before/after surface | 2 m | **A model output at design resolution, not a measurement.** |
+
+Interventions placed at 2 m change the land-cover fractions and albedo inside each 30 m model cell, and the calibrated model turns those changes into a modelled temperature change. The interface labels the 30 m data "measured" and the 2 m surface "modelled".
+
+Because the thermal band is natively 100 m, a 150 m street contains only one or two independent thermal measurements. That is why the model is never fitted on a street's own pixels.
+
+## Surface temperature, not air temperature
+
+Landsat measures land surface temperature: the radiometric temperature of roofs, roads, bare ground and canopy tops, seen from above at about 11:00 IST. It is not the air temperature a person feels at head height, and the two can differ substantially on hot, dry, sunlit surfaces. Every string in the product says "surface temperature". No copy says a person will feel a change.
+
+## Land cover from NDVI
+
+Each 10 m Sentinel-2 pixel is classed by the NDVI of its median red and near-infrared reflectance. Each 30 m cell's fraction is the share of its observed area in each class, by exact area overlap (the two grids share a 5 m sub-grid).
+
+| Class | NDVI | Share of 10 m pixels, FC Road window |
+|---|---|---|
+| Water | below 0 | 0.2% |
+| Impervious | 0 to below 0.2 | 27.5% |
+| Mixed (the model's reference class) | 0.2 to below 0.5 | 46.2% |
+| Canopy | 0.5 and above | 26.2% |
+
+Limitations, stated plainly:
+- **"Impervious" is really "non-vegetated".** NDVI cannot tell pavement and roofs from bare dry soil. Pre-monsoon Pune has open plots, college grounds and dry hillsides with NDVI as low as concrete, and all of them land in this class.
+- **"Canopy" is any vigorous green vegetation.** In March–May that is mostly trees and irrigated lawns, but a well-watered lawn counts the same as a tree canopy.
+- **The mixed class absorbs everything in between**, including sparse and dry vegetation, and it is the baseline the model's `t_base_c` refers to.
+
+## Calibration method
+
+- Pixels are usable when they have a Landsat value and full Sentinel-2 coverage, and are not more than 25% water.
+- 20% of usable pixels are held out at random (seed 42). The model is fitted by ordinary least squares on the rest.
+- `rmse_holdout_c` is the error on held-out pixels. `rmse_mean_baseline_c` is the error from predicting every held-out pixel as the mean of the fitting pixels. `r2_holdout` is computed on held-out pixels only.
+- Albedo enters as the difference from the mean albedo of the fitting pixels, so `t_base_c` is the modelled surface temperature of a cell with no canopy, no impervious surface and average albedo.
+
+What the hold-out error does and does not show:
+- **It measures misfit within this neighbourhood.** With four parameters and thousands of pixels, overfitting is not the risk, so hold-out and in-sample error come out close.
+- **It does not show transfer to other neighbourhoods.** Held-out pixels are not spatially independent of fitting pixels: at 100 m native resolution, neighbours share a thermal footprint.
+- **The printed coefficient standard errors are optimistic** for the same reason. They are a diagnostic, not confidence intervals.
+
+## Calibration result, FC Road window (Day 2): fails the plausibility check
+
+| Quantity | Value |
+|---|---|
+| `t_base_c` | 41.25 °C |
+| `k_canopy_c_per_fraction` | +2.39 |
+| `k_albedo_c_per_unit_albedo` | **−27.92 (wrong sign)** |
+| `k_impervious_c_per_fraction` | +1.34 |
+| `rmse_holdout_c` | 1.83 °C |
+| `rmse_mean_baseline_c` | 2.18 °C |
+| `r2_holdout` | 0.30 |
+| Pixels | 3,584 fitted, 896 held out, 9 excluded as water |
+
+Scatter: [figures/pune-fc-road-calibration.png](figures/pune-fc-road-calibration.png).
+
+**These coefficients must not be used to evaluate interventions.**
+
+- **Signs.** Canopy cools and impervious surface warms, as expected. Albedo does not: the fit says a brighter cell is hotter, by about 0.28 °C per 0.01 of albedo. Used by the optimizer, that would rank a high-albedo coating as a warming intervention.
+- **Why albedo flips.** It is confounding, not a coding error:
+  - Within cells that are at least 60% "impervious", albedo and surface temperature correlate at +0.45; within canopy-dominant cells, at −0.05.
+  - The brightest fifth of cells averages 42.18 °C, with 0.43 impervious and 0.17 canopy fraction. The other four fifths average 40.5–41.0 °C.
+  - The NDVI "impervious" class includes dry bare ground. In March–May at about 11:00, that ground is both brighter than asphalt and hotter, because it is dry. Albedo is acting as a proxy for dry, non-vegetated ground, not as a cooling surface property.
+- **Albedo adds little.** Fitting without the albedo term gives hold-out RMSE 1.88 °C and R² 0.26, against 1.83 °C and 0.30 with it.
+- **The fit is weak and flattened.** Pixels observed at 44–48 °C are predicted at 41–44 °C. The surface temperature map shows the blocky structure of the 100 m native thermal band, while the land-cover regressors carry 30 m detail the thermal band cannot see. That scale mismatch weakens the fitted coefficients (they are biased toward zero) and compresses the predictions.
+- **Status.** The model is not calibrated to a usable standard. The fix is an open decision, recorded in the Day 2 report, not made silently here.
