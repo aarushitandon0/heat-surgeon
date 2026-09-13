@@ -185,6 +185,39 @@ Each gives the value, the reasoning, and what changing it would change.
   - Reasoning: "place at the currently hottest valid cell" does not say which intervention goes first.
   - What it changes: trees-first lets coatings avoid new crowns, which favours greedy.
 
+### Day 3 result, FC Road segment
+
+**Design grid.**
+- 100 × 20 cells at 2 m, bearing 352.3°, origin (377672.6, 2048042.7) in EPSG:32643.
+- Surfaces: 791 canopy, 768 bare, 234 carriageway, 207 built, 0 footway.
+
+**Budget.** 20 trees and 150 reflective cells (600 m²) for every arm. GA settings: population 120, 400 generations.
+
+Mean change in modelled surface temperature over the design area. The low end is more cooling; the high end is the conservative figure the arms are ranked on.
+
+| Arm | Band | Conservative cooling |
+|---|---|---|
+| Random, mean of 30 seeds | high end −0.952 °C (best −1.001, worst −0.886) | 0.95 °C |
+| Greedy, hottest cell first | −1.565 to −0.868 °C | 0.87 °C |
+| GA, seed 0 | −1.823 to −1.125 °C | 1.13 °C |
+| GA, seed 1 | −1.824 to −1.126 °C | 1.13 °C |
+| GA, seed 2 | −1.819 to −1.121 °C | 1.12 °C |
+
+Figure: [figures/pune-fc-road-layouts.png](figures/pune-fc-road-layouts.png).
+
+- **The GA beats greedy and the best of 30 random layouts on every seed.** The three seeds agree within 0.005 °C and stop improving by about generation 200.
+- **Greedy does worse than random, and that is expected.** In a linear model, how much an intervention gains at a cell does not depend on how hot the cell is now. "Hottest first" therefore crowds trees and coatings into the hot south end of the segment, where crowns overlap each other and existing canopy.
+
+**Not yet physically credible: the cross-section.**
+- No sidewalk is mapped in OSM within 117 m of this segment, so the carriageway fell back to the 7 m implied by the two-lane tag.
+- The building lines sit about 13 m either side of the centreline. The strips between the 3.5 m carriageway edge and the buildings therefore count as bare ground wherever there is no canopy, and trees are allowed there.
+- Greedy placed 6 trees 5 m from the centreline, and the GA placed 6 trees 7–9 m out. Those positions are very likely real carriageway, parking or footpath.
+- The GA's advantage is real within the model as specified. The layouts are not credible street designs until FC Road's actual cross-section is known. Pune Municipal Corporation's *Urban Street Design Guidelines* (2016) are the first source to check.
+
+**The magnitudes depend on uncertain coefficients.**
+- A crown over bare ground gains k_canopy + k_bare = 7.8 °C per cell. Both coefficients carry standard errors of about 1 °C.
+- The coating band spans a factor of seven (1.5 to 10.8 °C per asphalt cell).
+
 ## Earlier data-layer assumptions
 
 ### Scene-level cloud cover pre-filter: `SCENE_CLOUD_COVER_MAX_PERCENT = 40`
