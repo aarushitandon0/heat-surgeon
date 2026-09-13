@@ -1,0 +1,46 @@
+{
+  "id": "pune-fc-road",
+  "name": "FC Road, Pune",
+  "city": "Pune",
+  "profile": "dense_commercial",
+  "bbox_street": [
+    73.8401,
+    18.5181,
+    73.8437,
+    18.5228
+  ],
+  "bbox_street_verified": false,
+  "bbox_window": [
+    73.83233,
+    18.51131,
+    73.85149,
+    18.52959
+  ],
+  "window": {
+    "crs": "EPSG:32643",
+    "bounds_m": [
+      376755.0,
+      2047155.0,
+      378765.0,
+      2049165.0
+    ],
+    "shape": [
+      67,
+      67
+    ]
+  },
+  "date_range": {
+    "start": "2024-03-01",
+    "end": "2026-05-31",
+    "months": [
+      3,
+      4,
+      5
+    ]
+  },
+  "source_adapter": "planetary_computer",
+  "cache": {
+    "surface_temperature": "fixtures/cache/planetary_computer/landsat_c2_l2_composite/05d579dcec54618e",
+    "land_cover": "fixtures/cache/planetary_computer/sentinel_2_l2a_composite/504761a61d44e741"
+  }
+}

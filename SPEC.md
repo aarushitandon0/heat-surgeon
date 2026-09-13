@@ -327,21 +327,23 @@ GET  /api/job/{job_id}/result            → OptimizationResult
 
 A median composite has no single date or scene ID. This object replaces the old `capture_date` / `source` fields entirely.
 
+*From real prefetch output* (FC Road window, 2026-09-14). `scene_ids` and `capture_dates` are truncated here to the first two of 30.
+
 ```json
 {
   "product": "surface_temperature",
   "date_range": ["2024-03-01", "2026-05-31"],
   "months": [3, 4, 5],
-  "scene_count": 27,
-  "capture_dates": ["2024-03-14", "2024-03-30"],
-  "scene_ids": ["LC09_L2SP_147047_20240314_02_T1"],
+  "scene_count": 30,
+  "capture_dates": ["2024-03-07", "2024-03-15"],
+  "scene_ids": ["LC09_L2SP_147047_20240307_02_T1", "LC08_L2SP_147047_20240315_02_T1"],
   "collections": ["landsat-c2-l2"],
   "platforms": ["landsat-8", "landsat-9"],
   "compositing": "per-pixel median",
-  "cloud_masking": "QA_PIXEL bitmask, ST_QA outlier drop, fill removal",
-  "overpass_local_time": "10:30",
-  "native_resolution_m": 100,
-  "delivered_resolution_m": 30,
+  "cloud_masking": "scene eo:cloud_cover < 40.0%; QA_PIXEL fill, dilated cloud, cirrus, cloud and cloud shadow dropped; ST_QA uncertainty above 5.0 K dropped; pixels need at least 5 clear observations",
+  "overpass_local_time": "10:57",
+  "native_resolution_m": 100.0,
+  "delivered_resolution_m": 30.0,
   "source_adapter": "planetary_computer"
 }
 ```
@@ -350,6 +352,7 @@ A median composite has no single date or scene ID. This object replaces the old 
 - `platforms` is filled where the adapter reports platform separately from the collection, and is empty otherwise.
 
 ### StreetSummary
+*From real prefetch output.* `bbox_street` is still the unverified placeholder.
 ```json
 {
   "id": "pune-fc-road",
@@ -358,7 +361,7 @@ A median composite has no single date or scene ID. This object replaces the old 
   "profile": "dense_commercial",
   "bbox_street": [73.8401, 18.5181, 73.8437, 18.5228],
   "bbox_street_verified": false,
-  "bbox_window": [73.8325, 18.5114, 73.8514, 18.5296],
+  "bbox_window": [73.83233, 18.51131, 73.85149, 18.52959],
   "cached": true
 }
 ```
@@ -384,17 +387,18 @@ A median composite has no single date or scene ID. This object replaces the old 
 All geometry is `PointUTM` in `crs`. `height_source` and `width_source` are one of `osm_tag | estimated_from_area | default_assumption`. Anything not `osm_tag` is an assumption and gets logged to `docs/methodology.md`.
 
 ### ThermalGrid
+*From real prefetch output.* `lst_c` is truncated here to the first four cells of row 0; the real grid is 67 × 67 with no nulls.
 ```json
 {
   "street_id": "pune-fc-road",
   "scope": "window",
   "crs": "EPSG:32643",
-  "transform": [30.0, 0.0, 373185.0, 0.0, -30.0, 2051925.0],
+  "transform": [30.0, 0.0, 376755.0, 0.0, -30.0, 2049165.0],
   "shape": [67, 67],
   "cell_size_m": 30.0,
-  "bbox_wgs84": [73.8325, 18.5114, 73.8514, 18.5296],
-  "lst_c": [[36.2, 35.8, null]],
-  "stats": { "min_c": 29.4, "max_c": 41.7, "mean_c": 35.9, "valid_pixels": 4431 },
+  "bbox_wgs84": [73.83233, 18.51131, 73.85149, 18.52959],
+  "lst_c": [[42.67, 42.47, 42.23, 41.99]],
+  "stats": { "min_c": 36.23, "max_c": 48.18, "mean_c": 41.0, "valid_pixels": 4489 },
   "provenance": {}
 }
 ```

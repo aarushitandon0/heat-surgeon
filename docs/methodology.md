@@ -8,7 +8,9 @@ Every assumption made in the build is recorded here, in the same commit that int
 
 **No resampling of measured values.** Landsat surface temperature is read on its native UTM grid (EPSG:32643 for Pune), and any window that does not land exactly on that grid raises an error. Sentinel-2 reflectance is read on its own native 10 m grid. The only cross-grid operation is summarising 10 m land cover onto 30 m cells, which aggregates land-cover fractions by exact area overlap and never touches a temperature.
 
-**Compositing.** Each product is a per-pixel median across all clear observations in the date window, never a single scene.
+**Compositing.** Each product is a per-pixel median across all clear observations in the date window, never a single scene. For the FC Road window that is 30 Landsat scenes and 46 Sentinel-2 scenes across March–May of 2024, 2025 and 2026. Every one of the 4,489 Landsat pixels has at least 29 clear observations.
+
+**Overpass time.** The median acquisition time of the Landsat scenes used is 10:57 IST (about 05:27 UTC); Sentinel-2's is 10:56 IST. SPEC.md describes Landsat's overpass as "around 10:30 local time". That matches local solar time at Pune (73.84° E is 4 h 55 min ahead of UTC, giving about 10:22), but the clock time a reader in Pune would recognise is nearer 11:00. Either way this is mid-morning land surface temperature, not the mid-afternoon peak. The interface states the measured clock time from `provenance.overpass_local_time` rather than a constant.
 
 **Sentinel-2 offset.** From processing baseline 04.00 (January 2022), Sentinel-2 L2A digital numbers carry an additive offset. Planetary Computer serves them without the offset applied; this was checked against real scenes (see sources.md). The adapter reads the offset from each product's own metadata, applies it, and records that it did.
 

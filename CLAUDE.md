@@ -109,4 +109,4 @@ Update this section as tiers complete.
 - [ ] Tier 2 — 3D scene, reveal moment, live WS streaming, street picker
 - [ ] Tier 3 — NSGA-II Pareto front, thermal sharpening, ward-scale batch
 
-Active satellite adapter: `earth_engine` / `planetary_computer` — record which, and why, when decided.
+Active satellite adapter: `planetary_computer`, decided Day 1 (2026-09-14). No Earth Engine project or credentials exist on the build machine. `EarthEngineSource` is written but has not been run against a live account.
