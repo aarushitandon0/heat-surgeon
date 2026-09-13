@@ -4,6 +4,8 @@
 > NextStep Hacks 2026 · HackAlphaX · Theme: Earth Forward
 > Build window: 10 days.
 
+**Revision 3** — measured grids stay on their native UTM grid (no resampling of measured values). `OptimizationResult` gains a street-aligned design grid with before/after surfaces and a single comparison-arm shape. Invalid cells are `null` with no separate mask. Coordinates use typed `BBoxWGS84` / `PointUTM` / `AffineUTM`. Model coefficients are named by unit. `layout_preview` is sent only on improvement. Sentinel-2 masking and offset handling specified. Uncitable thresholds are logged as assumptions. CLAUDE.md rules 6 and 7 amended. §7 examples are illustrative, not normative.
+
 **Revision 2** — contracts revised for composite provenance, cost ranges, unit-suffixed field names, a single intervention shape, and full endpoint coverage. Data layer revised for Pune's monsoon calendar, per-pixel cloud masking, and a source-adapter abstraction.
 
 ---
@@ -153,10 +155,21 @@ June–September is monsoon. Cloud filtering over those months leaves almost not
 
 ### 4.3 Masking and compositing
 
-1. Scene-level `eo:cloud_cover` / `CLOUD_COVER` filter as a cheap pre-filter.
-2. **Per-pixel masking on `QA_PIXEL`** (cloud, cloud shadow, cirrus, dilated cloud bits). Scene-level filtering alone leaves cloud edges that will wreck a single street.
-3. Drop fill pixels (raw value 0) and `ST_QA` outliers.
+**Landsat (surface temperature):**
+
+1. Scene-level `eo:cloud_cover` / `CLOUD_COVER` filter as a cheap pre-filter. The limit is an assumption, not a citation, and is logged in `docs/methodology.md`.
+2. **Per-pixel masking on `QA_PIXEL`** (fill, dilated cloud, cirrus, cloud, cloud shadow bits). Scene-level filtering alone leaves cloud edges that will wreck a single street.
+3. Drop fill pixels (raw value 0) and `ST_QA` outliers. The `ST_QA` cut-off is an assumption, not a citation.
 4. **Per-pixel median composite** across the surviving stack. Never a single scene.
+
+**Sentinel-2 (land cover):**
+
+1. Same date window as Landsat.
+2. Per-pixel mask on the scene classification layer `SCL`: drop classes 3 (cloud shadow), 8 (cloud, medium probability), 9 (cloud, high probability), 10 (thin cirrus), and no-data.
+3. From processing baseline 04.00 (January 2022), L2A digital numbers carry a `BOA_ADD_OFFSET`. Read the offset from each item's metadata rather than hardcoding −1000, apply it, and assert it was applied before NDVI is computed. A silent wrong-sign NDVI would poison the model with no error.
+4. Cache the per-pixel median of B4 (red) and B8 (NIR) only.
+
+Measured values are never resampled. Where two grids meet (10 m Sentinel-2 land cover summarised onto 30 m Landsat cells), land-cover *fractions* are aggregated by exact area overlap; temperatures are not touched.
 
 ### 4.4 Scaling (get this right or every number is wrong)
 
@@ -177,6 +190,7 @@ Landsat's descending overpass is around **10:30 local time**. This is mid-mornin
 2. **Fixtures are committed to git.** Four real streets with visibly different heat profiles: dense low-canopy commercial, leafy residential, wide arterial, mixed.
 3. `USE_LIVE_DATA` defaults to `false`. The demo path is the offline path.
 4. `prefetch` caches the **full 2 km neighbourhood window**, not just the street bbox, and caches Landsat **and** Sentinel-2 for that window **in the same run**. One fully-cached window beats two half-cached ones.
+5. Fixture street metadata carries `bbox_street_verified`. Street extents are placeholders until checked against OSM geometry on Day 3.
 
 ---
 
@@ -190,7 +204,7 @@ LST_pred(x) = T_base − k1·canopy(x) − k2·Δalbedo(x) + k3·impervious(x)
 
 - `canopy`, `impervious`: fractional land cover per cell, from NDVI thresholds over Sentinel-2.
 - `Δalbedo`: from published material albedo tables in `config.py`, cited in `docs/sources.md`.
-- `k1, k2, k3, T_base`: fit by least squares.
+- `k1, k2, k3, T_base`: fit by least squares. In contracts and code they are named by unit: `k_canopy_c_per_fraction`, `k_albedo_c_per_unit_albedo`, `k_impervious_c_per_fraction`, `t_base_c`.
 
 ### 5.2 Calibrate on the neighbourhood, apply to the street
 
@@ -245,6 +259,8 @@ Stating limits unprompted reads as rigour. Getting caught hiding one reads as fr
 ### 6.1 Encoding
 2m × 2m cells. Each cell: `unchanged | tree | reflective_pavement | permeable_pavement | shade_structure`. A 150m × 30m street = 75 × 15 = **1,125 cells**; genome is a flat integer array of that length.
 
+The grid is **street-aligned**: rotated to the street's bearing, because sidewalk and carriageway constraints are meaningless on an axis-aligned grid. It is capped at **4,000 cells**. A street that exceeds the cap raises an error; it is never silently coarsened.
+
 ### 6.2 Constraints — repair, not rejection
 Random genomes are almost always invalid, so rejection sampling wastes the population. `repair(genome)` projects any genome into the feasible set:
 - No intervention inside a building footprint → force `unchanged`.
@@ -271,7 +287,7 @@ Both at matched budget. Report all three:
 Without baselines, "−2.3 °C" is a number a judge cannot evaluate. With them, it is a demonstrated result.
 
 ### 6.5 Streaming
-Emit progress each generation over WebSocket, throttled to ~10 msg/sec. The frontend shows a live convergence curve, never a spinner.
+Emit progress each generation over WebSocket, throttled to ~10 msg/sec. The frontend shows a live convergence curve, never a spinner. `layout_preview` is sent only when the best individual improves and is `null` otherwise; the curve needs only the scalars.
 
 ---
 
@@ -279,7 +295,23 @@ Emit progress each generation over WebSocket, throttled to ~10 msg/sec. The fron
 
 Frozen on Day 1. Defined in `backend/app/contracts.py`, mirrored in `frontend/src/types/contracts.ts`.
 
-**Repo convention: every numeric field carries its unit suffix** — `temp_delta_c`, `cost_inr_low`, `rmse_holdout_c`, `cell_size_m`, `width_m`.
+**Examples are illustrative, not normative.** The shapes are binding; the numbers are not. Examples marked *from real prefetch output* were regenerated from cached data. The rest are placeholders until the stage that produces them exists.
+
+### Conventions
+
+- Every field expressing a physical quantity carries its unit suffix (CLAUDE.md rule 6). Dimensionless counts, indices and ratios are exempt, as are fields whose type encodes the unit.
+- Geometry lives in the street's UTM zone (Pune: `EPSG:32643`), in metres. WGS84 appears only in `bbox_*` fields, for display, never as geometry.
+- Invalid or unmeasured grid cells are `null`. There is no separate validity mask.
+- Grids are row-major. On measured grids row 0 is the north edge.
+
+### Coordinate types
+
+| Type | Shape | Meaning |
+|---|---|---|
+| `BBoxWGS84` | `[min_lon, min_lat, max_lon, max_lat]` | Degrees, EPSG:4326. Display only. |
+| `PointUTM` | `[easting, northing]` | Metres, in the object's `crs`. |
+| `AffineUTM` | `[a, b, c, d, e, f]` | rasterio/GDAL affine order in metres: `[cell_size, 0, origin_e, 0, -cell_size, origin_n]`. |
+| `CellIndex` | `[row, col]` | Index into a grid. |
 
 ```
 GET  /api/streets                        → StreetSummary[]
@@ -297,20 +329,25 @@ A median composite has no single date or scene ID. This object replaces the old 
 
 ```json
 {
+  "product": "surface_temperature",
   "date_range": ["2024-03-01", "2026-05-31"],
   "months": [3, 4, 5],
   "scene_count": 27,
   "capture_dates": ["2024-03-14", "2024-03-30"],
-  "scene_ids": ["LC09_L2SP_147047_20240314_20240315_02_T1"],
-  "collections": ["landsat-8-c2-l2", "landsat-9-c2-l2"],
+  "scene_ids": ["LC09_L2SP_147047_20240314_02_T1"],
+  "collections": ["landsat-c2-l2"],
+  "platforms": ["landsat-8", "landsat-9"],
   "compositing": "per-pixel median",
   "cloud_masking": "QA_PIXEL bitmask, ST_QA outlier drop, fill removal",
   "overpass_local_time": "10:30",
   "native_resolution_m": 100,
   "delivered_resolution_m": 30,
-  "source_adapter": "earth_engine"
+  "source_adapter": "planetary_computer"
 }
 ```
+- `product` is `surface_temperature | land_cover`.
+- `collections` holds each adapter's native IDs verbatim, never normalised. Earth Engine reports `LANDSAT/LC09/C02/T1_L2`; Planetary Computer reports `landsat-c2-l2`. `source_adapter` disambiguates.
+- `platforms` is filled where the adapter reports platform separately from the collection, and is empty otherwise.
 
 ### StreetSummary
 ```json
@@ -320,42 +357,51 @@ A median composite has no single date or scene ID. This object replaces the old 
   "city": "Pune",
   "profile": "dense_commercial",
   "bbox_street": [73.8401, 18.5181, 73.8437, 18.5228],
-  "bbox_window": [73.8300, 18.5080, 73.8540, 18.5330],
+  "bbox_street_verified": false,
+  "bbox_window": [73.8325, 18.5114, 73.8514, 18.5296],
   "cached": true
 }
 ```
+`profile` is one of `dense_commercial | leafy_residential | wide_arterial | mixed`. `bbox_street_verified` stays `false` until the extent is checked against OSM geometry.
 
 ### StreetGeometry
 ```json
 {
   "street_id": "pune-fc-road",
-  "crs": "EPSG:4326",
+  "crs": "EPSG:32643",
   "bbox_street": [73.8401, 18.5181, 73.8437, 18.5228],
   "buildings": [
-    { "id": "osm:way/123456", "footprint": [[73.8402, 18.5183]],
+    { "id": "osm:way/123456",
+      "footprint": [[374215.2, 2050884.9], [374230.8, 2050884.9], [374230.8, 2050901.3]],
       "height_m": 12.0, "height_source": "osm_tag" }
   ],
-  "road": { "centerline": [[73.8403, 18.5182]], "width_m": 18.0, "width_source": "osm_tag" },
-  "sidewalks": [ { "polygon": [[73.8402, 18.5183]], "width_m": 3.2 } ]
+  "road": { "centerline": [[374212.0, 2050882.0], [374890.5, 2051410.2]],
+            "width_m": 18.0, "width_source": "osm_tag" },
+  "sidewalks": [ { "polygon": [[374205.1, 2050880.3], [374260.4, 2050921.7]],
+                   "width_m": 3.2, "width_source": "estimated_from_area" } ]
 }
 ```
-`height_source` and `width_source` are one of `osm_tag | estimated_from_area | default_assumption`. Anything not `osm_tag` is an assumption and gets logged to `docs/methodology.md`.
+All geometry is `PointUTM` in `crs`. `height_source` and `width_source` are one of `osm_tag | estimated_from_area | default_assumption`. Anything not `osm_tag` is an assumption and gets logged to `docs/methodology.md`.
 
 ### ThermalGrid
 ```json
 {
   "street_id": "pune-fc-road",
   "scope": "window",
-  "bbox": [73.8300, 18.5080, 73.8540, 18.5330],
-  "shape": [67, 84],
+  "crs": "EPSG:32643",
+  "transform": [30.0, 0.0, 373185.0, 0.0, -30.0, 2051925.0],
+  "shape": [67, 67],
   "cell_size_m": 30.0,
-  "lst_c": [[36.2, 35.8]],
-  "valid_mask": [[true, true]],
-  "stats": { "min_c": 29.4, "max_c": 41.7, "mean_c": 35.9, "valid_pixels": 5218 },
+  "bbox_wgs84": [73.8325, 18.5114, 73.8514, 18.5296],
+  "lst_c": [[36.2, 35.8, null]],
+  "stats": { "min_c": 29.4, "max_c": 41.7, "mean_c": 35.9, "valid_pixels": 4431 },
   "provenance": {}
 }
 ```
-`scope` is `street | window`.
+- `scope` is `street | window`.
+- The grid is Landsat's native grid, unresampled. `transform` places row 0 at the north edge.
+- `lst_c` is `null` wherever no valid observation survived masking. The loader rebuilds a masked array from the nulls.
+- `bbox_wgs84` is for display only and is never used as geometry.
 
 ### CalibrationRequest / CalibrationResult
 ```json
@@ -365,19 +411,20 @@ A median composite has no single date or scene ID. This object replaces the old 
 // result
 {
   "street_id": "pune-fc-road",
-  "window_bbox": [73.8300, 18.5080, 73.8540, 18.5330],
-  "k1_canopy": 4.31,
-  "k2_albedo": 6.02,
-  "k3_impervious": 3.88,
+  "bbox_window": [73.8325, 18.5114, 73.8514, 18.5296],
+  "k_canopy_c_per_fraction": 4.31,
+  "k_albedo_c_per_unit_albedo": 6.02,
+  "k_impervious_c_per_fraction": 3.88,
   "t_base_c": 33.2,
   "rmse_holdout_c": 0.71,
   "rmse_mean_baseline_c": 2.14,
   "r2_holdout": 0.78,
   "n_pixels_fit": 4174,
   "n_pixels_holdout": 1044,
-  "provenance": {}
+  "provenance": [{}, {}]
 }
 ```
+`provenance` lists one entry per product used (surface temperature and land cover).
 
 ### OptimizeRequest / OptimizeJobHandle
 ```json
@@ -386,7 +433,7 @@ A median composite has no single date or scene ID. This object replaces the old 
   "budget_inr_max": 300000,
   "generations": 400,
   "population": 120,
-  "cost_weight_lambda": 0.00001,
+  "cost_weight_c_per_inr": 0.00001,
   "run_baselines": true,
   "seed": 42
 }
@@ -404,14 +451,17 @@ A median composite has no single date or scene ID. This object replaces the old 
 ### WebSocket messages
 ```json
 { "type": "progress", "job_id": "b1f2c3", "generation": 142, "generations_total": 400,
-  "best_fitness": 1.87, "best_temp_delta_c": -2.11,
+  "best_fitness_score": 1.87, "best_temp_delta_c": -2.11,
   "best_cost_inr_low": 180000, "best_cost_inr_high": 260000,
-  "layout_preview": [[12, 4, "tree"], [20, 7, "permeable_pavement"]] }
+  "layout_preview": [ { "type": "tree", "cells": [[12, 4]] },
+                      { "type": "permeable_pavement", "cells": [[20, 7]] } ] }
 
 { "type": "done", "job_id": "b1f2c3", "result_url": "/api/job/b1f2c3/result" }
 
 { "type": "error", "job_id": "b1f2c3", "code": "optimizer_failed", "message": "..." }
 ```
+- `layout_preview` uses the intervention shape. It is sent only on generations where the best individual improves, and is `null` otherwise.
+- `best_fitness_score` is the dimensionless scalarized objective from §6.3. It is not a physical quantity and is never displayed as one.
 
 ### OptimizationResult
 ```json
@@ -425,24 +475,37 @@ A median composite has no single date or scene ID. This object replaces the old 
   "cost_inr_high": 260000,
   "model": { "rmse_holdout_c": 0.71, "rmse_mean_baseline_c": 2.14 },
   "comparison": {
-    "random_temp_delta_c": -0.9,
-    "greedy_temp_delta_c": -1.6,
-    "ga_temp_delta_c": -2.3
+    "random": { "temp_delta_c": -0.9, "cost_inr_low": 175000, "cost_inr_high": 255000 },
+    "greedy": { "temp_delta_c": -1.6, "cost_inr_low": 178000, "cost_inr_high": 258000 },
+    "ga":     { "temp_delta_c": -2.3, "cost_inr_low": 180000, "cost_inr_high": 260000 }
   },
   "interventions": [
     { "type": "tree", "cells": [[12, 4], [15, 4], [18, 5]] },
     { "type": "permeable_pavement", "cells": [[20, 7], [21, 7]] }
   ],
+  "design_grid": {
+    "crs": "EPSG:32643",
+    "origin_e_m": 374210.0,
+    "origin_n_m": 2050880.0,
+    "bearing_deg": 37.4,
+    "cell_size_m": 2.0,
+    "shape": [75, 15]
+  },
+  "before_lst_c": [[36.1, 36.3, null]],
+  "after_lst_c": [[34.0, 36.3, null]],
   "resolution": {
     "measurement_resolution_m": 30,
     "design_resolution_m": 2,
     "output_kind": "model_output_at_design_resolution"
   },
-  "provenance": {}
+  "provenance": [{}, {}]
 }
 ```
 
-One intervention shape only: `{type, cells}`. Count is `len(cells)` — never stored separately.
+- One intervention shape only: `{type, cells}`. Count is `len(cells)`, never stored separately. `type` is one of `tree | reflective_pavement | permeable_pavement | shade_structure`.
+- All three `comparison` arms share one shape, so the matched-budget claim is checkable from the payload.
+- `design_grid` is street-aligned. (`origin_e_m`, `origin_n_m`) is the outer corner of cell `[0, 0]`. Rows advance along `bearing_deg` (degrees clockwise from UTM grid north) and columns advance to the right of that direction, so `shape` is `[cells along street, cells across street]`. Capped at 4,000 cells; exceeding the cap raises.
+- `before_lst_c` and `after_lst_c` lie on `design_grid` and are `null` where the model has no value. Both are model output, as `resolution.output_kind` states.
 
 ---
 

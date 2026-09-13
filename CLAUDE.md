@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Working agreement for this repo. Read `SPEC.md` (revision 2) for the full specification — this file is the operating rules.
+Working agreement for this repo. Read `SPEC.md` (revision 3) for the full specification — this file is the operating rules.
 
 ## What this is
 
@@ -33,11 +33,15 @@ All satellite reads go through the `SurfaceTemperatureSource` / `LandCoverSource
 ### 5. Contracts are frozen
 All request/response shapes live in `backend/app/contracts.py`, mirrored in `frontend/src/types/contracts.ts`. Changing a shape means changing both in the same commit, and saying so explicitly.
 
-### 6. Every numeric field carries its unit suffix
-`temp_delta_c`, `cost_inr_low`, `rmse_holdout_c`, `cell_size_m`, `width_m`, `t_base_c`. No bare `temp`, `cost`, or `rmse` anywhere in a contract, ever. This applies to Python fields, TypeScript fields, and variable names in numeric code.
+### 6. Every physical quantity carries its unit suffix
+Every field expressing a physical quantity carries its unit suffix: `temp_delta_c`, `cost_inr_low`, `rmse_holdout_c`, `cell_size_m`, `t_base_c`, `k_canopy_c_per_fraction`. No bare `temp`, `cost`, or `rmse` anywhere in a contract, ever.
 
-### 7. Constants are cited
-Every albedo value, cooling coefficient, NDVI threshold, and cost figure lives in `backend/app/config.py` with a corresponding entry in `docs/sources.md`. No magic numbers inline. If a constant can't be sourced, it doesn't go in.
+Exempt: dimensionless counts, indices and ratios (`scene_count`, `valid_pixels`, `n_pixels_fit`, `generation`, `cells`, `months`, `r2_holdout`), and fields whose type already encodes the unit (`BBoxWGS84`, `PointUTM`, `AffineUTM`). `best_fitness_score` is a dimensionless scalarized objective, not a physical quantity, and is never displayed as one.
+
+This applies to Python fields, TypeScript fields, and variable names in numeric code.
+
+### 7. Constants are cited or marked as assumptions
+Every albedo value, cooling coefficient, NDVI threshold, QA cut-off, and cost figure lives in `backend/app/config.py`. Each one is either cited in `docs/sources.md`, or marked in `config.py` with an `# ASSUMPTION:` comment and logged in `docs/methodology.md` with its value, the reasoning, and what changing it would change. No magic numbers inline. Never invent a source to avoid writing an assumption down.
 
 ### 8. Calibrate on the neighbourhood, apply to the street
 Never fit the four model parameters on a single street segment's handful of pixels — a 150 m street is ~5 delivered pixels and 1–2 independent measurements. Fit on a 1.5–2 km window (hundreds of pixels), then apply at street resolution. See `SPEC.md §5.2`.
@@ -55,7 +59,7 @@ Three resolutions coexist: 30 m measured, 2 km calibration window, 2 m design. T
 Landsat measures land surface temperature at roughly 10:30 local overpass. Label it as surface temperature in every string, comment, and doc. Never write copy implying a person will feel that delta, and never imply it is afternoon peak heat.
 
 ### 13. Composites have provenance, not a date
-We composite per-pixel medians across multiple scenes and collections, so there is no single `capture_date` or `source`. Use the `Provenance` object: `date_range`, `capture_dates[]`, `scene_ids[]`, `collections[]`, `scene_count`, `compositing`, `cloud_masking`. Never display a single scene ID as if it were the whole dataset.
+We composite per-pixel medians across multiple scenes and collections, so there is no single `capture_date` or `source`. Use the `Provenance` object: `date_range`, `capture_dates[]`, `scene_ids[]`, `collections[]`, `platforms[]`, `scene_count`, `compositing`, `cloud_masking`. `collections` holds each adapter's native IDs verbatim, never normalised. Never display a single scene ID as if it were the whole dataset.
 
 ### 14. Pune's calendar, not a generic summer
 Default date window is 1 March – 31 May across 3 years. June–September is monsoon and cloud filtering leaves nothing usable. Mask per pixel on `QA_PIXEL` (cloud, shadow, cirrus, dilated cloud), drop fill pixels and `ST_QA` outliers. Scene-level cloud filtering alone is not sufficient.
@@ -82,7 +86,7 @@ Full spec in `SPEC.md §9`. The short version:
 - When you make an assumption (building heights, a missing OSM tag, an unsourced cost), write it into `docs/methodology.md` in the same commit. That doc is a judging asset, not an afterthought.
 - Prefer boring, working code over clever code. This ships in 10 days and gets read on a projector.
 - Every numeric function gets a test with a hand-checked expected value. Especially the Landsat Kelvin→Celsius scaling — if that is wrong, every number in the product is wrong.
-- If something in `SPEC.md` turns out to be wrong or infeasible once real data lands, say so directly and propose the alternative. The spec is a plan, not scripture — revision 2 exists because revision 1 had four contract bugs and the wrong months for Pune.
+- If something in `SPEC.md` turns out to be wrong or infeasible once real data lands, say so directly and propose the alternative. The spec is a plan, not scripture — revision 2 exists because revision 1 had four contract bugs and the wrong months for Pune, and revision 3 because revision 2 would have resampled measured values onto a lat/lon grid.
 
 ## Commands
 
