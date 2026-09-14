@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { cityWayClass, designGridContext, expandBounds, pathTouches, roadWeight, svgPathData } from '../src/lib/basemap.ts'
 import { formatCountRange } from '../src/lib/format.ts'
-import { coolingMarginPercent, countRange, paddedDomain } from '../src/lib/model.ts'
+import { coolingMarginPercent, countRange, paddedDomain, strongestBaseline } from '../src/lib/model.ts'
 import type { ComparisonArm, DesignGrid } from '../src/types/contracts.ts'
 
 test('roadWeight and cityWayClass sort OSM values', () => {
@@ -62,6 +62,17 @@ test('coolingMarginPercent compares conservative ends, hand-checked', () => {
   // -0.70 against -0.80: 12.5% less.
   assert.ok(Math.abs(coolingMarginPercent(arm(-0.7), arm(-0.8))! + 12.5) < 1e-9)
   assert.equal(coolingMarginPercent(arm(-0.7), arm(0)), null)
+})
+
+test('strongestBaseline picks the baseline that cools most, never the search', () => {
+  // FC Road, trees only, 20 trees (methodology, Day 7 close): random -0.626 beats guideline -0.597 and greedy -0.547.
+  const fc = { random: arm(-0.626), greedy: arm(-0.547), design_guideline: arm(-0.597), ga: arm(-0.696) }
+  assert.equal(strongestBaseline(fc), 'random')
+  // 0.696 / 0.626 - 1 = 11.18%
+  assert.ok(Math.abs(coolingMarginPercent(fc.ga, fc[strongestBaseline(fc)])! - 11.182108626) < 1e-6)
+  assert.equal(strongestBaseline({ ...fc, design_guideline: arm(-0.7) }), 'design_guideline')
+  // A tie keeps the earlier arm.
+  assert.equal(strongestBaseline({ ...fc, greedy: arm(-0.626) }), 'random')
 })
 
 test('countRange and formatCountRange state counts plainly', () => {

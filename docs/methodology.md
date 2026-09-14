@@ -469,7 +469,7 @@ Hold-out RMSE is 1.16–1.68 °C per 90 m calibration cell on these streets, lar
   - The search itself placed 29 trees, or 28 with coating; the GA does not always fill the last pit.
   - The random arm places 26, because random sequential placement packs less densely than the maximum.
 - **What that means.** The search's advantage comes from choosing which pits to plant when there are more pits than trees. At capacity every pit is planted and there is nothing left to choose. The demo budget of 20 trees is below capacity on every street (27–44).
-- **The comparison caption states counts, not a verdict.** It reads, for example, "All layouts place 20 trees and no coating. The searched layout cools 17% more than the design-guideline layout." When arms differ by a tree, it gives the range ("25–26 trees") instead of calling the comparison unmatched. The margin is the conservative-end ratio, rounded to a whole percent.
+- **The comparison caption states counts, not a verdict.** (Superseded at Day 7 close: the margin is now against the strongest baseline, which is random on all four streets, e.g. "…cools 11% more than the strongest baseline, random layouts (mean).") It originally read, for example, "All layouts place 20 trees and no coating. The searched layout cools 17% more than the design-guideline layout." When arms differ by a tree, it gives the range ("25–26 trees") instead of calling the comparison unmatched. The margin is the conservative-end ratio, rounded to a whole percent.
 
 ### Basemap and locator (display only)
 

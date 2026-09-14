@@ -35,6 +35,19 @@ export function coolingMarginPercent(ours: ComparisonArm, reference: ComparisonA
   return (ours.temp_delta_c_high / reference.temp_delta_c_high - 1) * 100
 }
 
+export const BASELINE_ARMS = ['random', 'greedy', 'design_guideline'] as const satisfies readonly (keyof Comparison)[]
+export type BaselineArm = (typeof BASELINE_ARMS)[number]
+
+/**
+ * The baseline that cools most at the conservative end, so the searched layout is compared against the hardest
+ * arm, not a convenient one. Ties keep the earlier arm in BASELINE_ARMS.
+ */
+export function strongestBaseline(comparison: Comparison): BaselineArm {
+  return BASELINE_ARMS.reduce((best, key) =>
+    comparison[key].temp_delta_c_high < comparison[best].temp_delta_c_high ? key : best,
+  )
+}
+
 /** [min, max] padded by `fraction` of the span, and by at least `minPad` either side. */
 export function paddedDomain(values: number[], fraction: number, minPad: number): [number, number] {
   const min = Math.min(...values)

@@ -23,7 +23,7 @@ import { designGridLabels } from '../lib/labels.ts'
 import { measurer } from '../ui/textMeasure.ts'
 import { readBodyFont } from '../ui/tokens.ts'
 import { streetFrameAffine } from '../lib/geometry.ts'
-import { ARM_ORDER, coolingMarginPercent, countRange } from '../lib/model.ts'
+import { ARM_ORDER, coolingMarginPercent, countRange, strongestBaseline, type BaselineArm } from '../lib/model.ts'
 import { gridDomain } from '../lib/thermal.ts'
 import { StreetScene } from '../scene/StreetScene.tsx'
 import { useStore } from '../store/store.ts'
@@ -415,12 +415,19 @@ function ArmCost({ arm }: { arm: ComparisonArm }) {
   return range ? <span className="mono">{range}</span> : <>Not priced</>
 }
 
-/** "All layouts place 25–26 trees and no coating. The searched layout cools 13% more than the design-guideline layout." */
+const BASELINE_PHRASES: Record<BaselineArm, string> = {
+  random: 'the strongest baseline, random layouts (mean)',
+  greedy: 'the strongest baseline, greedy placement',
+  design_guideline: 'the strongest baseline, the design-guideline layout',
+}
+
+/** "All layouts place 20 trees and no coating. The searched layout cools 11% more than the strongest baseline, random layouts (mean)." */
 function ComparisonCaption({ comparison }: { comparison: Comparison }) {
   const arms = ARM_ORDER.map((key) => comparison[key])
   const trees = countRange(arms.map((arm) => arm.trees))
   const coated = countRange(arms.map((arm) => arm.reflective_cells))
-  const margin = coolingMarginPercent(comparison.ga, comparison.design_guideline)
+  const strongest = strongestBaseline(comparison)
+  const margin = coolingMarginPercent(comparison.ga, comparison[strongest])
   const banded = arms.some((arm) => formatDeltaBand(arm.temp_delta_c_low, arm.temp_delta_c_high).includes(' to '))
   return (
     <p className="result-heading">
@@ -437,7 +444,7 @@ function ComparisonCaption({ comparison }: { comparison: Comparison }) {
         <>
           {' '}
           The searched layout cools <span className="mono">{formatNumber(Math.abs(margin), PERCENT_DECIMALS)}%</span>{' '}
-          {margin >= 0 ? 'more' : 'less'} than the design-guideline layout{banded ? ', at the conservative end' : ''}.
+          {margin >= 0 ? 'more' : 'less'} than {BASELINE_PHRASES[strongest]}{banded ? ', at the conservative end' : ''}.
         </>
       )}
     </p>
