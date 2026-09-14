@@ -372,6 +372,41 @@ These are display choices, not model constants. They live in `frontend/src/lib/f
 - **Decode timing.** The scramble runs exactly as long as the window thermal request. When data lands, rows resolve 90 ms apart at 16 ms per character. That is about 0.6 s for the longest row, and it starts only after the data exists. Returning to stage 01 later shows the final text with no replay.
 - **Reveal timing.** 1.5 s, ease-in-out cubic. The grid interpolation and the delta count read one progress value, so they land on the same frame. It plays the first time the after view is shown; later toggles are instant. Cost and the comparison table appear when it lands. `prefers-reduced-motion` skips both motions.
 
+## Day 6: 3D scene, before state
+
+Stage 03 opens on a 3D scene; the 2D grid stays one toggle away and still carries the before/after view until the reveal moves into the scene.
+
+**What is drawn:**
+- **Ground.** The design grid's `before_lst_c`, one texel per 2 m cell. A fragment shader maps it through the five ramp tokens with the same piecewise-linear interpolation as the 2D canvas, using the same colour domain (before and both after bands). There is no tone mapping, so the colours are the token values.
+  - Null cells are discarded.
+  - Labelled "modelled at 2 m design resolution" and "Model output, not a measurement".
+- **Buildings.** Every footprint the geometry endpoint returns, extruded to `height_m`, merged into one geometry, and drawn in surface colours only. Heights follow the rules in "Building heights" below, and the left panel counts footprints and heights by source.
+- **Markers.** The searched layout drawn over the before-state ground. The ground does not include them yet.
+  - A tree is a stake plus a flat ring at `TREE_CROWN_DIAMETER_M` (8 m), so it shows the shaded extent without hiding the heat under it.
+  - A coated cell is a square outline.
+  - Each type is one `<Instances>` draw call.
+- **Graticule.** Offset so its 10 m and 50 m lines fall on UTM multiples.
+
+**Display choices:**
+- **Scene origin at the design grid centre.** UTM northings near 2 million metres would jitter in GPU floats.
+- **Opening camera.** From the street's right-hand side, turned 38° back along it, 40° above the ground, at 0.95 × the segment length, field of view 35°. Orbit is limited to 70° from vertical so no view grazes the ground plane.
+
+**Frame rate, measured on the largest fixture street.** Bajirao Road: 231 buildings, 20 tree markers and 150 coated-cell markers.
+- **Setup.** Measured 2026-09-14 in Chrome 152 headless on an Intel Iris Xe (integrated laptop GPU, Direct3D 11), window 1440 × 900.
+- **Method.** requestAnimationFrame intervals over 8 s idle, then 8 s while dragging to orbit.
+- **Draw calls.** 6 in every run: graticule, ground, building faces, building edges, tree markers, coated markers. The scene is 7,192 triangles.
+
+| Pixel ratio | Canvas | Frame cap | Idle: fps, p95 frame | Orbiting: fps, p95 frame | Worst frame |
+|---|---|---|---|---|---|
+| 1 | 1030 × 519 | on (120 Hz) | 120 fps, 8.6 ms | 120 fps, 8.6 ms | 9.5 ms |
+| 1 | 1030 × 519 | off | 361 fps, 4.3 ms | 279 fps, 5.9 ms | 45 ms |
+| 2 | 2060 × 1038 | off | 138 fps, 10.4 ms | 97 fps, 15.5 ms | 73 ms |
+
+- With the cap on, the scene holds the cap: every frame lands inside the 8.3 ms budget.
+- At pixel ratio 2 while orbiting, the scene still averages 97 fps with a p95 of 15.5 ms, inside a 60 Hz display's 16.7 ms budget.
+- Isolated frames of 38–73 ms appear only with the cap off. They were not investigated.
+- **Not measured:** a discrete-GPU machine, a 4K display, or a machine slower than an Iris Xe.
+
 ### Building heights (display only)
 
 Height is used only by the 3D scene; the heat model does not use it. Each building's `height_source` says which rule applied.

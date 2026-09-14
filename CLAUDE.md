@@ -124,3 +124,10 @@ Day 5 (2026-09-14):
   - Stage 03 is a 2D heat grid with the before/after reveal, cost range or "Not priced", model error with its baseline, and all four comparison arms.
 - **Checks.** Run `npm test` for hand-checked numeric tests and `npm run check:design` for hex, ramp, `--signal`, motion, emoji, arrow and middle-dot rules.
 - **Next.** Tier 1 still needs its §1 checklist confirmed end to end offline.
+
+Day 6 (2026-09-14):
+- **3D scene, before state only.** Stage 03 opens on extruded buildings over a shader ground of `before_lst_c`, with the searched layout as instanced markers.
+  - 6 draw calls in total.
+  - On Bajirao Road (Iris Xe), 97 fps and p95 15.5 ms while orbiting at pixel ratio 2.
+  - The reveal is not started; the 2D grid still holds before/after.
+- **Heights.** Untagged buildings are estimated from footprint area (`estimated_from_area`), from a table derived from 188 tagged OSM buildings.

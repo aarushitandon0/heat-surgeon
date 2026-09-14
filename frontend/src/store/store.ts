@@ -11,6 +11,7 @@ import type {
   OptimizeMessage,
   OptimizeProgress,
   OptimizeRequest,
+  StreetGeometry,
   StreetSummary,
   ThermalGrid,
 } from '../types/contracts.ts'
@@ -60,6 +61,7 @@ interface State {
   stage: StageId
   streets: Load<StreetSummary[]>
   street: StreetSummary | null
+  geometry: Load<StreetGeometry>
   thermalWindow: Load<ThermalGrid>
   thermalStreet: Load<ThermalGrid>
   calibration: Load<CalibrationResult>
@@ -90,7 +92,7 @@ function closeSocket() {
   socket = null
 }
 
-type LoadKey = 'thermalWindow' | 'thermalStreet' | 'calibration'
+type LoadKey = 'geometry' | 'thermalWindow' | 'thermalStreet' | 'calibration'
 
 function track<K extends LoadKey>(key: K, promise: Promise<State[K] extends Load<infer T> ? T : never>, token: number) {
   promise.then(
@@ -124,6 +126,7 @@ export const useStore = create<Store>()((set, get) => ({
   stage: 'locate',
   streets: { status: 'idle' },
   street: null,
+  geometry: { status: 'idle' },
   thermalWindow: { status: 'idle' },
   thermalStreet: { status: 'idle' },
   calibration: { status: 'idle' },
@@ -147,6 +150,7 @@ export const useStore = create<Store>()((set, get) => ({
     set({
       stage: 'diagnose',
       street,
+      geometry: { status: 'loading' },
       thermalWindow: { status: 'loading' },
       thermalStreet: { status: 'loading' },
       calibration: { status: 'loading' },
@@ -157,6 +161,8 @@ export const useStore = create<Store>()((set, get) => ({
     track('thermalWindow', api.thermal(street.id, 'window'), token)
     track('thermalStreet', api.thermal(street.id, 'street'), token)
     track('calibration', api.calibrate(street.id, { holdout_fraction: 0.2, seed: 42 }), token)
+    // Buildings for the stage 03 scene; small, so fetched up front with the rest.
+    track('geometry', api.geometry(street.id), token)
   },
 
   setRequest: (patch) => set((state) => ({ request: { ...state.request, ...patch } })),

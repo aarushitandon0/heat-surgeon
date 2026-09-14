@@ -7,6 +7,7 @@ import type {
   OptimizationResult,
   OptimizeJobHandle,
   OptimizeRequest,
+  StreetGeometry,
   StreetSummary,
   ThermalGrid,
 } from '../types/contracts.ts'
@@ -56,6 +57,7 @@ function postJson<T>(path: string, payload: unknown): Promise<T> {
 
 export const api = {
   streets: () => request<StreetSummary[]>('/api/streets'),
+  geometry: (streetId: string) => request<StreetGeometry>(`/api/street/${encodeURIComponent(streetId)}/geometry`),
   thermal: (streetId: string, scope: 'street' | 'window') =>
     request<ThermalGrid>(`/api/street/${encodeURIComponent(streetId)}/thermal?scope=${scope}`),
   calibrate: (streetId: string, body: CalibrationRequest) =>
