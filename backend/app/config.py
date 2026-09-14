@@ -4,6 +4,7 @@ Every constant here is either cited in docs/sources.md or marked `# ASSUMPTION:`
 and logged in docs/methodology.md (CLAUDE.md rule 7).
 """
 
+import math
 import os
 from pathlib import Path
 
@@ -123,10 +124,17 @@ FOOTPRINT_DEDUPE_DISTANCE_M = 5.0
 
 # --- Building heights for the 3D scene (docs/methodology.md) --------------------------------
 
-# ASSUMPTION: storey height where OSM gives building:levels but no height.
+# ASSUMPTION: storey height where OSM gives building:levels but no height, and for area estimates.
 STOREY_HEIGHT_M = 3.0
-# ASSUMPTION: a building with no height or levels tag is drawn two storeys tall. Height is used only for
-# display; the heat model does not use it.
+# ASSUMPTION: storeys for a footprint with no height or levels tag, by footprint area. Each entry is
+# (upper bound in m², storeys); a footprint takes the first entry whose bound exceeds its area. Derived by
+# `python -m app.data.heights` as the median building:levels of the 188 uniquely tagged OSM buildings across
+# the four fixture windows (2026-09-14), and frozen here so a new street never changes another's heights.
+# Height is display only; the heat model does not use it.
+BUILDING_STOREYS_BY_FOOTPRINT_AREA_M2 = ((100.0, 2), (300.0, 3), (1000.0, 4), (math.inf, 5))
+# Upper bounds used when re-deriving the table above.
+BUILDING_AREA_BIN_UPPER_BOUNDS_M2 = (100.0, 300.0, 1000.0)
+# ASSUMPTION: a degenerate footprint (zero area) is drawn two storeys tall.
 DEFAULT_BUILDING_HEIGHT_M = 6.0
 # Buildings returned with a street's geometry: those within this distance of the design segment.
 GEOMETRY_BUILDING_RADIUS_M = 150.0

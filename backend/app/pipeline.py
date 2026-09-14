@@ -87,9 +87,10 @@ def calibration(street_id: str, request: CalibrationRequest) -> CalibrationResul
 
 # --- Geometry ----------------------------------------------------------------------------------
 
-def building_height(tags: dict) -> tuple[float, str]:
-    """(height_m, height_source) from OSM height, else building:levels, else the default. Zero or negative tags
-    (seen in Pune OSM) are treated as missing."""
+def building_height(tags: dict, footprint_area_m2: float) -> tuple[float, str]:
+    """(height_m, height_source) from OSM height, else building:levels, else storeys estimated from footprint
+    area (config.BUILDING_STOREYS_BY_FOOTPRINT_AREA_M2), else the default for a degenerate footprint. Zero or
+    negative tags (seen in Pune OSM) are treated as missing."""
     try:
         height_m = float(str(tags["height"]).lower().replace("m", "").strip())
         if height_m > 0:
@@ -102,6 +103,9 @@ def building_height(tags: dict) -> tuple[float, str]:
             return levels * config.STOREY_HEIGHT_M, "osm_tag"
     except (KeyError, ValueError):
         pass
+    if footprint_area_m2 > 0:
+        storeys = next(n for bound_m2, n in config.BUILDING_STOREYS_BY_FOOTPRINT_AREA_M2 if footprint_area_m2 < bound_m2)
+        return storeys * config.STOREY_HEIGHT_M, "estimated_from_area"
     return config.DEFAULT_BUILDING_HEIGHT_M, "default_assumption"
 
 
@@ -124,7 +128,7 @@ def street_geometry(street_id: str) -> StreetGeometry:
         ring = b["rings"][0]
         if not Polygon(ring).intersects(segment):
             continue
-        height_m, height_source = building_height(tags_by_id.get(b["id"], {}))
+        height_m, height_source = building_height(tags_by_id.get(b["id"], {}), Polygon(ring).area)
         buildings.append(Building(id=b["id"], footprint=[tuple(p) for p in ring], height_m=height_m,
                                   height_source=height_source, footprint_source=b["footprint_source"]))
     source = "osm_tag" if section.source == "osm_tag" else "default_assumption"

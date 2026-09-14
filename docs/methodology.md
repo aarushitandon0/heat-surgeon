@@ -374,8 +374,33 @@ These are display choices, not model constants. They live in `frontend/src/lib/f
 
 ### Building heights (display only)
 
-- **Assumption.** Height comes from OSM `height`, else `building:levels` × 3 m, else 6 m (two storeys), labelled by `height_source`.
-- **What it changes.** Only the 3D scene; the heat model does not use height.
+Height is used only by the 3D scene; the heat model does not use it. Each building's `height_source` says which rule applied.
+
+1. **`osm_tag`:** OSM `height`, else `building:levels` × 3 m.
+2. **`estimated_from_area`:** storeys looked up from footprint area, × 3 m.
+3. **`default_assumption`:** 6 m, only for a degenerate footprint with zero area.
+
+**Why area.**
+- Almost no building next to the streets is tagged: 1–3 of the 131–231 buildings returned per street.
+- Across the four 2 km windows, 188 unique OSM buildings carry a positive integer `building:levels`.
+- In those, levels rise with footprint area (Spearman ρ = 0.59).
+
+**The table** (`BUILDING_STOREYS_BY_FOOTPRINT_AREA_M2`) is the median `building:levels` per area bin. It was derived on 2026-09-14 with `python -m app.data.heights` and frozen in `config.py`, so adding a street does not change another street's heights.
+
+| Footprint area | Tagged buildings | Median levels (IQR) | Drawn height |
+|---|---|---|---|
+| under 100 m² | 90 | 2 (1–3) | 6 m |
+| 100–300 m² | 36 | 3 (2–4) | 9 m |
+| 300–1,000 m² | 45 | 4 (2–5) | 12 m |
+| 1,000 m² and over | 17 | 5 (4–10) | 15 m |
+
+Assumptions, stated plainly:
+- **Tagged buildings are not a random sample.** Mappers tag apartment blocks, hospitals and colleges more than sheds and small shops, and 126 of the 188 come from North Main Road's window. The table probably overstates untagged buildings' heights, most in the smallest bin.
+  - What it changes: a lower table flattens the scene. Nothing numeric in the product depends on it.
+- **The spread within a bin is wide.** A 1,500 m² footprint can be a 2-storey market or a 12-storey tower. The drawn height is the bin median, not a claim about that building.
+- **Storey height 3 m.** A conventional value, not cited.
+- **OSM tags are used as given, including implausible ones.** A 4-level house tagged 60 m, for example. Only zero or negative values are treated as missing.
+- **Microsoft and Google footprints carry no height**, so they always take the area estimate.
 
 ## Earlier data-layer assumptions
 

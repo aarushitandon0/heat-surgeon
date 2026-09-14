@@ -10,16 +10,24 @@ BASE = {"generations": 1, "population": 2, "cost_weight_c_per_inr": 0.0}
 
 
 def test_building_height_from_tags_hand_checked():
-    assert building_height({"height": "12 m"}) == (12.0, "osm_tag")
+    assert building_height({"height": "12 m"}, 500.0) == (12.0, "osm_tag")
     # 4 levels x 3 m storey
-    assert building_height({"building:levels": "4"}) == (4 * config.STOREY_HEIGHT_M, "osm_tag")
-    assert building_height({}) == (config.DEFAULT_BUILDING_HEIGHT_M, "default_assumption")
+    assert building_height({"building:levels": "4"}, 50.0) == (4 * config.STOREY_HEIGHT_M, "osm_tag")
+
+
+def test_untagged_building_height_is_estimated_from_footprint_area():
+    # Table: < 100 m2 -> 2 storeys, < 300 -> 3, < 1000 -> 4, else 5; 3 m a storey.
+    assert building_height({}, 60.0) == (6.0, "estimated_from_area")
+    assert building_height({}, 100.0) == (9.0, "estimated_from_area")
+    assert building_height({}, 999.0) == (12.0, "estimated_from_area")
+    assert building_height({}, 9674.0) == (15.0, "estimated_from_area")
+    assert building_height({}, 0.0) == (config.DEFAULT_BUILDING_HEIGHT_M, "default_assumption")
 
 
 def test_zero_height_or_levels_tags_are_treated_as_missing():
-    assert building_height({"height": "0"}) == (config.DEFAULT_BUILDING_HEIGHT_M, "default_assumption")
-    assert building_height({"height": "0", "building:levels": "2"}) == (2 * config.STOREY_HEIGHT_M, "osm_tag")
-    assert building_height({"building:levels": "0"}) == (config.DEFAULT_BUILDING_HEIGHT_M, "default_assumption")
+    assert building_height({"height": "0"}, 60.0) == (6.0, "estimated_from_area")
+    assert building_height({"height": "0", "building:levels": "2"}, 60.0) == (2 * config.STOREY_HEIGHT_M, "osm_tag")
+    assert building_height({"building:levels": "0"}, 500.0) == (12.0, "estimated_from_area")
 
 
 def test_rupee_budget_caps_trees_at_the_high_end_of_the_cost_range():
