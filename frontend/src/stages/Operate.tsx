@@ -350,7 +350,15 @@ function OperateViewport({ result, mode, onMode, view, revealed, onBefore, onAft
       </div>
 
       {mode === 'scene' && domain && geometry.status === 'ready' && (
-        <StreetScene result={result} geometry={geometry.data} domain={domain} after={after} progress={progress} />
+        <StreetScene
+          result={result}
+          geometry={geometry.data}
+          domain={domain}
+          after={after}
+          progress={progress}
+          basemap={basemap.status === 'ready' ? basemap.data : null}
+          streetLabel={streetShortName(result.street.name)}
+        />
       )}
       {mode === 'scene' && geometry.status === 'loading' && <p className="viewport-message">Loading street geometry.</p>}
       {mode === 'scene' && geometry.status === 'error' && (
@@ -387,6 +395,12 @@ function OperateViewport({ result, mode, onMode, view, revealed, onBefore, onAft
               <span className="legend-item">
                 <span className="legend-context" aria-hidden="true" />
                 Road centrelines and building footprints, OpenStreetMap and Overture
+              </span>
+            )}
+            {mode === 'scene' && basemap.status === 'ready' && (
+              <span className="legend-item">
+                <span className="legend-context" aria-hidden="true" />
+                Road centrelines and names, OpenStreetMap
               </span>
             )}
           </div>

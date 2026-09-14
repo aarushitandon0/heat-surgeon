@@ -570,6 +570,22 @@ Labels are chrome, not data: body face, `--paper-dim`, with a thin `--base` halo
 - **Locator.** Up to 4 names: at most 2 rivers, then trunk roads, by length inside the extent.
 - **Assumptions.** The caps (10, 4, 3, 4), the 3 px bend limit and the lower-case rule are display choices, not citations. Changing them changes only which names appear.
 
+### Names in the 3D scene (display only)
+
+The 3D scene carries road centrelines and names, so the street can be located without leaving stage 03.
+- **Roads on the ground.** OSM centrelines (not footpaths) within 350 m of the design grid centre, as one hairline draw call just above the heat ground.
+- **Which names, in priority order.**
+  - The design street, under its display name.
+  - Its three nearest cross streets, of any class, 3 cells outside the planted strip.
+  - Up to 14 other named roads within 350 m, by class then length. Trunk to tertiary come first; residential, unclassified and living streets fill what remains, because close up it is local streets that locate a place. Stage 01's 2 km window still stops at tertiary.
+  - Up to 4 of the largest named buildings, at roughly roof height.
+- **Placement, recomputed whenever the camera moves.**
+  - Each name has several candidate positions: road names every 50 m along the road (nearest the design street first), the street name at five points along its centreline, and cross-street names on either side of the street.
+  - The first candidate that is on screen and overlaps no name already placed is used. Road names turn to follow their road on screen and are never upside down.
+  - A name with no free position is hidden, not squeezed in.
+- **Rendering.** HTML text over the canvas, in the body face and `--paper-dim` with a thin `--base` halo, so no font file is fetched. The street's own name is one size larger. It is interaction, not motion: names move only when the viewer orbits.
+- **Assumptions.** The 350 m radius, the caps (3, 14, 4), the 50 m spacing and the 14 m roof height for building names are display choices. Changing them changes only which names appear and where.
+
 ### The reveal (motion moment two)
 
 - **The trigger.** Stage 03 opens on today's street with the searched layout placed but not applied. "Apply the searched layout" starts the reveal.

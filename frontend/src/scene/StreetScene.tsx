@@ -1,8 +1,11 @@
 import { Grid as Graticule, OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
+import { sceneLabels, type SceneLabelOptions } from '../lib/sceneLabels.ts'
 import type { Domain, Grid } from '../lib/thermal.ts'
-import type { OptimizationResult, StreetGeometry } from '../types/contracts.ts'
+import type { OptimizationResult, StreetBasemap, StreetGeometry } from '../types/contracts.ts'
+import { ContextRoads } from './ContextRoads.tsx'
+import { SceneLabelLayer, SceneLabelProjector } from './SceneLabels.tsx'
 import { readSurfaceColor } from '../ui/tokens.ts'
 import { Buildings } from './Buildings.tsx'
 import { designGridCentre, graticuleOffset, threeQuarterPose, type ThreeQuarterView } from './frame.ts'
@@ -35,12 +38,35 @@ interface StreetSceneProps {
   after: Grid
   /** Reveal progress: 0 is before, 1 is after. */
   progress: number
+  /** OSM roads and names around the street; null until loaded, when the scene simply has no names. */
+  basemap: StreetBasemap | null
+  /** The design street's display name, e.g. "FC Road". */
+  streetLabel: string
+}
+
+/** Roads and names are drawn within this distance of the design grid centre. */
+const SCENE_CONTEXT_RADIUS_M = 350
+const SCENE_LABEL_OPTIONS: SceneLabelOptions = {
+  radius_m: SCENE_CONTEXT_RADIUS_M,
+  maxCrossStreets: 3,
+  // Close up, local streets are what locate a place, so they are named too, after the larger roads.
+  maxRoads: 14,
+  maxPlaces: 4,
+  maxRoadRank: 4,
 }
 
 /** Modelled ground from before to after, real building footprints, the searched layout's trees and coating. */
-export function StreetScene({ result, geometry, domain, after, progress }: StreetSceneProps) {
+export function StreetScene({ result, geometry, domain, after, progress, basemap, streetLabel }: StreetSceneProps) {
   const design = result.design_grid
   const origin = useMemo(() => designGridCentre(design), [design])
+  const labels = useMemo(
+    () =>
+      basemap
+        ? sceneLabels(basemap.roads, basemap.features, design, { osmName: basemap.street_osm_name, label: streetLabel }, SCENE_LABEL_OPTIONS)
+        : [],
+    [basemap, design, streetLabel],
+  )
+  const labelElements = useRef<(HTMLSpanElement | null)[]>([])
   const pose = useMemo(() => {
     const length_m = design.shape[0] * design.cell_size_m
     return threeQuarterPose(design, { ...OPENING_VIEW, distance_m: length_m * OPENING_DISTANCE_PER_SEGMENT_LENGTH })
@@ -79,6 +105,7 @@ export function StreetScene({ result, geometry, domain, after, progress }: Stree
           followCamera={false}
         />
         <HeatGround before={result.before_lst_c} after={after} progress={progress} design={design} origin={origin} domain={domain} />
+        {basemap && <ContextRoads roads={basemap.roads} origin={origin} radius_m={SCENE_CONTEXT_RADIUS_M} />}
         <Buildings buildings={geometry.buildings} origin={origin} />
         <InterventionMarkers design={design} interventions={result.interventions} origin={origin} />
         <OrbitControls
@@ -89,7 +116,9 @@ export function StreetScene({ result, geometry, domain, after, progress }: Stree
           maxDistance={MAX_DISTANCE_M}
           maxPolarAngle={MAX_POLAR_ANGLE_RAD}
         />
+        <SceneLabelProjector labels={labels} origin={origin} elements={labelElements} />
       </Canvas>
+      <SceneLabelLayer labels={labels} elements={labelElements} />
     </div>
   )
 }

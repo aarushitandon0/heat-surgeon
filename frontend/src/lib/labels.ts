@@ -23,8 +23,20 @@ export interface Label {
 }
 export type Measure = (text: string) => number
 
-/** OSM highway classes that get road labels, most important first. Everything else stays unlabelled. */
-const ROAD_RANK: Record<string, number> = { motorway: 0, trunk: 0, primary: 1, secondary: 2, tertiary: 3 }
+/**
+ * OSM highway classes that can get road labels, most important first. Each map sets how far down it goes: the 2 km
+ * window stops at tertiary (3); the close-up 3D scene also names local streets (4). Everything else stays unlabelled.
+ */
+const ROAD_RANK: Record<string, number> = {
+  motorway: 0,
+  trunk: 0,
+  primary: 1,
+  secondary: 2,
+  tertiary: 3,
+  residential: 4,
+  unclassified: 4,
+  living_street: 4,
+}
 
 export function roadRank(kind: string): number | null {
   return ROAD_RANK[kind] ?? null
