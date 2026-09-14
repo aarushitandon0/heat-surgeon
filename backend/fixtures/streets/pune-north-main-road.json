@@ -1,0 +1,50 @@
+{
+  "id": "pune-north-main-road",
+  "name": "North Main Road, Koregaon Park, Pune",
+  "city": "Pune",
+  "profile": "leafy_residential",
+  "bbox_street": [
+    73.8855,
+    18.539,
+    73.9038,
+    18.5398
+  ],
+  "bbox_street_verified": false,
+  "bbox_window": [
+    73.88507,
+    18.53033,
+    73.90423,
+    18.54861
+  ],
+  "window": {
+    "crs": "EPSG:32643",
+    "bounds_m": [
+      382335.0,
+      2049225.0,
+      384345.0,
+      2051235.0
+    ],
+    "shape": [
+      67,
+      67
+    ]
+  },
+  "date_range": {
+    "start": "2024-03-01",
+    "end": "2026-05-31",
+    "months": [
+      3,
+      4,
+      5
+    ]
+  },
+  "source_adapter": "planetary_computer",
+  "cache": {
+    "surface_temperature": "fixtures/cache/planetary_computer/landsat_c2_l2_composite/1202a088a0c7bbd6",
+    "land_cover": "fixtures/cache/planetary_computer/sentinel_2_l2a_composite/51c707870d8ca3d2",
+    "osm": "fixtures/cache/overpass/osm_buildings_highways/fa82aa12a5243070",
+    "overture_buildings": "fixtures/cache/overture/buildings/3655dc78921596ce"
+  },
+  "osm_name": "North Main Road",
+  "bbox_street_source": "Extent of OSM ways named North Main Road (Koregaon Park), Overpass 2026-09-14; the design segment is the middle 200 m of the longest such way in the window (1,057 m). Not yet verified end to end."
+}

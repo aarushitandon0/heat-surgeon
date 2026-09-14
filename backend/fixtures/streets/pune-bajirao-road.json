@@ -1,0 +1,51 @@
+{
+  "id": "pune-bajirao-road",
+  "name": "Bajirao Road, Pune",
+  "city": "Pune",
+  "profile": "dense_commercial",
+  "bbox_street": [
+    73.853,
+    18.5,
+    73.858,
+    18.518
+  ],
+  "bbox_street_verified": false,
+  "bbox_window": [
+    73.84605,
+    18.49974,
+    73.86521,
+    18.51801
+  ],
+  "window": {
+    "crs": "EPSG:32643",
+    "bounds_m": [
+      378195.0,
+      2045865.0,
+      380205.0,
+      2047875.0
+    ],
+    "shape": [
+      67,
+      67
+    ]
+  },
+  "date_range": {
+    "start": "2024-03-01",
+    "end": "2026-05-31",
+    "months": [
+      3,
+      4,
+      5
+    ]
+  },
+  "source_adapter": "planetary_computer",
+  "cache": {
+    "surface_temperature": "fixtures/cache/planetary_computer/landsat_c2_l2_composite/ff99e078b363f2c6",
+    "land_cover": "fixtures/cache/planetary_computer/sentinel_2_l2a_composite/a02c0229d0eff691",
+    "osm": "fixtures/cache/overpass/osm_buildings_highways/b55c21995b7cd5dd",
+    "overture_buildings": "fixtures/cache/overture/buildings/5afe1d83edc0539e"
+  },
+  "osm_name": "Bajirao Road",
+  "bbox_street_source": "Placeholder extent around Bajirao Road in the old city (Peth area); the design segment is the middle 200 m of the longest OSM way named Bajirao Road in the window (428 m). Not yet verified end to end.",
+  "profile_reason": "Lowest canopy (14.5%) and highest built share (30.2%) of the four calibration windows: the dense low-canopy commercial street."
+}

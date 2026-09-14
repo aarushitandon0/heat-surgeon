@@ -2,7 +2,7 @@
   "id": "pune-fc-road",
   "name": "FC Road, Pune",
   "city": "Pune",
-  "profile": "dense_commercial",
+  "profile": "mixed",
   "bbox_street": [
     73.84097,
     18.51446,
@@ -42,8 +42,10 @@
   "cache": {
     "surface_temperature": "fixtures/cache/planetary_computer/landsat_c2_l2_composite/05d579dcec54618e",
     "land_cover": "fixtures/cache/planetary_computer/sentinel_2_l2a_composite/504761a61d44e741",
-    "osm": "fixtures/cache/overpass/osm_buildings_highways/616f07e32b513e86"
+    "osm": "fixtures/cache/overpass/osm_buildings_highways/616f07e32b513e86",
+    "overture_buildings": "fixtures/cache/overture/buildings/6fa8951f28b9e120"
   },
+  "profile_reason": "Commercial frontage with college campuses: 26.6% canopy and 22.7% built. Reclassified from dense_commercial to mixed on Day 4, when Bajirao Road (14.5% canopy, 30.2% built) was added as the dense low-canopy commercial street.",
   "bbox_street_source": "OSM ways named Gopal Krushna Gokhale Path (alt_name FC Road / Ferguson College Road), Overpass 2026-09-13T19:08:06Z. The 2 km window was centred on the earlier placeholder extent; about 180 m of the road's north end lies outside it.",
   "osm_name": "Gopal Krushna Gokhale Path"
 }

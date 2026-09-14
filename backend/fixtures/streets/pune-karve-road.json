@@ -1,0 +1,50 @@
+{
+  "id": "pune-karve-road",
+  "name": "Karve Road, Pune",
+  "city": "Pune",
+  "profile": "wide_arterial",
+  "bbox_street": [
+    73.829,
+    18.504,
+    73.842,
+    18.515
+  ],
+  "bbox_street_verified": false,
+  "bbox_window": [
+    73.82587,
+    18.50042,
+    73.84503,
+    18.51871
+  ],
+  "window": {
+    "crs": "EPSG:32643",
+    "bounds_m": [
+      376065.0,
+      2045955.0,
+      378075.0,
+      2047965.0
+    ],
+    "shape": [
+      67,
+      67
+    ]
+  },
+  "date_range": {
+    "start": "2024-03-01",
+    "end": "2026-05-31",
+    "months": [
+      3,
+      4,
+      5
+    ]
+  },
+  "source_adapter": "planetary_computer",
+  "cache": {
+    "surface_temperature": "fixtures/cache/planetary_computer/landsat_c2_l2_composite/2f9bd5fd8680ffa8",
+    "land_cover": "fixtures/cache/planetary_computer/sentinel_2_l2a_composite/2f09d4691a4ba000",
+    "osm": "fixtures/cache/overpass/osm_buildings_highways/0f25e29b76311d6d",
+    "overture_buildings": "fixtures/cache/overture/buildings/078ecc5ab9ad67d0"
+  },
+  "osm_name": "Karve Road",
+  "bbox_street_source": "Placeholder extent around the Deccan to Nal Stop stretch; the design segment is the middle 200 m of the longest OSM way named Karve Road in the window (367 m). Not yet verified against the full OSM extent."
+}
