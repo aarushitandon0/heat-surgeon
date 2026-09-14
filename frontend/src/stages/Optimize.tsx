@@ -39,13 +39,13 @@ function bandsDiffer(p: OptimizeProgress): boolean {
   return formatSigned(p.best_temp_delta_c_low, DELTA_DECIMALS) !== formatSigned(p.best_temp_delta_c_high, DELTA_DECIMALS)
 }
 
-function StatusLine({ job }: { job: JobState }) {
+function StatusLine({ job, replaying }: { job: JobState; replaying: boolean }) {
   const latest = job.progress.at(-1)
   switch (job.status) {
     case 'starting':
-      return <>Starting the search.</>
+      return replaying ? <>Loading the recorded search.</> : <>Starting the search.</>
     case 'searching':
-      if (!latest) return <>Search started. Waiting for the first generation.</>
+      if (!latest) return replaying ? <>Replaying the recorded search.</> : <>Search started. Waiting for the first generation.</>
       if (latest.generation >= latest.generations_total) {
         return (
           <>
@@ -57,7 +57,8 @@ function StatusLine({ job }: { job: JobState }) {
       }
       return (
         <>
-          Searching layouts. Generation <span className="mono">{formatCount(latest.generation)}</span> of{' '}
+          {replaying ? 'Replaying the recorded search.' : 'Searching layouts.'} Generation{' '}
+          <span className="mono">{formatCount(latest.generation)}</span> of{' '}
           <span className="mono">{formatCount(latest.generations_total)}</span>.
         </>
       )
@@ -76,6 +77,7 @@ export function OptimizePanel() {
   const request = useStore((s) => s.request)
   const calibration = useStore((s) => s.calibration)
   const goTo = useStore((s) => s.goTo)
+  const replaying = useStore((s) => s.dataMode.kind === 'replay')
   const latest = job.progress.at(-1)
 
   return (
@@ -93,7 +95,7 @@ export function OptimizePanel() {
           </>
         ) : (
           <p className="status" aria-live="polite">
-            <StatusLine job={job} />
+            <StatusLine job={job} replaying={replaying} />
           </p>
         )}
       </section>

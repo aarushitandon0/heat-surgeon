@@ -5,10 +5,11 @@ interface NumberFieldProps {
   value: number
   min: number
   onChange: (value: number) => void
+  disabled?: boolean
 }
 
 /** Integer input. The value is numeric, so it is set in mono; the label is not. */
-export function NumberField({ label, value, min, onChange }: NumberFieldProps) {
+export function NumberField({ label, value, min, onChange, disabled = false }: NumberFieldProps) {
   const [draft, setDraft] = useState<string | null>(null)
   return (
     <label className="field">
@@ -19,6 +20,7 @@ export function NumberField({ label, value, min, onChange }: NumberFieldProps) {
         inputMode="numeric"
         min={min}
         step={1}
+        disabled={disabled}
         value={draft ?? String(value)}
         onChange={(event) => {
           setDraft(event.target.value)

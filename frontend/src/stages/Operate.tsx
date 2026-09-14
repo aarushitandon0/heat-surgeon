@@ -92,6 +92,7 @@ export function OperateStage() {
           onMode={setMode}
           view={view}
           revealed={revealed}
+          landed={revealed && progress >= 1}
           onBefore={() => setView('before')}
           onAfter={showAfter}
           bandEnd={bandEnd}
@@ -201,8 +202,10 @@ interface OperateViewportProps {
   mode: Mode
   onMode: (mode: Mode) => void
   view: View
-  /** True once the reveal has been started; the before/after toggle is for inspection after that. */
+  /** True once the reveal has been started. */
   revealed: boolean
+  /** True once the reveal has landed; the before/after toggle is for inspection after that, never during it. */
+  landed: boolean
   onBefore: () => void
   onAfter: () => void
   bandEnd: BandEnd
@@ -210,7 +213,7 @@ interface OperateViewportProps {
   progress: number
 }
 
-function OperateViewport({ result, mode, onMode, view, revealed, onBefore, onAfter, bandEnd, onBandEnd, progress }: OperateViewportProps) {
+function OperateViewport({ result, mode, onMode, view, revealed, landed, onBefore, onAfter, bandEnd, onBandEnd, progress }: OperateViewportProps) {
   const geometry = useStore((s) => s.geometry)
   // Along the street, not north-up: a 200 m by 40 m strip drawn north-up leaves 2 m cells a few pixels wide.
   const affine = useMemo(() => streetFrameAffine(result.design_grid), [result.design_grid])
@@ -326,7 +329,7 @@ function OperateViewport({ result, mode, onMode, view, revealed, onBefore, onAft
               Apply the searched layout
             </button>
           )}
-          {revealed && (
+          {landed && (
             <div className="segmented" role="group" aria-label="Street state">
               <button type="button" aria-pressed={view === 'before'} onClick={onBefore}>
                 Before

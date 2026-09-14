@@ -126,6 +126,14 @@ input {
   color: var(--paper-dim);
 }
 
+.replay-notice {
+  flex-basis: 100%;
+  max-width: var(--measure);
+  padding-left: var(--sp-3);
+  border-left: 2px solid var(--paper);
+  color: var(--paper);
+}
+
 .status-dot {
   display: inline-block;
   width: 0.5rem;

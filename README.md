@@ -187,7 +187,7 @@ Open http://localhost:5173. The Vite dev server proxies `/api` and `/ws` to `127
 
 1. **Pick a street** (stage 00, Locate).
 2. **Diagnose it** (stage 01). The window thermal grid loads, the provenance readout resolves, and calibration returns its hold-out error.
-3. **Start the search** (stage 02, Optimize). The convergence curve streams over the WebSocket. With the defaults (population 120, 400 generations) a run takes about 2–4 minutes on a laptop CPU.
+3. **Start the search** (stage 02, Optimize). The convergence curve streams over the WebSocket. With the defaults (trees only, population 120, 400 generations) the search takes about 63 s on an Intel Iris Xe laptop. "Short search" runs 150 generations in about 23 s.
 4. **Read the result** (stage 03, Operate). It has:
    - the 3D scene, and a 2D before/after grid
    - the modelled change as a band, with the model error beside it

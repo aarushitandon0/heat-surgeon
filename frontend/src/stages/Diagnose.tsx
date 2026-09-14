@@ -21,6 +21,7 @@ import { ROAD_LABEL_FRACTIONS, placePointLabels, placeRoadLabels, roadCandidates
 import { affineFromTransform, cellToUtm, gridBounds, utmToScreen } from '../lib/geometry.ts'
 import { DECODE_ROW_STAGGER_MS } from '../lib/motion.ts'
 import { contrastAgainst } from '../lib/model.ts'
+import { SEARCH_LENGTHS, searchLengthOf } from '../lib/search.ts'
 import { COATED_CELLS_WHEN_ON, useStore } from '../store/store.ts'
 import type { CalibrationResult, Provenance, ThermalGrid } from '../types/contracts.ts'
 import { LABEL_FONT_PX, LABEL_PAD_PX, drawLabels, strokeBasemap, type ContextStyle } from '../ui/basemapDraw.ts'
@@ -98,6 +99,7 @@ export function DiagnosePanel() {
   const job = useStore((s) => s.job)
   const setRequest = useStore((s) => s.setRequest)
   const startOptimize = useStore((s) => s.startOptimize)
+  const replaying = useStore((s) => s.dataMode.kind === 'replay')
 
   // Decode only if this panel watched the fetch happen; coming back to stage 01 later shows final text.
   const [sawAcquiring] = useState(() => thermalWindow.status === 'loading')
@@ -202,9 +204,15 @@ export function DiagnosePanel() {
         <p className="panel-note">
           The search, random layouts, greedy placement and the design-guideline layout all get the same budget.
         </p>
+        {replaying && (
+          <p className="panel-note">
+            This recording holds one search per street, with the settings shown. They cannot be changed in a replay.
+          </p>
+        )}
         <div className="segmented" role="group" aria-label="Interventions">
           <button
             type="button"
+            disabled={replaying}
             aria-pressed={!coatingOn}
             onClick={() => {
               if (coatingOn) setCoatedWhenOn(request.reflective_cells_max)
@@ -213,22 +221,46 @@ export function DiagnosePanel() {
           >
             Trees only
           </button>
-          <button type="button" aria-pressed={coatingOn} onClick={() => setRequest({ reflective_cells_max: coatedWhenOn })}>
+          <button
+            type="button"
+            disabled={replaying}
+            aria-pressed={coatingOn}
+            onClick={() => setRequest({ reflective_cells_max: coatedWhenOn })}
+          >
             Trees and coating
           </button>
         </div>
+        <div className="segmented" role="group" aria-label="Search length">
+          <button
+            type="button"
+            disabled={replaying}
+            aria-pressed={searchLengthOf(request) === 'full'}
+            onClick={() => setRequest(SEARCH_LENGTHS.full)}
+          >
+            Full search
+          </button>
+          <button
+            type="button"
+            disabled={replaying}
+            aria-pressed={searchLengthOf(request) === 'short'}
+            onClick={() => setRequest(SEARCH_LENGTHS.short)}
+          >
+            Short search
+          </button>
+        </div>
         <div className="fields">
-          <NumberField label="Trees, at most" value={request.trees_max} min={0} onChange={(v) => setRequest({ trees_max: v })} />
+          <NumberField label="Trees, at most" value={request.trees_max} min={0} disabled={replaying} onChange={(v) => setRequest({ trees_max: v })} />
           {coatingOn && (
             <NumberField
               label="Coated cells, at most"
               value={request.reflective_cells_max}
               min={1}
+              disabled={replaying}
               onChange={(v) => setRequest({ reflective_cells_max: v })}
             />
           )}
-          <NumberField label="Generations" value={request.generations} min={1} onChange={(v) => setRequest({ generations: v })} />
-          <NumberField label="Population" value={request.population} min={2} onChange={(v) => setRequest({ population: v })} />
+          <NumberField label="Generations" value={request.generations} min={1} disabled={replaying} onChange={(v) => setRequest({ generations: v })} />
+          <NumberField label="Population" value={request.population} min={2} disabled={replaying} onChange={(v) => setRequest({ population: v })} />
         </div>
         {coatingOn ? (
           <p className="panel-note">
@@ -246,7 +278,7 @@ export function DiagnosePanel() {
           disabled={calibration.status !== 'ready'}
           onClick={() => void startOptimize()}
         >
-          Search layouts
+          {replaying ? 'Replay the recorded search' : 'Search layouts'}
         </button>
         {calibration.status !== 'ready' && <p className="panel-note">Available once the model is calibrated.</p>}
         {searchRunning && <p className="panel-note">A search is running. Starting another replaces it.</p>}

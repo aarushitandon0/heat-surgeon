@@ -657,6 +657,30 @@ Trees only, 20 trees for every arm, computed through the same calls the job runn
 - **Why greedy is worst.** In the linear model a tree's gain depends on the surface its crown replaces, not on how hot the cell is. The hottest cells are often roofs and paving next to buildings, where pits cluster.
 - **What the claim is now.** The search beats the strongest matched-budget baseline by 5–11% (0.03–0.09 °C). The seed spread (at most 0.008 °C) is below that on every street; the absolute error (±1.16–1.68 °C per 90 m cell) is not, and is common-mode across arms.
 
+## Demo safety kit (Day 7, close)
+
+### Short search: 150 generations instead of 400
+
+Trees only, 20 trees, seed 42, population 120, run through `run_ga` on each street's real grid (Intel Iris Xe laptop, one process). The strongest baseline is random on every street (section above).
+
+| Street | 150 generations | 400 generations | Time, 150 / 400 |
+|---|---|---|---|
+| Bajirao Road | −0.674 °C | −0.674 °C | 21.8 s / 62.7 s |
+| FC Road | −0.696 °C | −0.696 °C | 22.9 s / 63.1 s |
+| Karve Road | −0.936 °C | −0.936 °C | 26.6 s / 78.5 s |
+| North Main Road | −0.698 °C | −0.698 °C (seed table above) | 35.5 s, measured while another test ran |
+
+- **Result.** At this budget 150 generations reached the same searched value as 400 on all four streets, in about a third of the time. Smaller populations (60 × 100, 80 × 150) came within 0.008 °C.
+- **Why it is a preset, not the default.** One seed at one budget is not evidence that 150 generations always converges. The full search stays the default; "Short search" is a labelled choice, and the stage 02 counter always shows the generation total ("Generation 142 of 150").
+- **What changing it would change.** A budget nearer a street's capacity, or coating switched on, enlarges the choice and may need more generations. Re-run this table before relying on the short preset in those settings.
+
+### Recorded replay when the backend is unreachable
+
+- **What it is.** `python -m app.snapshot` calls this API in-process (FastAPI TestClient, `USE_LIVE_DATA` forced off) for every fixture street and writes each response to `frontend/public/snapshot/<street>/`: geometry, basemap, both thermal grids, calibration, the optimize handle, every optimizer progress message with the second it arrived, and the result. Nothing is edited or summarised; the only rewritten value is the transport URL of the `done` message, which points at the recorded result file instead of the backend's job store.
+- **When it is used.** Only when the backend does not answer at all (a network failure or an empty proxy response), or when the page is opened with `?replay` or built with `VITE_REPLAY_ONLY=true`. A backend that answers with an error shows that error; it never falls back.
+- **How it is labelled.** A notice under the header on every stage: that this is a recording, the date it was made, and that searches replay at the recorded pace with the recorded settings. Search settings are disabled; the button reads "Replay the recorded search"; the stage 02 status reads "Replaying the recorded search."
+- **What it cannot do.** Answer any request it did not record. A different calibration or optimize request is refused with a plain message, never approximated.
+
 ## Earlier data-layer assumptions
 
 ### Scene-level cloud cover pre-filter: `SCENE_CLOUD_COVER_MAX_PERCENT = 40`
