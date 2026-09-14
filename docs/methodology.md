@@ -310,6 +310,45 @@ Cross-section assumptions:
 - **Any cooling would come from evaporation**, which needs moisture that pre-monsoon Pune surfaces lack and which this model does not represent. It is left out, not tuned to look useful.
 - **Shade structures** have no cited surface temperature effect and no fitted coefficient.
 
+### Day 4 result: four arms on four streets
+
+**Setup.**
+- 200 m segment on each street, 2 m design grid, cross-section from template 24A on every street (measured right of way 26.2–28.2 m).
+- The same budget for every arm: 20 trees and 150 reflective cells (600 m²).
+- GA: population 120, 400 generations, 3 seeds. Random: mean of 30 seeds.
+- Cost is null for every arm, because coating is unpriced.
+
+Conservative cooling is the high end of the band, i.e. the smallest modelled drop in mean surface temperature over the design area:
+
+| Street (profile) | Random | Greedy | Design guideline | GA (worst seed) | GA over guideline |
+|---|---|---|---|---|---|
+| FC Road (mixed) | 0.706 °C | 0.629 °C | 0.683 °C | 0.801 °C | +0.118 °C |
+| Karve Road (wide arterial) | 0.933 °C | 0.832 °C | 0.933 °C | 1.045 °C | +0.112 °C |
+| North Main Road (leafy residential) | 0.757 °C | 0.747 °C | 0.728 °C | 0.810 °C | +0.082 °C |
+| Bajirao Road (dense commercial) | 0.725 °C | 0.682 °C | 0.699 °C | 0.781 °C | +0.082 °C |
+
+Figures: `figures/<street-id>-layouts.png`.
+
+- **The GA beats the design guideline on every street and every seed**, by 0.08–0.12 °C conservative. That is 11–17% more modelled cooling from the same trees and coating.
+- **The guideline is not a strong baseline in this model.** It ties random on Karve Road and loses to it on North Main Road. Evenly spaced trees still overlap existing canopy, and the widest paved run is not always where coating pays most. The GA's advantage comes from choosing tree pits clear of existing crowns and coating what the new crowns do not cover.
+- **The gap is smaller than the model error.** Hold-out RMSE is 1.2–1.7 °C per 90 m calibration cell. The comparison between arms shares the same coefficients, so the ranking is more robust than the absolute numbers, but none of these differences is measured.
+- **The absolute cooling is driven by coefficients with standard errors of about 0.4–1.2 °C**, and by a coating band that spans a factor of seven.
+
+### Day 4 offline run
+
+- **How it ran.**
+  - A `sitecustomize.py` guard blocked every non-loopback socket connection and DNS lookup; a test outbound request was refused.
+  - The server ran with `USE_LIVE_DATA=false`.
+  - For all four streets, a client drove: list streets, thermal (street scope), geometry, calibrate, optimize, the WebSocket until done, and the result.
+- **Outcome.**
+  - All four streets returned a complete, contract-valid `OptimizationResult`: resolution block, both provenance objects, cross-section and plantable mask.
+  - The guard blocked nothing.
+  - The integration test (`tests/test_integration_offline.py`) repeats this with the socket guard inside pytest.
+- **Progress rate.**
+  - The server sent 1.6–3.9 progress messages per second, one per generation, each run taking 116–271 s.
+  - The 10 per second cap was never reached, because generations were slower than 0.1 s. Three command-line GA runs were sharing the CPU at the same time.
+  - Previews are sent only when the best layout improved since the last message: 60–103 per run.
+
 ### Building heights (display only)
 
 - **Assumption.** Height comes from OSM `height`, else `building:levels` × 3 m, else 6 m (two storeys), labelled by `height_source`.
