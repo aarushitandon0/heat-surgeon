@@ -181,6 +181,15 @@ class BasemapWay(Contract):
     path: list[PointUTM]
 
 
+class BasemapFeature(Contract):
+    """A named OSM building, for a handful of recognisable place labels. Display only."""
+
+    name: str
+    kind: str = Field(description="OSM building value verbatim, e.g. 'university', 'yes'.")
+    anchor: PointUTM = Field(description="A point inside the footprint, where the label goes.")
+    footprint_area_m2: float = Field(gt=0)
+
+
 class CityLocator(Contract):
     """Major roads and rivers across the city, so the 2 km window can be shown in its city context."""
 
@@ -201,8 +210,10 @@ class StreetBasemap(Contract):
     window_bounds_m: tuple[float, float, float, float] = Field(
         description="[min_e, min_n, max_e, max_n] of the 2 km window, in metres in crs."
     )
+    street_osm_name: str = Field(description="OSM name of the design street's ways, to find them among roads.")
     roads: list[BasemapWay]
     buildings: list[list[PointUTM]]
+    features: list[BasemapFeature]
     city: CityLocator
     attribution: str
     osm_base: str | None

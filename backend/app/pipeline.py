@@ -14,6 +14,7 @@ from shapely.geometry import LineString, Polygon
 
 from app import config
 from app.contracts import (
+    BasemapFeature,
     BasemapWay,
     Building,
     CityLocator,
@@ -156,6 +157,27 @@ def _simplified_path(coords: list[list[float]], tolerance_m: float) -> list[tupl
     return [(round(x, 1), round(y, 1)) for x, y in line.coords]
 
 
+def _osm_label(tags: dict) -> str | None:
+    return tags.get("name:en") or tags.get("name")
+
+
+def _named_features(osm_buildings: list[dict]) -> list[BasemapFeature]:
+    """The largest named OSM buildings, as label candidates. Lower-case names are mapper notes ('cs department'),
+    not place names, so they are skipped; the frontend shows only a few after collision."""
+    features = []
+    for b in osm_buildings:
+        name = _osm_label(b["tags"])
+        polygon = Polygon(b["rings"][0])
+        if not name or not name[0].isupper() or not polygon.is_valid or polygon.area <= 0:
+            continue
+        anchor = polygon.representative_point()
+        features.append(BasemapFeature(name=name, kind=b["tags"].get("building", "yes"),
+                                       anchor=(round(anchor.x, 1), round(anchor.y, 1)),
+                                       footprint_area_m2=round(polygon.area, 1)))
+    features.sort(key=lambda f: -f.footprint_area_m2)
+    return features[:config.BASEMAP_NAMED_FEATURES_MAX]
+
+
 @lru_cache(maxsize=8)
 def street_basemap(street_id: str) -> StreetBasemap:
     """OSM highways and merged footprints for the window, plus the city locator. Display geometry only."""
@@ -164,11 +186,12 @@ def street_basemap(street_id: str) -> StreetBasemap:
     city = window.manifest["city"]
     city_ways = load_city_ways(city, crs, allow_network=False)
     window_m, city_m = config.BASEMAP_WINDOW_SIMPLIFY_M, config.BASEMAP_CITY_SIMPLIFY_M
-    roads = [BasemapWay(kind=w["tags"]["highway"], name=w["tags"].get("name"), path=_simplified_path(w["coords"], window_m))
+    roads = [BasemapWay(kind=w["tags"]["highway"], name=_osm_label(w["tags"]), path=_simplified_path(w["coords"], window_m))
              for w in window.osm["highways"] if len(w["coords"]) >= 2]
     buildings = [ring for ring in (_simplified_path(b["rings"][0], window_m) for b in window.buildings) if len(ring) >= 4]
     return StreetBasemap(
-        street_id=street_id, crs=crs, window_bounds_m=window.bbox.bounds, roads=roads, buildings=buildings,
+        street_id=street_id, crs=crs, window_bounds_m=window.bbox.bounds, street_osm_name=window.manifest["osm_name"],
+        roads=roads, buildings=buildings, features=_named_features(window.osm["buildings"]),
         city=CityLocator(city=city, bbox_wgs84=config.CITY_LOCATOR_BOUNDS_WGS84[city], bounds_m=city_bbox(city, crs).bounds,
                          ways=[BasemapWay(kind=w["kind"], name=w["name"], path=_simplified_path(w["coords"], city_m))
                                for w in city_ways["ways"] if len(w["coords"]) >= 2]),

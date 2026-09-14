@@ -114,6 +114,8 @@ CITY_LOCATOR_HIGHWAY_CLASSES = ("motorway", "trunk", "primary", "secondary")
 # pixel at any zoom the app uses; 15 m at city scale is under a pixel in a 200 px inset. Display only.
 BASEMAP_WINDOW_SIMPLIFY_M = 1.0
 BASEMAP_CITY_SIMPLIFY_M = 15.0
+# Named buildings sent as label candidates, largest first. The map shows only a few; this bounds the payload.
+BASEMAP_NAMED_FEATURES_MAX = 20
 
 # --- Building footprints beyond OSM (docs/sources.md, Building footprints) ----------------
 

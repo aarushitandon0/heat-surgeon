@@ -23,7 +23,7 @@ from app.contracts import (
 TS_CONTRACTS = Path(__file__).resolve().parents[2] / "frontend" / "src" / "types" / "contracts.ts"
 
 UNIT_SUFFIX = re.compile(
-    r"_(c|c_low|c_high|m|deg|inr|inr_low|inr_high|inr_max|c_per_fraction|c_per_unit_albedo|c_per_inr)$"
+    r"_(c|c_low|c_high|m|m2|deg|inr|inr_low|inr_high|inr_max|c_per_fraction|c_per_unit_albedo|c_per_inr)$"
 )
 DIMENSIONLESS = {
     "scene_count", "valid_pixels", "n_cells_fit", "n_cells_holdout", "generation", "generations",

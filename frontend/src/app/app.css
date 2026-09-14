@@ -613,6 +613,16 @@ input {
   stroke-width: 1.5;
 }
 
+/* Place names in SVG maps: chrome, not data. Body face, --paper-dim, a --base halo drawn under the fill. */
+.map-label {
+  font-family: var(--font-body);
+  fill: var(--paper-dim);
+  stroke: var(--base);
+  stroke-linejoin: round;
+  paint-order: stroke;
+  pointer-events: none;
+}
+
 /* Stage 00 map */
 
 .map {

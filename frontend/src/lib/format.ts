@@ -106,6 +106,11 @@ export function formatLongitude(lon_deg: number, decimals = 4): string {
   return `${Math.abs(lon_deg).toFixed(decimals)}° ${lon_deg < 0 ? 'W' : 'E'}`
 }
 
+/** "FC Road" from "FC Road, Pune": the street's own name, for map labels. */
+export function streetShortName(name: string): string {
+  return name.split(',')[0].trim()
+}
+
 export const SOURCE_ADAPTER_LABELS = {
   planetary_computer: 'Microsoft Planetary Computer',
   earth_engine: 'Google Earth Engine',

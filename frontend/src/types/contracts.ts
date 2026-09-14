@@ -127,6 +127,16 @@ export interface BasemapWay {
   path: PointUTM[]
 }
 
+/** A named OSM building, for a handful of recognisable place labels. Display only. */
+export interface BasemapFeature {
+  name: string
+  /** OSM building value verbatim, e.g. 'university', 'yes'. */
+  kind: string
+  /** A point inside the footprint, where the label goes. */
+  anchor: PointUTM
+  footprint_area_m2: number
+}
+
 /** Major roads and rivers across the city, so the 2 km window can be shown in its city context. */
 export interface CityLocator {
   city: string
@@ -145,8 +155,11 @@ export interface StreetBasemap {
   crs: CrsCode
   /** [min_e, min_n, max_e, max_n] of the 2 km window, in metres in crs. */
   window_bounds_m: [number, number, number, number]
+  /** OSM name of the design street's ways, to find them among roads. */
+  street_osm_name: string
   roads: BasemapWay[]
   buildings: PointUTM[][]
+  features: BasemapFeature[]
   city: CityLocator
   attribution: string
   osm_base: string | null

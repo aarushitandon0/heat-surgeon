@@ -14,21 +14,32 @@ import {
   formatSigned,
   formatLatitude,
   formatLongitude,
+  streetShortName,
 } from '../lib/format.ts'
 import { expandBounds } from '../lib/basemap.ts'
+import { ROAD_LABEL_FRACTIONS, placePointLabels, placeRoadLabels, roadCandidates, type XY } from '../lib/labels.ts'
 import { affineFromTransform, cellToUtm, gridBounds, utmToScreen } from '../lib/geometry.ts'
 import { DECODE_ROW_STAGGER_MS } from '../lib/motion.ts'
 import { contrastAgainst } from '../lib/model.ts'
 import { COATED_CELLS_WHEN_ON, useStore } from '../store/store.ts'
 import type { CalibrationResult, Provenance, ThermalGrid } from '../types/contracts.ts'
-import { strokeBasemap, type ContextStyle } from '../ui/basemapDraw.ts'
+import { LABEL_FONT_PX, LABEL_PAD_PX, drawLabels, strokeBasemap, type ContextStyle } from '../ui/basemapDraw.ts'
+import { measurer } from '../ui/textMeasure.ts'
 import { CityLocatorMap } from '../ui/CityLocatorMap.tsx'
 import { Decode } from '../ui/Decode.tsx'
 import { HeatCanvas, type OverlayContext } from '../ui/HeatCanvas.tsx'
 import { NumberField } from '../ui/NumberField.tsx'
 import { Readout } from '../ui/Readout.tsx'
 import { ThermalScale } from '../ui/ThermalScale.tsx'
-import { readSurfaceColor } from '../ui/tokens.ts'
+import { readBodyFont, readSurfaceColor } from '../ui/tokens.ts'
+
+/** Road labels: trunk, primary and secondary first; tertiary roads only fill slots that remain. */
+const ROAD_LABEL_RANK_MAX = 3
+const ROAD_LABELS_MAX = 10
+/** A label is set only on a stretch that bends less than this under it. */
+const ROAD_LABEL_MAX_BEND_PX = 3
+/** Named buildings, largest first, after the roads. Recognition, not a gazetteer. */
+const PLACE_LABELS_MAX = 4
 
 /** Streets shown this far past the measured window on every side. */
 const WINDOW_CONTEXT_MARGIN_M = 150
@@ -349,25 +360,39 @@ function MeasuredWindow({ grid, street }: { grid: ThermalGrid; street: ThermalGr
     [basemap],
   )
 
+  const summary = useStore((s) => s.street)
+  const streetLabel = summary ? streetShortName(summary.name) : null
+
   const overlay = useCallback(
-    ({ ctx, view }: OverlayContext) => {
-      if (!street) return
-      const streetAffine = affineFromTransform(street.transform)
-      const [streetRows, streetCols] = street.shape
-      const corners = [
-        [0, 0],
-        [streetCols, 0],
-        [streetCols, streetRows],
-        [0, streetRows],
-      ].map(([col, row]) => utmToScreen(view, ...cellToUtm(streetAffine, col, row)))
-      ctx.strokeStyle = readSurfaceColor('--paper')
-      ctx.lineWidth = 1.5
-      ctx.beginPath()
-      corners.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)))
-      ctx.closePath()
-      ctx.stroke()
+    ({ ctx, view, width_px, height_px, reserved }: OverlayContext) => {
+      if (street) strokeStreetExtent(ctx, view, street)
+      if (!basemap || !streetLabel) return
+      const project = (e_m: number, n_m: number): XY => utmToScreen(view, e_m, n_m)
+      const bounds = { x: 0, y: 0, w: width_px, h: height_px }
+      const measure = measurer(readBodyFont(LABEL_FONT_PX))
+      const roads = placeRoadLabels(
+        roadCandidates(basemap.roads, project, ROAD_LABEL_RANK_MAX, { osmName: basemap.street_osm_name, label: streetLabel }),
+        measure,
+        LABEL_FONT_PX,
+        bounds,
+        reserved,
+        { max: ROAD_LABELS_MAX, fractions: ROAD_LABEL_FRACTIONS, maxBend: ROAD_LABEL_MAX_BEND_PX, pad: LABEL_PAD_PX },
+      )
+      const places = placePointLabels(
+        basemap.features.map((feature) => {
+          const [x, y] = project(...feature.anchor)
+          return { text: feature.name, anchors: [{ x, y, align: 'center' as const }] }
+        }),
+        measure,
+        LABEL_FONT_PX,
+        bounds,
+        [...reserved, ...roads.map((label) => label.box)],
+        PLACE_LABELS_MAX,
+        LABEL_PAD_PX,
+      )
+      drawLabels(ctx, [...roads, ...places])
     },
-    [street],
+    [street, basemap, streetLabel],
   )
 
   return (
@@ -423,4 +448,24 @@ function MeasuredWindow({ grid, street }: { grid: ThermalGrid; street: ThermalGr
       </div>
     </>
   )
+}
+
+/** The street's measured extent: the street-scope thermal grid's outer edge. */
+function strokeStreetExtent(ctx: CanvasRenderingContext2D, view: OverlayContext['view'], street: ThermalGrid) {
+  const streetAffine = affineFromTransform(street.transform)
+  const [streetRows, streetCols] = street.shape
+  const corners = [
+    [0, 0],
+    [streetCols, 0],
+    [streetCols, streetRows],
+    [0, streetRows],
+  ].map(([col, row]) => utmToScreen(view, ...cellToUtm(streetAffine, col, row)))
+  ctx.save()
+  ctx.strokeStyle = readSurfaceColor('--paper')
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  corners.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)))
+  ctx.closePath()
+  ctx.stroke()
+  ctx.restore()
 }

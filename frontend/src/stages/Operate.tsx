@@ -16,15 +16,19 @@ import {
   formatInrRange,
   formatNumber,
   formatSigned,
+  streetShortName,
 } from '../lib/format.ts'
 import { designGridContext } from '../lib/basemap.ts'
+import { designGridLabels } from '../lib/labels.ts'
+import { measurer } from '../ui/textMeasure.ts'
+import { readBodyFont } from '../ui/tokens.ts'
 import { streetFrameAffine } from '../lib/geometry.ts'
 import { ARM_ORDER, coolingMarginPercent, countRange } from '../lib/model.ts'
 import { gridDomain } from '../lib/thermal.ts'
 import { StreetScene } from '../scene/StreetScene.tsx'
 import { useStore } from '../store/store.ts'
 import type { Building, Comparison, ComparisonArm, OptimizationResult } from '../types/contracts.ts'
-import { strokeGridContext, type ContextStyle } from '../ui/basemapDraw.ts'
+import { LABEL_FONT_PX, LABEL_PAD_PX, drawLabels, strokeGridContext, type ContextStyle } from '../ui/basemapDraw.ts'
 import { HeatCanvas, type OverlayContext } from '../ui/HeatCanvas.tsx'
 import { Numeral } from '../ui/Numeral.tsx'
 import { Readout } from '../ui/Readout.tsx'
@@ -34,6 +38,10 @@ import { readSurfaceColor } from '../ui/tokens.ts'
 
 /** Room across the street, each side of the design grid, for the buildings that line it. */
 const STREET_CONTEXT_MARGIN_M = 14
+/** The design street is labelled, and at most this many of its nearest cross streets. */
+const CROSS_STREET_LABELS_MAX = 3
+/** Space between the grid edge and a label beside it. */
+const LABEL_GAP_PX = 6
 /** Hairlines over modelled data: light enough that the surface temperature still carries the frame. */
 const GRID_CONTEXT_STYLE: ContextStyle = {
   buildingAlpha: 0.5,
@@ -227,8 +235,23 @@ function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEn
   }, [result.design_grid])
 
   const overlay = useCallback(
-    ({ ctx, cellToScreen, cell_px }: OverlayContext) => {
-      if (context) strokeGridContext(ctx, context, cellToScreen, GRID_CONTEXT_STYLE)
+    ({ ctx, cellToScreen, cell_px, width_px, height_px }: OverlayContext) => {
+      if (context) {
+        strokeGridContext(ctx, context, cellToScreen, GRID_CONTEXT_STYLE)
+        if (basemap.status === 'ready') {
+          const labels = designGridLabels(
+            context.roads,
+            result.design_grid.shape,
+            cellToScreen,
+            { osmName: basemap.data.street_osm_name, label: streetShortName(result.street.name) },
+            measurer(readBodyFont(LABEL_FONT_PX)),
+            LABEL_FONT_PX,
+            { x: 0, y: 0, w: width_px, h: height_px },
+            { gap: LABEL_GAP_PX, pad: LABEL_PAD_PX, maxCrossStreets: CROSS_STREET_LABELS_MAX, inward: false },
+          )
+          drawLabels(ctx, labels)
+        }
+      }
       if (view !== 'after') return
       const paper = readSurfaceColor('--paper')
       const paperDim = readSurfaceColor('--paper-dim')
@@ -263,7 +286,7 @@ function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEn
         }
       }
     },
-    [view, result.interventions, context],
+    [view, result.interventions, result.design_grid.shape, result.street.name, context, basemap],
   )
 
   return (

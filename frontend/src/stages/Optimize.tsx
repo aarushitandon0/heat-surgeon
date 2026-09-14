@@ -3,6 +3,11 @@
 import { useId, useMemo } from 'react'
 import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 import { designGridContext, type CellPoint } from '../lib/basemap.ts'
+import { designGridLabels } from '../lib/labels.ts'
+import { LABEL_FONT_PX, LABEL_HALO_PX, LABEL_PAD_PX } from '../ui/basemapDraw.ts'
+import { useElementSize } from '../ui/hooks.ts'
+import { measurer } from '../ui/textMeasure.ts'
+import { readBodyFont } from '../ui/tokens.ts'
 import {
   DELTA_DECIMALS,
   ERROR_DECIMALS,
@@ -11,6 +16,7 @@ import {
   formatInrRange,
   formatNumber,
   formatSigned,
+  streetShortName,
 } from '../lib/format.ts'
 import { paddedDomain } from '../lib/model.ts'
 import { useStore, type JobState } from '../store/store.ts'
@@ -25,6 +31,9 @@ const CHART_MIN_PAD_C = 0.02
 const PREVIEW_CONTEXT_MARGIN_M = 2
 /** The layout preview grows with the viewport width up to this height. */
 const PREVIEW_MAX_HEIGHT_REM = 12
+/** The street and at most this many nearest cross streets are named on the preview. */
+const CROSS_STREET_LABELS_MAX = 3
+const PREVIEW_LABEL_GAP_PX = 4
 
 function bandsDiffer(p: OptimizeProgress): boolean {
   return formatSigned(p.best_temp_delta_c_low, DELTA_DECIMALS) !== formatSigned(p.best_temp_delta_c_high, DELTA_DECIMALS)
@@ -253,7 +262,9 @@ function previewPath(points: CellPoint[]): string {
 
 function LayoutPreview({ design, preview }: { design: DesignGrid; preview: Intervention[] | null }) {
   const basemap = useStore((s) => s.basemap)
+  const street = useStore((s) => s.street)
   const clipId = `layout-clip${useId().replace(/:/g, '')}`
+  const [frameRef, frameSize] = useElementSize<HTMLDivElement>()
   const [rows, cols] = design.shape
   const context = useMemo(
     () =>
@@ -262,9 +273,25 @@ function LayoutPreview({ design, preview }: { design: DesignGrid; preview: Inter
         : null,
     [basemap, design],
   )
+  // Labels are placed in pixels, then drawn in grid units: one unit is one cell, px_per_cell pixels wide.
+  const px_per_cell = frameSize.width_px / rows
+  const labels = useMemo(() => {
+    if (!context || basemap.status !== 'ready' || !street || px_per_cell <= 0) return []
+    return designGridLabels(
+      context.roads,
+      design.shape,
+      (col, row) => [row * px_per_cell, col * px_per_cell],
+      { osmName: basemap.data.street_osm_name, label: streetShortName(street.name) },
+      measurer(readBodyFont(LABEL_FONT_PX)),
+      LABEL_FONT_PX,
+      { x: 0, y: 0, w: rows * px_per_cell, h: cols * px_per_cell },
+      { gap: PREVIEW_LABEL_GAP_PX, pad: LABEL_PAD_PX, maxCrossStreets: CROSS_STREET_LABELS_MAX, inward: true },
+    )
+  }, [context, basemap, street, px_per_cell, design.shape, rows, cols])
 
   return (
     <figure className="layout-preview">
+      <div ref={frameRef}>
       <svg
         viewBox={`0 0 ${rows} ${cols}`}
         // Sized to the grid's own proportions, so the border is the grid edge and the street never looks cut short.
@@ -294,7 +321,22 @@ function LayoutPreview({ design, preview }: { design: DesignGrid; preview: Inter
         {preview
           ?.filter((iv) => iv.type === 'tree')
           .flatMap((iv) => iv.cells.map(([row, col]) => <circle key={`tree${row}-${col}`} className="layout-tree" cx={row + 0.5} cy={col + 0.5} r={0.7} />))}
+        {labels.map((label) => (
+          <text
+            key={label.text}
+            className="map-label"
+            x={label.x / px_per_cell}
+            y={label.y / px_per_cell}
+            fontSize={LABEL_FONT_PX / px_per_cell}
+            strokeWidth={LABEL_HALO_PX / px_per_cell}
+            textAnchor={label.align === 'center' ? 'middle' : label.align === 'right' ? 'end' : 'start'}
+            dominantBaseline="central"
+          >
+            {label.text}
+          </text>
+        ))}
       </svg>
+      </div>
       <figcaption className="legend">
         <span>
           {preview

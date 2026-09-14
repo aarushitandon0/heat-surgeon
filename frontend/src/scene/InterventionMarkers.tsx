@@ -6,16 +6,14 @@ import type { DesignGrid, Intervention } from '../types/contracts.ts'
 import { readSurfaceColor } from '../ui/tokens.ts'
 import { interventionPositions, streetRotationY_rad, type SceneOrigin } from './frame.ts'
 
-// The ring matches backend TREE_CROWN_DIAMETER_M (an ASSUMPTION logged in docs/methodology.md): the ground the
-// model treats as shaded. It stays flat, so it outlines that extent without hiding the heat under it.
-const TREE_CROWN_DIAMETER_M = 8
-const TREE_RING_WIDTH_M = 0.3
-// Display only, not model inputs (docs/methodology.md, Day 7): a young street tree a few years after planting,
-// so the intervention reads as a tree at true scale rather than as a pin.
-const TREE_CANOPY_DIAMETER_M = 4.5
-const TREE_CANOPY_DEPTH_M = 2.6
-const TREE_TRUNK_HEIGHT_M = 3
-const TREE_TRUNK_RADIUS_M = 0.18
+// The canopy is drawn at backend TREE_CROWN_DIAMETER_M (an ASSUMPTION logged in docs/methodology.md), the ground
+// the model treats as shaded, so the drawn tree and the modelled shade are the same size. Trunk height and
+// canopy depth are display only: a tall clear trunk and a shallow crown leave the cooled ground under the crown
+// visible from the opening three-quarter view.
+const TREE_CANOPY_DIAMETER_M = 8
+const TREE_CANOPY_DEPTH_M = 2.2
+const TREE_TRUNK_HEIGHT_M = 4
+const TREE_TRUNK_RADIUS_M = 0.2
 const MARKER_Y_M = 0.15
 const COATED_OUTLINE_M = 0.2
 
@@ -42,18 +40,16 @@ export function InterventionMarkers({ design, interventions, origin }: Intervent
   const positions = useMemo(() => interventionPositions(design, interventions, origin), [design, interventions, origin])
   const coatedColor = useMemo(() => readSurfaceColor('--paper-dim'), [])
 
-  // Trunk, canopy and the flat crown ring, merged with per-vertex colour so trees stay one draw call.
+  // Trunk and canopy, merged with per-vertex colour so trees stay one draw call.
   const tree = useMemo(() => {
     const paper = new Color(readSurfaceColor('--paper'))
     const paperDim = new Color(readSurfaceColor('--paper-dim'))
-    const ring = new RingGeometry(TREE_CROWN_DIAMETER_M / 2 - TREE_RING_WIDTH_M, TREE_CROWN_DIAMETER_M / 2, 48)
-    ring.rotateX(-Math.PI / 2)
     const trunk = new CylinderGeometry(TREE_TRUNK_RADIUS_M, TREE_TRUNK_RADIUS_M, TREE_TRUNK_HEIGHT_M, 6)
     trunk.translate(0, TREE_TRUNK_HEIGHT_M / 2, 0)
-    const canopy = new SphereGeometry(TREE_CANOPY_DIAMETER_M / 2, 16, 10)
+    const canopy = new SphereGeometry(TREE_CANOPY_DIAMETER_M / 2, 20, 10)
     canopy.scale(1, TREE_CANOPY_DEPTH_M / TREE_CANOPY_DIAMETER_M, 1)
     canopy.translate(0, TREE_TRUNK_HEIGHT_M + TREE_CANOPY_DEPTH_M / 2 - TREE_TRUNK_RADIUS_M, 0)
-    const parts = [painted(ring, paperDim), painted(trunk, paperDim), painted(canopy, paper)]
+    const parts = [painted(trunk, paperDim), painted(canopy, paper)]
     const merged = mergeGeometries(parts, false)
     parts.forEach((part) => part.dispose())
     return merged

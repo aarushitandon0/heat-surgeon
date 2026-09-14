@@ -1,8 +1,36 @@
 // Stroking OpenStreetMap context onto a canvas in surface colours. Context, not data: never the thermal ramp.
 
 import { roadWeight, type CellPoint, type DesignGridContext } from '../lib/basemap.ts'
+import type { Label } from '../lib/labels.ts'
 import type { BasemapWay, PointUTM } from '../types/contracts.ts'
-import { readSurfaceColor } from './tokens.ts'
+import { readBodyFont, readSurfaceColor } from './tokens.ts'
+
+/** Map labels: body face, --paper-dim, with a thin --base halo so they stay legible over the thermal colours. */
+export const LABEL_FONT_PX = 12
+export const LABEL_HALO_PX = 3
+/** Space kept between labels, and between a label and the drawing edge. */
+export const LABEL_PAD_PX = 4
+
+export function drawLabels(ctx: CanvasRenderingContext2D, labels: Label[], size_px = LABEL_FONT_PX) {
+  if (labels.length === 0) return
+  ctx.save()
+  ctx.font = readBodyFont(size_px)
+  ctx.textBaseline = 'middle'
+  ctx.lineJoin = 'round'
+  ctx.lineWidth = LABEL_HALO_PX
+  ctx.strokeStyle = readSurfaceColor('--base')
+  ctx.fillStyle = readSurfaceColor('--paper-dim')
+  for (const label of labels) {
+    ctx.save()
+    ctx.translate(label.x, label.y)
+    ctx.rotate(label.angle_rad)
+    ctx.textAlign = label.align
+    ctx.strokeText(label.text, 0, 0)
+    ctx.fillText(label.text, 0, 0)
+    ctx.restore()
+  }
+  ctx.restore()
+}
 
 type Project = (x: number, y: number) => [number, number]
 

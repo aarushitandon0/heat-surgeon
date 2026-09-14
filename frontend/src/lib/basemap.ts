@@ -69,7 +69,7 @@ export function svgPathData(path: PointUTM[], project: (e_m: number, n_m: number
 export type CellPoint = [number, number]
 
 export interface DesignGridContext {
-  roads: { weight: Exclude<RoadWeight, 'path'>; points: CellPoint[] }[]
+  roads: { weight: Exclude<RoadWeight, 'path'>; name: string | null; points: CellPoint[] }[]
   buildings: CellPoint[][]
 }
 
@@ -81,7 +81,7 @@ export function designGridContext(roads: BasemapWay[], buildings: PointUTM[][], 
   return {
     roads: roads.flatMap((way) => {
       const weight = roadWeight(way.kind)
-      return weight !== 'path' && pathTouches(way.path, bounds) ? [{ weight, points: toCells(way.path) }] : []
+      return weight !== 'path' && pathTouches(way.path, bounds) ? [{ weight, name: way.name, points: toCells(way.path) }] : []
     }),
     buildings: buildings.filter((ring) => pathTouches(ring, bounds)).map(toCells),
   }

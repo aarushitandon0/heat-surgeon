@@ -14,6 +14,7 @@ import {
   type View,
 } from '../lib/geometry.ts'
 import { TEMP_DECIMALS, formatCount, formatNumber } from '../lib/format.ts'
+import type { Box } from '../lib/labels.ts'
 import { lerpGrid, paintGrid, type Domain, type Grid } from '../lib/thermal.ts'
 import type { GridShape } from '../types/contracts.ts'
 import { useElementSize } from './hooks.ts'
@@ -31,6 +32,10 @@ export interface OverlayContext {
   cellToScreen: CellToScreen
   view: View
   cell_px: number
+  width_px: number
+  height_px: number
+  /** Screen boxes covered by HTML on top of the canvas (the inset), for labels to avoid. */
+  reserved: Box[]
 }
 
 interface HeatCanvasProps {
@@ -72,6 +77,7 @@ export function HeatCanvas({
 }: HeatCanvasProps) {
   const [wrapRef, size] = useElementSize<HTMLDivElement>()
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const insetRef = useRef<HTMLDivElement | null>(null)
   const [hover, setHover] = useState<{ row: number; col: number } | null>(null)
 
   const bounds = useMemo(() => frame ?? gridBounds(affine, shape), [frame, affine, shape])
@@ -114,10 +120,19 @@ export function HeatCanvas({
     ctx.stroke()
 
     const cell_px = view.scale_px_per_m * Math.hypot(affine.e_per_col_m, affine.n_per_col_m)
+    const frameRect = canvas.parentElement?.getBoundingClientRect()
+    const insetRect = insetRef.current?.getBoundingClientRect()
+    const reserved: Box[] =
+      frameRect && insetRect
+        ? [{ x: insetRect.left - frameRect.left, y: insetRect.top - frameRect.top, w: insetRect.width, h: insetRect.height }]
+        : []
     const context: OverlayContext = {
       ctx,
       view,
       cell_px,
+      width_px: size.width_px,
+      height_px: size.height_px,
+      reserved,
       cellToScreen: (col, row) => utmToScreen(view, ...cellToUtm(affine, col, row)),
     }
     underlay?.(context)
@@ -161,7 +176,11 @@ export function HeatCanvas({
           onPointerMove={onPointerMove}
           onPointerLeave={() => setHover(null)}
         />
-        {inset && <div className="heat-canvas-inset">{inset}</div>}
+        {inset && (
+          <div className="heat-canvas-inset" ref={insetRef}>
+            {inset}
+          </div>
+        )}
       </div>
       {view && bar_m !== null && (
         <p className="scale-bar">

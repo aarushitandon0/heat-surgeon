@@ -22,6 +22,11 @@ export function readSurfaceColor(name: SurfaceToken): string {
   return readToken(name)
 }
 
+/** Labels and other chrome: the body face, never mono. */
+export function readBodyFont(size_px: number): string {
+  return `${size_px}px ${readToken('--font-body')}`
+}
+
 export function readMonoFont(size_px: number): string {
   return `${size_px}px ${readToken('--font-mono')}`
 }
