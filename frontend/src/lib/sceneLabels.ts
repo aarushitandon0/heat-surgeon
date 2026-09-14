@@ -1,6 +1,5 @@
-// Which names the 3D scene shows, and where they may sit on the ground, in UTM metres. Pure; projection to the
-// screen, choosing a candidate position and collision happen per frame in src/scene/SceneLabels.tsx. Labels are
-// chrome, never data.
+// Which names the 3D scene shows, and where they may sit, in UTM metres. Pure; projection to the screen, choosing a
+// candidate position and collision happen per frame in src/scene/SceneLabels.tsx. Labels are chrome, never data.
 
 import type { BasemapFeature, BasemapWay, DesignGrid, PointUTM } from '../types/contracts.ts'
 import { designGridContext } from './basemap.ts'
@@ -13,6 +12,8 @@ export interface SceneLabelPosition {
   anchor: PointUTM
   /** A second point along the feature, so the label can turn to follow it; null for upright place names. */
   toward: PointUTM | null
+  /** Roof height of the drawn building the name belongs on, or null to sit at street level. */
+  height_m: number | null
 }
 
 export interface SceneLabel {
@@ -28,6 +29,12 @@ export interface SceneLabelOptions {
   maxRoads: number
   maxPlaces: number
   maxRoadRank: number
+}
+
+/** A drawn 3D building, for putting a name on its roof. */
+export interface RoofBuilding {
+  footprint: PointUTM[]
+  height_m: number
 }
 
 /** Cross streets are looked for this far outside the design grid. */
@@ -60,19 +67,30 @@ function densify(path: PointUTM[], step_m: number): PointUTM[] {
   return out
 }
 
+/** Ray casting: true when the point lies inside the ring. */
+export function pointInRing([e, n]: PointUTM, ring: PointUTM[]): boolean {
+  let inside = false
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [ei, ni] = ring[i]
+    const [ej, nj] = ring[j]
+    if (ni > n !== nj > n && e < ((ej - ei) * (n - ni)) / (nj - ni) + ei) inside = !inside
+  }
+  return inside
+}
+
 /** Points roughly every spacing_m along a densified run, each with the next point for direction, nearest the centre first. */
 function roadCandidates(points: PointUTM[], centre: PointUTM, spacing_m: number, max: number): SceneLabelPosition[] {
   const every = Math.max(1, Math.round(spacing_m / DENSIFY_STEP_M))
   const positions: SceneLabelPosition[] = []
-  for (let i = 0; i < points.length - 1; i += every) positions.push({ anchor: points[i], toward: points[i + 1] })
+  for (let i = 0; i < points.length - 1; i += every) positions.push({ anchor: points[i], toward: points[i + 1], height_m: null })
   const distance = ([e, n]: PointUTM) => Math.hypot(e - centre[0], n - centre[1])
   return positions.sort((a, b) => distance(a.anchor) - distance(b.anchor)).slice(0, max)
 }
 
 /**
  * Names for the 3D scene, most important first: the design street along its centreline, its nearest cross streets
- * just outside the grid, other named roads by class and length within radius_m of the grid centre, then the
- * largest named buildings within the same radius.
+ * just outside the grid, other named roads by class and length within radius_m of the grid centre, then named
+ * buildings and places nearest the street first, on the roof of the drawn building they fall inside.
  */
 export function sceneLabels(
   roads: BasemapWay[],
@@ -80,11 +98,13 @@ export function sceneLabels(
   design: DesignGrid,
   street: { osmName: string; label: string },
   options: SceneLabelOptions,
+  roofs: RoofBuilding[] = [],
 ): SceneLabel[] {
   const [rows, cols] = design.shape
   const affine = affineFromDesignGrid(design)
   const centre = cellToUtm(affine, cols / 2, rows / 2)
-  const near = ([e, n]: PointUTM) => Math.hypot(e - centre[0], n - centre[1]) <= options.radius_m
+  const distanceToCentre = ([e, n]: PointUTM) => Math.hypot(e - centre[0], n - centre[1])
+  const near = (point: PointUTM) => distanceToCentre(point) <= options.radius_m
 
   const labels: SceneLabel[] = [
     {
@@ -93,6 +113,7 @@ export function sceneLabels(
       candidates: STREET_CANDIDATE_ROWS.map((f) => ({
         anchor: cellToUtm(affine, cols / 2, rows * f),
         toward: cellToUtm(affine, cols / 2, rows * f + 10),
+        height_m: null,
       })),
     },
   ]
@@ -107,7 +128,7 @@ export function sceneLabels(
       kind: 'cross',
       candidates: sides.map((side) => {
         const outside = side < 0 ? -CROSS_LABEL_OFFSET_CELLS : cols + CROSS_LABEL_OFFSET_CELLS
-        return { anchor: cellToUtm(affine, outside, crossing.row), toward: cellToUtm(affine, outside + side * 5, crossing.row) }
+        return { anchor: cellToUtm(affine, outside, crossing.row), toward: cellToUtm(affine, outside + side * 5, crossing.row), height_m: null }
       }),
     })
     used.add(crossing.name)
@@ -145,10 +166,16 @@ export function sceneLabels(
       candidates: roadCandidates(road.points, centre, ROAD_CANDIDATE_SPACING_M, ROAD_CANDIDATES_MAX),
     }))
 
+  const seenPlaces = new Set<string>()
   const placeLabels = features
     .filter((feature) => near(feature.anchor) && !used.has(feature.name))
+    .sort((a, b) => distanceToCentre(a.anchor) - distanceToCentre(b.anchor))
+    .filter((feature) => !seenPlaces.has(feature.name) && seenPlaces.add(feature.name))
     .slice(0, options.maxPlaces)
-    .map((feature): SceneLabel => ({ text: feature.name, kind: 'place', candidates: [{ anchor: feature.anchor, toward: null }] }))
+    .map((feature): SceneLabel => {
+      const roof = roofs.find((building) => pointInRing(feature.anchor, building.footprint))
+      return { text: feature.name, kind: 'place', candidates: [{ anchor: feature.anchor, toward: null, height_m: roof ? roof.height_m : null }] }
+    })
 
   return [...labels, ...roadLabels, ...placeLabels]
 }

@@ -578,13 +578,31 @@ The 3D scene carries road centrelines and names, so the street can be located wi
   - The design street, under its display name.
   - Its three nearest cross streets, of any class, 3 cells outside the planted strip.
   - Up to 14 other named roads within 350 m, by class then length. Trunk to tertiary come first; residential, unclassified and living streets fill what remains, because close up it is local streets that locate a place. Stage 01's 2 km window still stops at tertiary.
-  - Up to 4 of the largest named buildings, at roughly roof height.
+  - Up to 12 named buildings and places, nearest the design street first (see "Building and place names" below).
 - **Placement, recomputed whenever the camera moves.**
   - Each name has several candidate positions: road names every 50 m along the road (nearest the design street first), the street name at five points along its centreline, and cross-street names on either side of the street.
   - The first candidate that is on screen and overlaps no name already placed is used. Road names turn to follow their road on screen and are never upside down.
   - A name with no free position is hidden, not squeezed in.
 - **Rendering.** HTML text over the canvas, in the body face and `--paper-dim` with a thin `--base` halo, so no font file is fetched. The street's own name is one size larger. It is interaction, not motion: names move only when the viewer orbits.
-- **Assumptions.** The 350 m radius, the caps (3, 14, 4), the 50 m spacing and the 14 m roof height for building names are display choices. Changing them changes only which names appear and where.
+- **Assumptions.** The 350 m radius, the caps (3, 14, 12) and the 50 m spacing are display choices. Changing them changes only which names appear and where.
+
+### Building and place names (display only)
+
+- **Where names come from.** OpenStreetMap only.
+  - Building outlines with a `name` tag, from the cached window pull.
+  - Named places: shops, banks, restaurants, schools, hospitals, places of worship, hotels, parks. These come from a separate cached pull per window of elements with a `name` and an `amenity`, `shop`, `office`, `tourism`, `leisure` or `historic` tag (sources.md).
+  - Windows hold 215–463 displayable places.
+- **Nothing is named that OSM does not name.** The Microsoft and Google footprints carry no names, and no commercial places service is used.
+- **Which names are skipped.**
+  - Names starting with a lower-case letter ("cs department", "b12") are mapper notes.
+  - Block codes ("B12", "A-3") name nothing a reader would recognise.
+  - A place with the same name as a named building is the same thing mapped twice, so only the building is kept.
+- **Stage 01** still names only the 4 largest named buildings in the 2 km window.
+- **3D scene.**
+  - Up to 12 names within 350 m, nearest the design street first, one per name.
+  - A name that falls inside a drawn building sits 2 m above that building's roof, using the height rules above. Otherwise it sits 3 m above the street.
+  - As with road names, a name that would collide is hidden.
+- **Assumptions.** OSM coverage decides which places appear; a well-known place that nobody has mapped is simply absent. Roof heights come from the area-based height table, so a name can float above or below the true roof.
 
 ### The reveal (motion moment two)
 

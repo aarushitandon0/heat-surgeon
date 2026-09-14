@@ -5,6 +5,7 @@ never prefetched raises CacheMiss; nothing is fetched or invented.
 """
 
 import math
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -38,7 +39,7 @@ from app.contracts import (
 from app.data.cache import load
 from app.data.fixtures import CachedWindow, load_window, street_manifest, window_keys
 from app.data.footprints import overture_key
-from app.data.osm import city_bbox, load_city_ways, osm_key
+from app.data.osm import city_bbox, load_city_ways, load_places, osm_key
 from app.model import cost
 from app.model.validate import CalibrationRun, calibrate
 from app.optimizer.encoding import TREE, Budget, Objectives, StreetGrid, segment_frame, street_grid_for
@@ -161,21 +162,38 @@ def _osm_label(tags: dict) -> str | None:
     return tags.get("name:en") or tags.get("name")
 
 
-def _named_features(osm_buildings: list[dict]) -> list[BasemapFeature]:
-    """The largest named OSM buildings, as label candidates. Lower-case names are mapper notes ('cs department'),
-    not place names, so they are skipped; the frontend shows only a few after collision."""
-    features = []
+# Short codes mappers use for blocks and wings ("B12", "A-3"), which name nothing a reader would recognise.
+_CODE_NAME = re.compile(r"[A-Za-z]{0,2}\s?-?\d+[A-Za-z]?")
+
+
+def display_place_name(name: str | None) -> str | None:
+    """A name worth putting on a map, or None. Lower-case names are mapper notes ('cs department', 'b12') and
+    block codes are not place names; both are skipped."""
+    if not name or not name[0].isupper() or _CODE_NAME.fullmatch(name.strip()):
+        return None
+    return name
+
+
+def _named_features(osm_buildings: list[dict], places: list[dict]) -> list[BasemapFeature]:
+    """Label candidates: named OSM buildings, largest first, then named OSM places. A place with the same name as a
+    listed building is the same thing mapped twice, so only the building is kept. The frontend shows a few."""
+    buildings = []
     for b in osm_buildings:
-        name = _osm_label(b["tags"])
+        name = display_place_name(_osm_label(b["tags"]))
         polygon = Polygon(b["rings"][0])
-        if not name or not name[0].isupper() or not polygon.is_valid or polygon.area <= 0:
+        if not name or not polygon.is_valid or polygon.area <= 0:
             continue
         anchor = polygon.representative_point()
-        features.append(BasemapFeature(name=name, kind=b["tags"].get("building", "yes"),
-                                       anchor=(round(anchor.x, 1), round(anchor.y, 1)),
-                                       footprint_area_m2=round(polygon.area, 1)))
-    features.sort(key=lambda f: -f.footprint_area_m2)
-    return features[:config.BASEMAP_NAMED_FEATURES_MAX]
+        buildings.append(BasemapFeature(name=name, kind=f"building={b['tags'].get('building', 'yes')}", origin="osm_building",
+                                        anchor=(round(anchor.x, 1), round(anchor.y, 1)),
+                                        footprint_area_m2=round(polygon.area, 1)))
+    buildings.sort(key=lambda f: -f.footprint_area_m2)
+    building_names = {f.name for f in buildings}
+    named_places = [BasemapFeature(name=name, kind=p["kind"], origin="osm_place",
+                                   anchor=(round(p["point"][0], 1), round(p["point"][1], 1)), footprint_area_m2=None)
+                    for p in places
+                    if (name := display_place_name(p["name"])) and name not in building_names]
+    return (buildings + named_places)[:config.BASEMAP_NAMED_FEATURES_MAX]
 
 
 @lru_cache(maxsize=8)
@@ -191,7 +209,8 @@ def street_basemap(street_id: str) -> StreetBasemap:
     buildings = [ring for ring in (_simplified_path(b["rings"][0], window_m) for b in window.buildings) if len(ring) >= 4]
     return StreetBasemap(
         street_id=street_id, crs=crs, window_bounds_m=window.bbox.bounds, street_osm_name=window.manifest["osm_name"],
-        roads=roads, buildings=buildings, features=_named_features(window.osm["buildings"]),
+        roads=roads, buildings=buildings,
+        features=_named_features(window.osm["buildings"], load_places(window.bbox, allow_network=False)["places"]),
         city=CityLocator(city=city, bbox_wgs84=config.CITY_LOCATOR_BOUNDS_WGS84[city], bounds_m=city_bbox(city, crs).bounds,
                          ways=[BasemapWay(kind=w["kind"], name=w["name"], path=_simplified_path(w["coords"], city_m))
                                for w in city_ways["ways"] if len(w["coords"]) >= 2]),

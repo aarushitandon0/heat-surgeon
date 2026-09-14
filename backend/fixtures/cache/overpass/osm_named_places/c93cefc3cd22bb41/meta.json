@@ -1,0 +1,3628 @@
+{
+  "key": {
+    "source_adapter": "overpass",
+    "product": "osm_named_places",
+    "bbox": {
+      "crs": "EPSG:32643",
+      "bounds": [
+        376065.0,
+        2045955.0,
+        378075.0,
+        2047965.0
+      ]
+    },
+    "date_range": {
+      "start": "2026-09-14",
+      "end": "2026-09-14",
+      "months": []
+    }
+  },
+  "stored_utc": "2026-09-14T14:42:33+00:00",
+  "arrays": {},
+  "metadata": {
+    "osm_base": "2026-05-31T22:37:44Z",
+    "attribution": "Map data \u00a9 OpenStreetMap contributors, ODbL 1.0",
+    "places": [
+      {
+        "id": "osm:node/513157038",
+        "name": "Nisarg",
+        "kind": "amenity=restaurant",
+        "point": [
+          376724.58,
+          2046646.19
+        ]
+      },
+      {
+        "id": "osm:node/674075322",
+        "name": "Raviraj",
+        "kind": "tourism=hotel",
+        "point": [
+          377165.72,
+          2047880.33
+        ]
+      },
+      {
+        "id": "osm:node/678444711",
+        "name": "Sambhaji Police Chowki",
+        "kind": "amenity=police",
+        "point": [
+          377963.63,
+          2047354.11
+        ]
+      },
+      {
+        "id": "osm:node/763545776",
+        "name": "Grubshup",
+        "kind": "amenity=cafe",
+        "point": [
+          376484.06,
+          2047106.15
+        ]
+      },
+      {
+        "id": "osm:node/763545824",
+        "name": "Kalyan Bhel",
+        "kind": "amenity=fast_food",
+        "point": [
+          376521.06,
+          2047221.88
+        ]
+      },
+      {
+        "id": "osm:node/865812384",
+        "name": "Pastry Corner",
+        "kind": "amenity=cafe",
+        "point": [
+          376536.09,
+          2046879.94
+        ]
+      },
+      {
+        "id": "osm:node/1534215007",
+        "name": "Darshan",
+        "kind": "amenity=restaurant",
+        "point": [
+          377650.27,
+          2047455.46
+        ]
+      },
+      {
+        "id": "osm:node/1534218276",
+        "name": "International Book Service",
+        "kind": "shop=books",
+        "point": [
+          377777.63,
+          2047552.1
+        ]
+      },
+      {
+        "id": "osm:node/1534219011",
+        "name": "Chitale Bandhu Mithaiwale",
+        "kind": "shop=confectionery",
+        "point": [
+          377748.18,
+          2047615.82
+        ]
+      },
+      {
+        "id": "osm:node/1534219869",
+        "name": "Regal Bakery",
+        "kind": "shop=bakery",
+        "point": [
+          377634.47,
+          2047458.93
+        ]
+      },
+      {
+        "id": "osm:node/1534401106",
+        "name": "Apollo Pharmacy",
+        "kind": "amenity=pharmacy",
+        "point": [
+          376916.75,
+          2047801.13
+        ]
+      },
+      {
+        "id": "osm:node/1534406257",
+        "name": "Vet Care Pet Clinic",
+        "kind": "amenity=veterinary",
+        "point": [
+          376976.6,
+          2047858.17
+        ]
+      },
+      {
+        "id": "osm:node/1534417021",
+        "name": "The Four Fountains Spa",
+        "kind": "shop=hairdresser",
+        "point": [
+          377189.46,
+          2047756.6
+        ]
+      },
+      {
+        "id": "osm:node/1534419509",
+        "name": "Kotak Mahindra Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377293.79,
+          2047887.07
+        ]
+      },
+      {
+        "id": "osm:node/1534443956",
+        "name": "Balbhim Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377233.87,
+          2047706.2
+        ]
+      },
+      {
+        "id": "osm:node/1534446149",
+        "name": "Shubham Medical",
+        "kind": "amenity=pharmacy",
+        "point": [
+          377303.17,
+          2047386.02
+        ]
+      },
+      {
+        "id": "osm:node/1534448614",
+        "name": "Oriental Bank of Commerce",
+        "kind": "amenity=bank",
+        "point": [
+          377303.46,
+          2047431.05
+        ]
+      },
+      {
+        "id": "osm:node/1534457948",
+        "name": "Cafe Good Luck",
+        "kind": "amenity=restaurant",
+        "point": [
+          377709.71,
+          2047811.79
+        ]
+      },
+      {
+        "id": "osm:node/1534458997",
+        "name": "Archie's Gallery",
+        "kind": "shop=books",
+        "point": [
+          377769.42,
+          2047851.37
+        ]
+      },
+      {
+        "id": "osm:node/1534460856",
+        "name": "IDBI Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377819.6,
+          2047882.43
+        ]
+      },
+      {
+        "id": "osm:node/1534465625",
+        "name": "Deccan Gymkhana Police Chowki",
+        "kind": "amenity=police",
+        "point": [
+          377593.63,
+          2047462.95
+        ]
+      },
+      {
+        "id": "osm:node/1534471890",
+        "name": "Deccan Gymkhana Post Office",
+        "kind": "amenity=post_office",
+        "point": [
+          377751.2,
+          2047569.46
+        ]
+      },
+      {
+        "id": "osm:node/1534474062",
+        "name": "Vegetable Market",
+        "kind": "shop=greengrocer",
+        "point": [
+          377744.65,
+          2047521.66
+        ]
+      },
+      {
+        "id": "osm:node/1534501626",
+        "name": "R Deccan Multiplex",
+        "kind": "amenity=cinema",
+        "point": [
+          377801.97,
+          2047717.19
+        ]
+      },
+      {
+        "id": "osm:node/1534503367",
+        "name": "HP",
+        "kind": "amenity=fuel",
+        "point": [
+          377763.32,
+          2047782.17
+        ]
+      },
+      {
+        "id": "osm:node/1720374434",
+        "name": "Abhishek Veg",
+        "kind": "amenity=restaurant",
+        "point": [
+          376558.59,
+          2046324.57
+        ]
+      },
+      {
+        "id": "osm:node/2148865443",
+        "name": "Panchvati Gaurav",
+        "kind": "amenity=restaurant",
+        "point": [
+          377409.65,
+          2047880.04
+        ]
+      },
+      {
+        "id": "osm:node/2165021348",
+        "name": "State Bank of India",
+        "kind": "amenity=bank",
+        "point": [
+          376329.22,
+          2046682.56
+        ]
+      },
+      {
+        "id": "osm:node/2183488936",
+        "name": "Barista Lavazza",
+        "kind": "amenity=cafe",
+        "point": [
+          376360.28,
+          2047587.66
+        ]
+      },
+      {
+        "id": "osm:node/2183488938",
+        "name": "Kollage Food Court",
+        "kind": "amenity=cafe",
+        "point": [
+          376347.5,
+          2047442.4
+        ]
+      },
+      {
+        "id": "osm:node/2192111446",
+        "name": "Bank of Maharashtra",
+        "kind": "amenity=bank",
+        "point": [
+          377872.22,
+          2047792.94
+        ]
+      },
+      {
+        "id": "osm:node/2192111451",
+        "name": "Raymond",
+        "kind": "shop=clothes",
+        "point": [
+          377804.08,
+          2047812.26
+        ]
+      },
+      {
+        "id": "osm:node/2207888045",
+        "name": "Bank of Maharashtra",
+        "kind": "amenity=bank",
+        "point": [
+          377960.62,
+          2046794.79
+        ]
+      },
+      {
+        "id": "osm:node/2266979716",
+        "name": "DCC",
+        "kind": "shop=computer",
+        "point": [
+          377985.73,
+          2047741.76
+        ]
+      },
+      {
+        "id": "osm:node/2266979717",
+        "name": "DCC",
+        "kind": "shop=computer",
+        "point": [
+          378049.58,
+          2047845.7
+        ]
+      },
+      {
+        "id": "osm:node/2266979718",
+        "name": "KFC",
+        "kind": "amenity=fast_food",
+        "point": [
+          377812.79,
+          2047712.94
+        ]
+      },
+      {
+        "id": "osm:node/2266979719",
+        "name": "McDonald's",
+        "kind": "amenity=fast_food",
+        "point": [
+          378043.99,
+          2047917.08
+        ]
+      },
+      {
+        "id": "osm:node/2266979720",
+        "name": "Wadeshwar",
+        "kind": "amenity=restaurant",
+        "point": [
+          377726.61,
+          2047936.55
+        ]
+      },
+      {
+        "id": "osm:node/2273735905",
+        "name": "Amrapali",
+        "kind": "amenity=restaurant",
+        "point": [
+          377723.48,
+          2047960.27
+        ]
+      },
+      {
+        "id": "osm:node/2273735906",
+        "name": "Barbeque Nation",
+        "kind": "amenity=restaurant",
+        "point": [
+          377799.06,
+          2047702.62
+        ]
+      },
+      {
+        "id": "osm:node/2273735907",
+        "name": "Champion",
+        "kind": "shop=clothes",
+        "point": [
+          377714.29,
+          2047693.79
+        ]
+      },
+      {
+        "id": "osm:node/2279178863",
+        "name": "Khandujibaba Vitthal Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377841.44,
+          2047507.79
+        ]
+      },
+      {
+        "id": "osm:node/2410718632",
+        "name": "Visava Maruti Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377835.13,
+          2047143.12
+        ]
+      },
+      {
+        "id": "osm:node/2517303173",
+        "name": "Senadatta Police Chowki",
+        "kind": "amenity=police",
+        "point": [
+          378033.06,
+          2046471.45
+        ]
+      },
+      {
+        "id": "osm:node/2537620596",
+        "name": "Abhishek Non-Veg",
+        "kind": "amenity=restaurant",
+        "point": [
+          376549.78,
+          2046357.09
+        ]
+      },
+      {
+        "id": "osm:node/2537620598",
+        "name": "Domino's",
+        "kind": "amenity=fast_food",
+        "point": [
+          376752.1,
+          2046686.17
+        ]
+      },
+      {
+        "id": "osm:node/2537620599",
+        "name": "Kalinga",
+        "kind": "amenity=restaurant",
+        "point": [
+          377027.72,
+          2046790.3
+        ]
+      },
+      {
+        "id": "osm:node/2537620601",
+        "name": "Manali",
+        "kind": "amenity=restaurant",
+        "point": [
+          376369.92,
+          2046211.93
+        ]
+      },
+      {
+        "id": "osm:node/2537620603",
+        "name": "Pavitra",
+        "kind": "amenity=restaurant",
+        "point": [
+          376152.5,
+          2046069.51
+        ]
+      },
+      {
+        "id": "osm:node/2537620605",
+        "name": "Swami",
+        "kind": "amenity=restaurant",
+        "point": [
+          377023.29,
+          2046787.12
+        ]
+      },
+      {
+        "id": "osm:node/2556961543",
+        "name": "Padma Cafe",
+        "kind": "amenity=fast_food",
+        "point": [
+          376497.64,
+          2046947.43
+        ]
+      },
+      {
+        "id": "osm:node/2566241270",
+        "name": "KFC",
+        "kind": "amenity=fast_food",
+        "point": [
+          377423.05,
+          2047071.93
+        ]
+      },
+      {
+        "id": "osm:node/2566241272",
+        "name": "Lagu Bandhu",
+        "kind": "shop=jewelry",
+        "point": [
+          376463.35,
+          2046748.17
+        ]
+      },
+      {
+        "id": "osm:node/2566241273",
+        "name": "McDonald's",
+        "kind": "amenity=fast_food",
+        "point": [
+          377428.03,
+          2047077.77
+        ]
+      },
+      {
+        "id": "osm:node/2604377957",
+        "name": "Casa Lolo",
+        "kind": "amenity=restaurant",
+        "point": [
+          376915.29,
+          2047778.21
+        ]
+      },
+      {
+        "id": "osm:node/2787018254",
+        "name": "Hotel Khybar",
+        "kind": "amenity=bar",
+        "point": [
+          377939.16,
+          2047863.65
+        ]
+      },
+      {
+        "id": "osm:node/2787018959",
+        "name": "United Colors of Benetton",
+        "kind": "shop=clothes",
+        "point": [
+          378009.39,
+          2047871.73
+        ]
+      },
+      {
+        "id": "osm:node/2787019789",
+        "name": "Poonam Textiles",
+        "kind": "shop=clothes",
+        "point": [
+          377917.92,
+          2047774.18
+        ]
+      },
+      {
+        "id": "osm:node/2787019790",
+        "name": "Priyanka",
+        "kind": "shop=clothes",
+        "point": [
+          377912.49,
+          2047767.85
+        ]
+      },
+      {
+        "id": "osm:node/2787020120",
+        "name": "Sukanta",
+        "kind": "amenity=restaurant",
+        "point": [
+          378004.83,
+          2047771.01
+        ]
+      },
+      {
+        "id": "osm:node/2801208406",
+        "name": "Bal Shivaji Mitra Mandal",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377402.13,
+          2046393.6
+        ]
+      },
+      {
+        "id": "osm:node/2801208409",
+        "name": "Cosmos Bank",
+        "kind": "amenity=atm",
+        "point": [
+          377334.04,
+          2047911.93
+        ]
+      },
+      {
+        "id": "osm:node/2801208410",
+        "name": "Cosmos Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377325.97,
+          2047912.93
+        ]
+      },
+      {
+        "id": "osm:node/2858176027",
+        "name": "Vishweshwar Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377010.51,
+          2046780.36
+        ]
+      },
+      {
+        "id": "osm:node/2859985517",
+        "name": "Bank of Baroda",
+        "kind": "amenity=bank",
+        "point": [
+          377510.58,
+          2047329.5
+        ]
+      },
+      {
+        "id": "osm:node/2859985518",
+        "name": "Bata",
+        "kind": "shop=shoes",
+        "point": [
+          377922.98,
+          2047780.45
+        ]
+      },
+      {
+        "id": "osm:node/2859985520",
+        "name": "Central Bank of India",
+        "kind": "amenity=bank",
+        "point": [
+          377783.1,
+          2047521.56
+        ]
+      },
+      {
+        "id": "osm:node/2928753030",
+        "name": "Rajmal Lakhichand Jewellers",
+        "kind": "shop=jewelry",
+        "point": [
+          376738.44,
+          2046942.14
+        ]
+      },
+      {
+        "id": "osm:node/2928754507",
+        "name": "SEED Tutorials",
+        "kind": "office=educational_institution",
+        "point": [
+          376757.45,
+          2046983.42
+        ]
+      },
+      {
+        "id": "osm:node/2929239714",
+        "name": "Gangar Eyenation",
+        "kind": "shop=optician",
+        "point": [
+          376585.77,
+          2046861.89
+        ]
+      },
+      {
+        "id": "osm:node/2940513801",
+        "name": "HDFC Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378014.52,
+          2046743.81
+        ]
+      },
+      {
+        "id": "osm:node/2940513803",
+        "name": "Saffron",
+        "kind": "amenity=restaurant",
+        "point": [
+          378011.9,
+          2046757.23
+        ]
+      },
+      {
+        "id": "osm:node/3337848239",
+        "name": "Janata Sahakari Bank, Kothrud Branch",
+        "kind": "amenity=bank",
+        "point": [
+          377452.9,
+          2047262.47
+        ]
+      },
+      {
+        "id": "osm:node/3337848243",
+        "name": "Woodlands",
+        "kind": "amenity=restaurant",
+        "point": [
+          376985.37,
+          2046797.66
+        ]
+      },
+      {
+        "id": "osm:node/3337848266",
+        "name": "ICICI Bank",
+        "kind": "amenity=atm",
+        "point": [
+          377243.27,
+          2047200.75
+        ]
+      },
+      {
+        "id": "osm:node/3376012873",
+        "name": "Symbiosis Open School",
+        "kind": "amenity=school",
+        "point": [
+          376592.58,
+          2047659.05
+        ]
+      },
+      {
+        "id": "osm:node/3376012876",
+        "name": "Nishigandha",
+        "kind": "shop=beauty",
+        "point": [
+          376623.71,
+          2047760.42
+        ]
+      },
+      {
+        "id": "osm:node/3376012884",
+        "name": "Om Properties",
+        "kind": "office=architect",
+        "point": [
+          376566.41,
+          2047668.01
+        ]
+      },
+      {
+        "id": "osm:node/3379383278",
+        "name": "Lakme",
+        "kind": "shop=beauty",
+        "point": [
+          376680.79,
+          2047524.15
+        ]
+      },
+      {
+        "id": "osm:node/3379398637",
+        "name": "Bank of Maharashtra",
+        "kind": "amenity=bank",
+        "point": [
+          376934.97,
+          2047681.33
+        ]
+      },
+      {
+        "id": "osm:node/3379399601",
+        "name": "Shri Gurudev Datt Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          376989.28,
+          2047716.84
+        ]
+      },
+      {
+        "id": "osm:node/3381592654",
+        "name": "HDFC Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377128.92,
+          2047922.16
+        ]
+      },
+      {
+        "id": "osm:node/3386030400",
+        "name": "HAL Marut",
+        "kind": "tourism=attraction",
+        "point": [
+          377066.52,
+          2047811.29
+        ]
+      },
+      {
+        "id": "osm:node/3386030401",
+        "name": "Prabhat Police Chowki",
+        "kind": "amenity=police",
+        "point": [
+          376847.04,
+          2047509.95
+        ]
+      },
+      {
+        "id": "osm:node/3488367794",
+        "name": "Le Plaisir",
+        "kind": "amenity=cafe",
+        "point": [
+          377354.98,
+          2047907.06
+        ]
+      },
+      {
+        "id": "osm:node/3495323617",
+        "name": "Sveekar",
+        "kind": "amenity=restaurant",
+        "point": [
+          376741.46,
+          2046613.57
+        ]
+      },
+      {
+        "id": "osm:node/3610703511",
+        "name": "Royal Optic House",
+        "kind": "shop=optician",
+        "point": [
+          376576.79,
+          2046809.58
+        ]
+      },
+      {
+        "id": "osm:node/3647415344",
+        "name": "Cafe Coffee Day",
+        "kind": "amenity=cafe",
+        "point": [
+          376654.46,
+          2046785.99
+        ]
+      },
+      {
+        "id": "osm:node/3647429522",
+        "name": "Samudra",
+        "kind": "amenity=restaurant",
+        "point": [
+          376659.57,
+          2046778.46
+        ]
+      },
+      {
+        "id": "osm:node/3657496166",
+        "name": "Aavees",
+        "kind": "amenity=restaurant",
+        "point": [
+          376922.04,
+          2047044.38
+        ]
+      },
+      {
+        "id": "osm:node/3657496175",
+        "name": "Dairy Don",
+        "kind": "shop=ice_cream",
+        "point": [
+          377091.31,
+          2047080.87
+        ]
+      },
+      {
+        "id": "osm:node/3657496181",
+        "name": "Kobe Sizzlers",
+        "kind": "amenity=restaurant",
+        "point": [
+          376385.33,
+          2047547.28
+        ]
+      },
+      {
+        "id": "osm:node/3657496197",
+        "name": "Sehegal Autoriders",
+        "kind": "shop=car",
+        "point": [
+          376351.03,
+          2047438.47
+        ]
+      },
+      {
+        "id": "osm:node/3657496201",
+        "name": "Wadeshwar",
+        "kind": "amenity=restaurant",
+        "point": [
+          376354.67,
+          2047555.05
+        ]
+      },
+      {
+        "id": "osm:node/3657496216",
+        "name": "ICICI",
+        "kind": "amenity=atm",
+        "point": [
+          376386.49,
+          2047234.8
+        ]
+      },
+      {
+        "id": "osm:node/3699871343",
+        "name": "Aditya Pure Veg.",
+        "kind": "amenity=restaurant",
+        "point": [
+          376922.12,
+          2046995.98
+        ]
+      },
+      {
+        "id": "osm:node/3699871696",
+        "name": "Bank of Maharashtra",
+        "kind": "amenity=bank",
+        "point": [
+          377917.19,
+          2047836.85
+        ]
+      },
+      {
+        "id": "osm:node/3710571718",
+        "name": "Saraswat Bank",
+        "kind": "amenity=bank",
+        "point": [
+          376553.78,
+          2046797.08
+        ]
+      },
+      {
+        "id": "osm:node/3710571734",
+        "name": "Jumboking Vada Pav",
+        "kind": "amenity=cafe",
+        "point": [
+          377849.98,
+          2047675.84
+        ]
+      },
+      {
+        "id": "osm:node/3710571735",
+        "name": "Aditya Pure Veg.",
+        "kind": "amenity=restaurant",
+        "point": [
+          376920.31,
+          2046996.14
+        ]
+      },
+      {
+        "id": "osm:node/3736424926",
+        "name": "Bharat Vihar",
+        "kind": "tourism=apartment",
+        "point": [
+          376186.32,
+          2046066.6
+        ]
+      },
+      {
+        "id": "osm:node/3740999835",
+        "name": "PMC Swachata Griha",
+        "kind": "amenity=toilets",
+        "point": [
+          378029.96,
+          2047766.12
+        ]
+      },
+      {
+        "id": "osm:node/3746860826",
+        "name": "Saumitra",
+        "kind": "tourism=apartment",
+        "point": [
+          376155.33,
+          2046008.5
+        ]
+      },
+      {
+        "id": "osm:node/3824604285",
+        "name": "Purab",
+        "kind": "amenity=restaurant",
+        "point": [
+          377824.44,
+          2047557.26
+        ]
+      },
+      {
+        "id": "osm:node/3836998962",
+        "name": "Vitthal Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377930.09,
+          2047288.78
+        ]
+      },
+      {
+        "id": "osm:node/3837531761",
+        "name": "Allen Solly",
+        "kind": "shop=clothes",
+        "point": [
+          377997.51,
+          2047926.68
+        ]
+      },
+      {
+        "id": "osm:node/3837531762",
+        "name": "Bags & Baggage",
+        "kind": "shop=bag",
+        "point": [
+          377960.17,
+          2047819.31
+        ]
+      },
+      {
+        "id": "osm:node/3837531764",
+        "name": "Canara Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377969.01,
+          2047893.64
+        ]
+      },
+      {
+        "id": "osm:node/3837531765",
+        "name": "Corporation Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378038.55,
+          2047908.78
+        ]
+      },
+      {
+        "id": "osm:node/3837531766",
+        "name": "Deccan Corner",
+        "kind": "amenity=restaurant",
+        "point": [
+          377804.94,
+          2047706.27
+        ]
+      },
+      {
+        "id": "osm:node/3837531768",
+        "name": "Footin",
+        "kind": "shop=shoes",
+        "point": [
+          377956.08,
+          2047814.53
+        ]
+      },
+      {
+        "id": "osm:node/3837531770",
+        "name": "Louis Philippe",
+        "kind": "shop=clothes",
+        "point": [
+          378000.17,
+          2047931.65
+        ]
+      },
+      {
+        "id": "osm:node/3837531771",
+        "name": "Marne Paan House",
+        "kind": "shop=paan",
+        "point": [
+          377886.84,
+          2047740.92
+        ]
+      },
+      {
+        "id": "osm:node/3837531772",
+        "name": "Mayfair Tailors",
+        "kind": "shop=tailor",
+        "point": [
+          377893.97,
+          2047743.93
+        ]
+      },
+      {
+        "id": "osm:node/3837531773",
+        "name": "Metro Optician",
+        "kind": "shop=optician",
+        "point": [
+          377893.22,
+          2047742.64
+        ]
+      },
+      {
+        "id": "osm:node/3837531774",
+        "name": "Mochi",
+        "kind": "shop=shoes",
+        "point": [
+          377804.92,
+          2047702.35
+        ]
+      },
+      {
+        "id": "osm:node/3837531775",
+        "name": "Peter England",
+        "kind": "shop=clothes",
+        "point": [
+          377968.79,
+          2047831.47
+        ]
+      },
+      {
+        "id": "osm:node/3837531776",
+        "name": "Ravindra",
+        "kind": "shop=furniture",
+        "point": [
+          377948.02,
+          2047805.59
+        ]
+      },
+      {
+        "id": "osm:node/3837531777",
+        "name": "SVC Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377977.31,
+          2047918.66
+        ]
+      },
+      {
+        "id": "osm:node/3837531778",
+        "name": "Shoe Paradise",
+        "kind": "shop=shoes",
+        "point": [
+          378042.02,
+          2047913.34
+        ]
+      },
+      {
+        "id": "osm:node/3844082159",
+        "name": "Bakliwal Tutorials - IIT",
+        "kind": "office=educational_institution",
+        "point": [
+          377757.76,
+          2047615.89
+        ]
+      },
+      {
+        "id": "osm:node/4247914694",
+        "name": "Punjab bank",
+        "kind": "amenity=bank",
+        "point": [
+          377011.78,
+          2047442.52
+        ]
+      },
+      {
+        "id": "osm:node/4415636702",
+        "name": "Vivek Hairdressers",
+        "kind": "shop=hairdresser",
+        "point": [
+          378038.87,
+          2046623.62
+        ]
+      },
+      {
+        "id": "osm:node/4452486686",
+        "name": "Himali Society Gym",
+        "kind": "leisure=sports_centre",
+        "point": [
+          376701.05,
+          2046212.12
+        ]
+      },
+      {
+        "id": "osm:node/4452486687",
+        "name": "Himali Canteen",
+        "kind": "amenity=cafe",
+        "point": [
+          376743.08,
+          2046274.41
+        ]
+      },
+      {
+        "id": "osm:node/4452491917",
+        "name": "Suma Soft",
+        "kind": "office=yes",
+        "point": [
+          376698.29,
+          2046302.12
+        ]
+      },
+      {
+        "id": "osm:node/4452495870",
+        "name": "Coffee and Bread Art Cafe",
+        "kind": "amenity=cafe",
+        "point": [
+          376576.88,
+          2046347.61
+        ]
+      },
+      {
+        "id": "osm:node/4452498099",
+        "name": "Perio",
+        "kind": "shop=fashion",
+        "point": [
+          376574.37,
+          2046341.14
+        ]
+      },
+      {
+        "id": "osm:node/4452498840",
+        "name": "Surya Veg/Non Veg",
+        "kind": "amenity=restaurant",
+        "point": [
+          376593.93,
+          2046347.77
+        ]
+      },
+      {
+        "id": "osm:node/4452499726",
+        "name": "Umesh Ceramics",
+        "kind": "shop=hardware",
+        "point": [
+          376584.41,
+          2046385.91
+        ]
+      },
+      {
+        "id": "osm:node/4452516704",
+        "name": "Ganesh Bhel",
+        "kind": "amenity=fast_food",
+        "point": [
+          376122.07,
+          2045959.69
+        ]
+      },
+      {
+        "id": "osm:node/4452536072",
+        "name": "Reliance Trends",
+        "kind": "shop=mall",
+        "point": [
+          376863.37,
+          2046386.4
+        ]
+      },
+      {
+        "id": "osm:node/4589574794",
+        "name": "Kusumbai Motichand Planetarium",
+        "kind": "amenity=planetarium",
+        "point": [
+          378058.01,
+          2047085.45
+        ]
+      },
+      {
+        "id": "osm:node/4666595591",
+        "name": "Bata",
+        "kind": "shop=shoes",
+        "point": [
+          376961.07,
+          2047061.07
+        ]
+      },
+      {
+        "id": "osm:node/4666613989",
+        "name": "Indian Overseas Bank",
+        "kind": "amenity=bank",
+        "point": [
+          376677.96,
+          2046905.73
+        ]
+      },
+      {
+        "id": "osm:node/5253713305",
+        "name": "Dattawadi Police Chowki",
+        "kind": "amenity=police",
+        "point": [
+          377572.27,
+          2046009.08
+        ]
+      },
+      {
+        "id": "osm:node/5324848124",
+        "name": "Bank of Maharashtra",
+        "kind": "amenity=bank",
+        "point": [
+          376929.54,
+          2047667.8
+        ]
+      },
+      {
+        "id": "osm:node/5810802097",
+        "name": "Toastmasters Club of Pune-West",
+        "kind": "amenity=community_centre",
+        "point": [
+          376154.66,
+          2046162.96
+        ]
+      },
+      {
+        "id": "osm:node/5832220015",
+        "name": "Kollage",
+        "kind": "amenity=restaurant",
+        "point": [
+          376325.55,
+          2047512.22
+        ]
+      },
+      {
+        "id": "osm:node/5832220016",
+        "name": "Coffee Republic",
+        "kind": "amenity=cafe",
+        "point": [
+          376380.18,
+          2047508.13
+        ]
+      },
+      {
+        "id": "osm:node/5832220017",
+        "name": "Crazy Cheesy Cafe",
+        "kind": "amenity=cafe",
+        "point": [
+          376423.0,
+          2047202.88
+        ]
+      },
+      {
+        "id": "osm:node/5832438786",
+        "name": "Kalinga",
+        "kind": "amenity=restaurant",
+        "point": [
+          376709.52,
+          2046461.95
+        ]
+      },
+      {
+        "id": "osm:node/5832438787",
+        "name": "Vishwas Medico",
+        "kind": "amenity=pharmacy",
+        "point": [
+          376606.79,
+          2046416.23
+        ]
+      },
+      {
+        "id": "osm:node/5832438788",
+        "name": "All For Small",
+        "kind": "shop=clothes",
+        "point": [
+          377717.48,
+          2047790.25
+        ]
+      },
+      {
+        "id": "osm:node/5832438790",
+        "name": "Saraswat Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377679.37,
+          2047863.46
+        ]
+      },
+      {
+        "id": "osm:node/5832438791",
+        "name": "Thomas Cook",
+        "kind": "shop=travel_agency",
+        "point": [
+          377624.09,
+          2047875.35
+        ]
+      },
+      {
+        "id": "osm:node/5832438792",
+        "name": "Girikand Holidays",
+        "kind": "shop=travel_agency",
+        "point": [
+          377514.53,
+          2047891.33
+        ]
+      },
+      {
+        "id": "osm:node/5832438793",
+        "name": "Pallod",
+        "kind": "shop=clothes",
+        "point": [
+          377442.49,
+          2047904.95
+        ]
+      },
+      {
+        "id": "osm:node/5832438794",
+        "name": "Samarth Sahakari Bank",
+        "kind": "amenity=atm",
+        "point": [
+          377399.94,
+          2047904.66
+        ]
+      },
+      {
+        "id": "osm:node/5832438795",
+        "name": "Samarth Sahakari Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377394.13,
+          2047904.84
+        ]
+      },
+      {
+        "id": "osm:node/5832438797",
+        "name": "Amul",
+        "kind": "amenity=ice_cream",
+        "point": [
+          377358.24,
+          2047882.55
+        ]
+      },
+      {
+        "id": "osm:node/5832438798",
+        "name": "Nizkaya",
+        "kind": "shop=clothes",
+        "point": [
+          377321.09,
+          2047912.27
+        ]
+      },
+      {
+        "id": "osm:node/5832438799",
+        "name": "Svelte",
+        "kind": "shop=clothes",
+        "point": [
+          377317.02,
+          2047912.3
+        ]
+      },
+      {
+        "id": "osm:node/5832438800",
+        "name": "Health Care Medical",
+        "kind": "amenity=pharmacy",
+        "point": [
+          377311.86,
+          2047912.47
+        ]
+      },
+      {
+        "id": "osm:node/5832438803",
+        "name": "Sane Dairy",
+        "kind": "shop=dairy",
+        "point": [
+          377274.04,
+          2047887.18
+        ]
+      },
+      {
+        "id": "osm:node/5832438804",
+        "name": "ICICI Bank Retail Asset Division Pune Branch",
+        "kind": "office=company",
+        "point": [
+          377189.45,
+          2047922.13
+        ]
+      },
+      {
+        "id": "osm:node/5832438805",
+        "name": "Bank of Baroda",
+        "kind": "amenity=bank",
+        "point": [
+          377227.76,
+          2047891.77
+        ]
+      },
+      {
+        "id": "osm:node/5832438806",
+        "name": "Suryama",
+        "kind": "amenity=restaurant",
+        "point": [
+          377160.54,
+          2047895.37
+        ]
+      },
+      {
+        "id": "osm:node/5832438807",
+        "name": "Neo Artery and Vein Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          377137.73,
+          2047893.4
+        ]
+      },
+      {
+        "id": "osm:node/5832438808",
+        "name": "The Titan Shop",
+        "kind": "shop=watches",
+        "point": [
+          377093.73,
+          2047921.13
+        ]
+      },
+      {
+        "id": "osm:node/5832438810",
+        "name": "ICICI Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377010.13,
+          2047930.82
+        ]
+      },
+      {
+        "id": "osm:node/5832438811",
+        "name": "Golwilkar Metropolis Heath Service (India) Pvt Ltd",
+        "kind": "amenity=hospital",
+        "point": [
+          376966.73,
+          2047908.44
+        ]
+      },
+      {
+        "id": "osm:node/5832438812",
+        "name": "Aarohan",
+        "kind": "shop=travel_agency",
+        "point": [
+          376951.22,
+          2047903.34
+        ]
+      },
+      {
+        "id": "osm:node/5832438813",
+        "name": "Bandhan Bank",
+        "kind": "amenity=bank",
+        "point": [
+          376951.44,
+          2047904.84
+        ]
+      },
+      {
+        "id": "osm:node/5832438814",
+        "name": "Bhangini Nivedita Sahakari Bank",
+        "kind": "amenity=bank",
+        "point": [
+          376951.63,
+          2047906.08
+        ]
+      },
+      {
+        "id": "osm:node/5832438815",
+        "name": "Javed Habib Hair Studio",
+        "kind": "shop=hairdresser",
+        "point": [
+          376945.4,
+          2047861.72
+        ]
+      },
+      {
+        "id": "osm:node/5832438816",
+        "name": "Food Junction",
+        "kind": "shop=convenience",
+        "point": [
+          376962.37,
+          2047858.93
+        ]
+      },
+      {
+        "id": "osm:node/5832462252",
+        "name": "ICICI Bank",
+        "kind": "amenity=atm",
+        "point": [
+          378029.32,
+          2046675.47
+        ]
+      },
+      {
+        "id": "osm:node/5832462253",
+        "name": "ICICI Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378030.07,
+          2046670.4
+        ]
+      },
+      {
+        "id": "osm:node/5832462254",
+        "name": "Ajantha",
+        "kind": "shop=confectionery",
+        "point": [
+          378024.67,
+          2046689.56
+        ]
+      },
+      {
+        "id": "osm:node/5832462255",
+        "name": "WS Bakers",
+        "kind": "shop=pastry",
+        "point": [
+          378024.2,
+          2046693.52
+        ]
+      },
+      {
+        "id": "osm:node/5832462256",
+        "name": "Kanhere's Studio Event",
+        "kind": "shop=photo",
+        "point": [
+          377756.89,
+          2046430.0
+        ]
+      },
+      {
+        "id": "osm:node/5832462257",
+        "name": "Travel India Club",
+        "kind": "shop=travel_agency",
+        "point": [
+          377761.21,
+          2046429.91
+        ]
+      },
+      {
+        "id": "osm:node/5832462258",
+        "name": "Papillon",
+        "kind": "shop=hairdresser",
+        "point": [
+          377740.75,
+          2046430.88
+        ]
+      },
+      {
+        "id": "osm:node/5832462259",
+        "name": "Mayur Medicals",
+        "kind": "amenity=pharmacy",
+        "point": [
+          377497.48,
+          2046455.7
+        ]
+      },
+      {
+        "id": "osm:node/5832462260",
+        "name": "Nutan Gift Shopee",
+        "kind": "shop=gift",
+        "point": [
+          377493.69,
+          2046454.5
+        ]
+      },
+      {
+        "id": "osm:node/5832462261",
+        "name": "Mayur Sweets",
+        "kind": "shop=confectionery",
+        "point": [
+          377489.14,
+          2046452.9
+        ]
+      },
+      {
+        "id": "osm:node/6145441616",
+        "name": "D'Decor",
+        "kind": "shop=interior_decoration",
+        "point": [
+          377288.04,
+          2047225.37
+        ]
+      },
+      {
+        "id": "osm:node/6145441617",
+        "name": "ICICI Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377235.04,
+          2047197.42
+        ]
+      },
+      {
+        "id": "osm:node/6145441618",
+        "name": "Pets Gallery",
+        "kind": "shop=pet",
+        "point": [
+          376569.31,
+          2046805.7
+        ]
+      },
+      {
+        "id": "osm:node/6145441620",
+        "name": "Prem Resto Bar",
+        "kind": "amenity=restaurant",
+        "point": [
+          376401.74,
+          2046761.81
+        ]
+      },
+      {
+        "id": "osm:node/6145520663",
+        "name": "Jana Small Finance Bank",
+        "kind": "amenity=bank",
+        "point": [
+          376763.24,
+          2046556.45
+        ]
+      },
+      {
+        "id": "osm:node/6145520664",
+        "name": "Kotak Mahindra Bank",
+        "kind": "amenity=atm",
+        "point": [
+          376566.04,
+          2046334.31
+        ]
+      },
+      {
+        "id": "osm:node/6145520668",
+        "name": "Dattatray Vishwanath Hurne",
+        "kind": "shop=clothes",
+        "point": [
+          376411.37,
+          2046249.39
+        ]
+      },
+      {
+        "id": "osm:node/6145662565",
+        "name": "Saudamini Handloom",
+        "kind": "shop=clothes",
+        "point": [
+          377727.21,
+          2047750.71
+        ]
+      },
+      {
+        "id": "osm:node/6145662566",
+        "name": "Indian Overseas Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377734.52,
+          2047719.14
+        ]
+      },
+      {
+        "id": "osm:node/6199246420",
+        "name": "Lokmat",
+        "kind": "office=newspaper",
+        "point": [
+          376343.47,
+          2047438.5
+        ]
+      },
+      {
+        "id": "osm:node/6199246421",
+        "name": "Tata Motors Bafna",
+        "kind": "shop=car",
+        "point": [
+          376435.19,
+          2047170.29
+        ]
+      },
+      {
+        "id": "osm:node/6358041302",
+        "name": "Joshi Upahar Gruha",
+        "kind": "amenity=restaurant",
+        "point": [
+          376330.5,
+          2046649.08
+        ]
+      },
+      {
+        "id": "osm:node/6893199115",
+        "name": "Indian Serological Institute Blood Bank",
+        "kind": "amenity=blood_bank",
+        "point": [
+          377545.96,
+          2046580.27
+        ]
+      },
+      {
+        "id": "osm:node/6893199116",
+        "name": "Deenanath Mangeshkar Hospital Blood Bank",
+        "kind": "amenity=blood_bank",
+        "point": [
+          376731.88,
+          2046126.53
+        ]
+      },
+      {
+        "id": "osm:node/7044819851",
+        "name": "Galaxy Care Laparoscopy Institute Pvt. Ltd.",
+        "kind": "amenity=hospital",
+        "point": [
+          377245.57,
+          2047117.98
+        ]
+      },
+      {
+        "id": "osm:node/7048084570",
+        "name": "Bhide Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378005.02,
+          2046434.01
+        ]
+      },
+      {
+        "id": "osm:node/7048167596",
+        "name": "Poona Laser Center",
+        "kind": "amenity=hospital",
+        "point": [
+          377359.53,
+          2047268.53
+        ]
+      },
+      {
+        "id": "osm:node/7049658153",
+        "name": "Joshi Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          376846.94,
+          2047800.05
+        ]
+      },
+      {
+        "id": "osm:node/7050060080",
+        "name": "Khares Eye Institute",
+        "kind": "amenity=hospital",
+        "point": [
+          376681.48,
+          2047510.47
+        ]
+      },
+      {
+        "id": "osm:node/7052133789",
+        "name": "Nachiket Hospital Pvt Ltd",
+        "kind": "amenity=hospital",
+        "point": [
+          376605.23,
+          2046755.08
+        ]
+      },
+      {
+        "id": "osm:node/7054803809",
+        "name": "Ameya Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          376419.32,
+          2046317.74
+        ]
+      },
+      {
+        "id": "osm:node/7055472144",
+        "name": "Nayanjyot Eye Clinic and Laser Centre(NEO EYE CLINIC)",
+        "kind": "amenity=clinic",
+        "point": [
+          377065.38,
+          2047892.88
+        ]
+      },
+      {
+        "id": "osm:node/7063077070",
+        "name": "Paranjpe Eye Clinic and Eye Surgery Centre",
+        "kind": "amenity=hospital",
+        "point": [
+          377598.67,
+          2047929.28
+        ]
+      },
+      {
+        "id": "osm:node/7063808901",
+        "name": "Ace Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          376529.06,
+          2046450.87
+        ]
+      },
+      {
+        "id": "osm:node/7065561512",
+        "name": "Global Hospital & Research Institute",
+        "kind": "amenity=hospital",
+        "point": [
+          377651.41,
+          2046044.2
+        ]
+      },
+      {
+        "id": "osm:node/7065820589",
+        "name": "Lokmanya Hospital, Pune",
+        "kind": "amenity=hospital",
+        "point": [
+          376927.36,
+          2046888.17
+        ]
+      },
+      {
+        "id": "osm:node/7073537781",
+        "name": "Deodhar Eye Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377179.06,
+          2047167.8
+        ]
+      },
+      {
+        "id": "osm:node/7073949807",
+        "name": "Dr.Pawar Eye Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378070.05,
+          2046921.07
+        ]
+      },
+      {
+        "id": "osm:node/7079392093",
+        "name": "Shreeyash Hospital, Pune",
+        "kind": "amenity=hospital",
+        "point": [
+          377751.57,
+          2047619.75
+        ]
+      },
+      {
+        "id": "osm:node/7081375502",
+        "name": "Biniwale Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          377292.0,
+          2047532.59
+        ]
+      },
+      {
+        "id": "osm:node/7226627720",
+        "name": "Late Anandibai Narhar Gadgil Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377405.86,
+          2046165.87
+        ]
+      },
+      {
+        "id": "osm:node/7621410003",
+        "name": "Colony Nursing Home",
+        "kind": "amenity=hospital",
+        "point": [
+          378040.89,
+          2046235.73
+        ]
+      },
+      {
+        "id": "osm:node/7651453312",
+        "name": "Apex Superspeciality Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377965.23,
+          2046736.58
+        ]
+      },
+      {
+        "id": "osm:node/7651453314",
+        "name": "Dr. Swaroop Savanur",
+        "kind": "amenity=doctors",
+        "point": [
+          377876.26,
+          2047186.02
+        ]
+      },
+      {
+        "id": "osm:node/7651453317",
+        "name": "Dhaumya Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          377588.61,
+          2046135.83
+        ]
+      },
+      {
+        "id": "osm:node/7651453322",
+        "name": "Mansi Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          377414.25,
+          2046293.21
+        ]
+      },
+      {
+        "id": "osm:node/7651453326",
+        "name": "Sabane Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377913.49,
+          2047080.45
+        ]
+      },
+      {
+        "id": "osm:node/7651453327",
+        "name": "Shree Datta Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          377851.91,
+          2046424.15
+        ]
+      },
+      {
+        "id": "osm:node/7651453342",
+        "name": "Sammohini Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          377941.25,
+          2046795.12
+        ]
+      },
+      {
+        "id": "osm:node/7651453345",
+        "name": "Dr. Jamenis Dental Clinic",
+        "kind": "amenity=dentist",
+        "point": [
+          377063.36,
+          2047144.57
+        ]
+      },
+      {
+        "id": "osm:node/7651453364",
+        "name": "Deccan Dental Clinic",
+        "kind": "amenity=dentist",
+        "point": [
+          377780.65,
+          2047662.5
+        ]
+      },
+      {
+        "id": "osm:node/7651453394",
+        "name": "Nadkarni Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          376366.2,
+          2046217.87
+        ]
+      },
+      {
+        "id": "osm:node/7651453398",
+        "name": "Dr. NarenDr. a G. Patwardhan",
+        "kind": "amenity=doctors",
+        "point": [
+          377750.01,
+          2047649.93
+        ]
+      },
+      {
+        "id": "osm:node/7651453402",
+        "name": "Mantri Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          376931.26,
+          2046478.25
+        ]
+      },
+      {
+        "id": "osm:node/8257275387",
+        "name": "PAI RAITURKAR IVF CLINIC",
+        "kind": "amenity=clinic",
+        "point": [
+          376989.23,
+          2047446.55
+        ]
+      },
+      {
+        "id": "osm:node/8257748847",
+        "name": "Dr Barve's The Bone and Joint Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          377166.42,
+          2047116.0
+        ]
+      },
+      {
+        "id": "osm:node/8261103130",
+        "name": "SHUBHANAND CLINIC",
+        "kind": "amenity=clinic",
+        "point": [
+          376691.16,
+          2046438.4
+        ]
+      },
+      {
+        "id": "osm:node/8261350757",
+        "name": "DR. AMEET DRAVID",
+        "kind": "amenity=clinic",
+        "point": [
+          376829.5,
+          2047945.05
+        ]
+      },
+      {
+        "id": "osm:node/8261635893",
+        "name": "Perfection Hair Transplant Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          376371.92,
+          2046671.35
+        ]
+      },
+      {
+        "id": "osm:node/8266093820",
+        "name": "Facethetics - Dental, Facial Cosmetics(BOTOX), & Hair Transplant Clinique",
+        "kind": "amenity=hospital",
+        "point": [
+          376347.75,
+          2047414.46
+        ]
+      },
+      {
+        "id": "osm:node/8266243292",
+        "name": "Neo Clinic Artery and Vein Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          377135.18,
+          2047922.67
+        ]
+      },
+      {
+        "id": "osm:node/8266436922",
+        "name": "SMILE GALLERY DENTAL CARE CENTRE",
+        "kind": "amenity=clinic",
+        "point": [
+          376528.21,
+          2046911.98
+        ]
+      },
+      {
+        "id": "osm:node/8266714689",
+        "name": "Dr. Devendra Vartak",
+        "kind": "amenity=clinic",
+        "point": [
+          376413.36,
+          2046327.35
+        ]
+      },
+      {
+        "id": "osm:node/8267014540",
+        "name": "TEETHZ TANTRAS\u2122",
+        "kind": "amenity=clinic",
+        "point": [
+          377491.78,
+          2046461.54
+        ]
+      },
+      {
+        "id": "osm:node/8269717984",
+        "name": "Krushna Orthodontic & Dental Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          377743.38,
+          2045989.05
+        ]
+      },
+      {
+        "id": "osm:node/9174863571",
+        "name": "The Verandah",
+        "kind": "amenity=restaurant",
+        "point": [
+          376646.85,
+          2046453.63
+        ]
+      },
+      {
+        "id": "osm:node/9215757550",
+        "name": "Metropolis Healthcare Ltd",
+        "kind": "amenity=hospital",
+        "point": [
+          376124.8,
+          2046775.78
+        ]
+      },
+      {
+        "id": "osm:node/9229694180",
+        "name": "Kwality Resto Bar & Restaurant",
+        "kind": "amenity=restaurant",
+        "point": [
+          377043.99,
+          2046874.89
+        ]
+      },
+      {
+        "id": "osm:node/9278151721",
+        "name": "Irani Cafe",
+        "kind": "amenity=cafe",
+        "point": [
+          377297.59,
+          2047455.42
+        ]
+      },
+      {
+        "id": "osm:node/9283646114",
+        "name": "Apte Motor School",
+        "kind": "amenity=driving_school",
+        "point": [
+          377976.82,
+          2047248.05
+        ]
+      },
+      {
+        "id": "osm:node/9295472627",
+        "name": "Joshi Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377797.2,
+          2047875.17
+        ]
+      },
+      {
+        "id": "osm:node/9354875893",
+        "name": "State Bank of India",
+        "kind": "amenity=bank",
+        "point": [
+          377903.78,
+          2047688.89
+        ]
+      },
+      {
+        "id": "osm:node/9438496733",
+        "name": "Chhatrapati Sambhaji Maharaj statue",
+        "kind": "tourism=artwork",
+        "point": [
+          377781.35,
+          2047633.93
+        ]
+      },
+      {
+        "id": "osm:node/9495029415",
+        "name": "Raj",
+        "kind": "shop=supermarket",
+        "point": [
+          376916.97,
+          2047059.81
+        ]
+      },
+      {
+        "id": "osm:node/9507918307",
+        "name": "National shop",
+        "kind": "shop=supermarket",
+        "point": [
+          376421.55,
+          2047114.96
+        ]
+      },
+      {
+        "id": "osm:node/9521845697",
+        "name": "Little me",
+        "kind": "shop=clothes",
+        "point": [
+          376707.12,
+          2047515.98
+        ]
+      },
+      {
+        "id": "osm:node/9523273130",
+        "name": "Starbucks",
+        "kind": "amenity=cafe",
+        "point": [
+          376377.89,
+          2047499.59
+        ]
+      },
+      {
+        "id": "osm:node/9531539890",
+        "name": "Dr. Sathe's cardiac clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          376921.93,
+          2047843.03
+        ]
+      },
+      {
+        "id": "osm:node/9875811911",
+        "name": "Dr. Sarafs Joints Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          377200.61,
+          2047206.79
+        ]
+      },
+      {
+        "id": "osm:node/10016389135",
+        "name": "HDFC Bank",
+        "kind": "amenity=bank",
+        "point": [
+          376546.74,
+          2047964.72
+        ]
+      },
+      {
+        "id": "osm:node/10030779721",
+        "name": "Surendra cycle",
+        "kind": "shop=bicycle",
+        "point": [
+          377079.6,
+          2047108.52
+        ]
+      },
+      {
+        "id": "osm:node/10172880979",
+        "name": "Minal Khanawal",
+        "kind": "amenity=restaurant",
+        "point": [
+          378015.82,
+          2047307.52
+        ]
+      },
+      {
+        "id": "osm:node/10172934103",
+        "name": "sameer pan palace",
+        "kind": "amenity=restaurant",
+        "point": [
+          378047.19,
+          2047316.06
+        ]
+      },
+      {
+        "id": "osm:node/10172937839",
+        "name": "Sainath restra",
+        "kind": "amenity=restaurant",
+        "point": [
+          377993.5,
+          2047303.3
+        ]
+      },
+      {
+        "id": "osm:node/10172959190",
+        "name": "raghav non veg",
+        "kind": "amenity=restaurant",
+        "point": [
+          378082.45,
+          2047330.94
+        ]
+      },
+      {
+        "id": "osm:node/10172977865",
+        "name": "Ghaisas ENT Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377804.37,
+          2047804.56
+        ]
+      },
+      {
+        "id": "osm:node/10172977866",
+        "name": "Phadke Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377965.89,
+          2047922.51
+        ]
+      },
+      {
+        "id": "osm:node/10172979840",
+        "name": "Sports Ground",
+        "kind": "leisure=park",
+        "point": [
+          376702.02,
+          2045990.65
+        ]
+      },
+      {
+        "id": "osm:node/10172986709",
+        "name": "Poona Hospital and Research Centre",
+        "kind": "amenity=hospital",
+        "point": [
+          377766.7,
+          2047074.89
+        ]
+      },
+      {
+        "id": "osm:node/10172986714",
+        "name": "GLOBAL HOSPITAL & RESEARCH",
+        "kind": "amenity=hospital",
+        "point": [
+          377650.34,
+          2046040.14
+        ]
+      },
+      {
+        "id": "osm:node/10172994212",
+        "name": "Bal Shivaji Mitra Mandal",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377400.15,
+          2046382.06
+        ]
+      },
+      {
+        "id": "osm:node/10173005946",
+        "name": "Joshi Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377797.36,
+          2047878.06
+        ]
+      },
+      {
+        "id": "osm:node/10173005947",
+        "name": "Prayag Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377850.23,
+          2047831.31
+        ]
+      },
+      {
+        "id": "osm:node/10593418590",
+        "name": "Dixit Dental Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          376628.45,
+          2046923.26
+        ]
+      },
+      {
+        "id": "osm:node/10677469987",
+        "name": "Sevasadan Dilasa Karyashala",
+        "kind": "amenity=social_facility",
+        "point": [
+          376694.39,
+          2046019.15
+        ]
+      },
+      {
+        "id": "osm:node/10724748486",
+        "name": "SHARF",
+        "kind": "amenity=school",
+        "point": [
+          377009.98,
+          2047641.39
+        ]
+      },
+      {
+        "id": "osm:node/10724823959",
+        "name": "Naad insitute",
+        "kind": "amenity=school",
+        "point": [
+          376994.71,
+          2047477.92
+        ]
+      },
+      {
+        "id": "osm:node/10724823960",
+        "name": "little miracles",
+        "kind": "amenity=school",
+        "point": [
+          376868.05,
+          2047623.81
+        ]
+      },
+      {
+        "id": "osm:node/10724871527",
+        "name": "leapbridge early childhood",
+        "kind": "amenity=school",
+        "point": [
+          377117.55,
+          2047602.47
+        ]
+      },
+      {
+        "id": "osm:node/10724871528",
+        "name": "symbiosis sports center and primary and secondary school",
+        "kind": "amenity=school",
+        "point": [
+          376621.89,
+          2047632.32
+        ]
+      },
+      {
+        "id": "osm:node/10724889771",
+        "name": "vidya mahamandal",
+        "kind": "amenity=school",
+        "point": [
+          377814.73,
+          2047882.15
+        ]
+      },
+      {
+        "id": "osm:node/10724927032",
+        "name": "kedar bhagwat music academy",
+        "kind": "amenity=school",
+        "point": [
+          376544.19,
+          2047971.54
+        ]
+      },
+      {
+        "id": "osm:node/10724934783",
+        "name": "maharastra vidya mandal",
+        "kind": "amenity=school",
+        "point": [
+          376525.22,
+          2047831.75
+        ]
+      },
+      {
+        "id": "osm:node/10724941696",
+        "name": "ayan businness school",
+        "kind": "amenity=school",
+        "point": [
+          377761.5,
+          2047894.38
+        ]
+      },
+      {
+        "id": "osm:node/10724942844",
+        "name": "fairyland children's center",
+        "kind": "amenity=school",
+        "point": [
+          377720.37,
+          2047653.82
+        ]
+      },
+      {
+        "id": "osm:node/10724949171",
+        "name": "prasanna autism centre",
+        "kind": "amenity=school",
+        "point": [
+          377593.68,
+          2047938.14
+        ]
+      },
+      {
+        "id": "osm:node/10724949840",
+        "name": "SSCD{symbiosis schools central dictorate}",
+        "kind": "amenity=school",
+        "point": [
+          376614.99,
+          2047658.36
+        ]
+      },
+      {
+        "id": "osm:node/10724950765",
+        "name": "bhisma school of indic studies",
+        "kind": "amenity=school",
+        "point": [
+          378079.94,
+          2047868.66
+        ]
+      },
+      {
+        "id": "osm:node/10724950766",
+        "name": "MES Sou vimlabai garware high school",
+        "kind": "amenity=school",
+        "point": [
+          377608.71,
+          2047428.63
+        ]
+      },
+      {
+        "id": "osm:node/10724952253",
+        "name": "rajal enterprices",
+        "kind": "amenity=school",
+        "point": [
+          377423.18,
+          2047486.34
+        ]
+      },
+      {
+        "id": "osm:node/10724964228",
+        "name": "swatarang sangeet vidyalaya",
+        "kind": "amenity=school",
+        "point": [
+          377235.96,
+          2047486.66
+        ]
+      },
+      {
+        "id": "osm:node/10724970333",
+        "name": "school of culture and language",
+        "kind": "amenity=school",
+        "point": [
+          376978.25,
+          2047526.13
+        ]
+      },
+      {
+        "id": "osm:node/10724973517",
+        "name": "E-learning school pmc",
+        "kind": "amenity=school",
+        "point": [
+          376637.57,
+          2047725.5
+        ]
+      },
+      {
+        "id": "osm:node/11083396429",
+        "name": "Bags and Baggage",
+        "kind": "shop=bag",
+        "point": [
+          377914.28,
+          2047827.02
+        ]
+      },
+      {
+        "id": "osm:node/11186086403",
+        "name": "Ashleys Dental Clinic",
+        "kind": "amenity=dentist",
+        "point": [
+          376273.07,
+          2047456.87
+        ]
+      },
+      {
+        "id": "osm:node/11259275104",
+        "name": "D-dent Care Laser and Multi-speciality Dental Clinics",
+        "kind": "amenity=clinic",
+        "point": [
+          376888.28,
+          2047139.44
+        ]
+      },
+      {
+        "id": "osm:node/11274081926",
+        "name": "Maurya Multi Cuisine Restaurant And Bar",
+        "kind": "amenity=restaurant",
+        "point": [
+          376935.29,
+          2046057.35
+        ]
+      },
+      {
+        "id": "osm:node/11274081927",
+        "name": "Multi Spice",
+        "kind": "amenity=restaurant",
+        "point": [
+          376934.97,
+          2046077.62
+        ]
+      },
+      {
+        "id": "osm:node/11274081928",
+        "name": "Vishnuji Ki Rasoi",
+        "kind": "amenity=restaurant",
+        "point": [
+          377024.57,
+          2046060.16
+        ]
+      },
+      {
+        "id": "osm:node/11274086085",
+        "name": "YKS Sizzlers",
+        "kind": "tourism=hotel",
+        "point": [
+          376957.59,
+          2046981.94
+        ]
+      },
+      {
+        "id": "osm:node/11274086086",
+        "name": "Swaad Idli Dosa Center",
+        "kind": "amenity=restaurant",
+        "point": [
+          376803.63,
+          2046932.26
+        ]
+      },
+      {
+        "id": "osm:node/11274086087",
+        "name": "Anand Veg",
+        "kind": "amenity=restaurant",
+        "point": [
+          376827.04,
+          2046944.27
+        ]
+      },
+      {
+        "id": "osm:node/11274086088",
+        "name": "Aroma's Hyderabadi Biryani",
+        "kind": "amenity=restaurant",
+        "point": [
+          376866.56,
+          2046958.43
+        ]
+      },
+      {
+        "id": "osm:node/11274086089",
+        "name": "Chow Chow Chinese",
+        "kind": "amenity=restaurant",
+        "point": [
+          376864.96,
+          2046955.96
+        ]
+      },
+      {
+        "id": "osm:node/11274100323",
+        "name": "Cafe House of Bamboo - HOB",
+        "kind": "amenity=cafe",
+        "point": [
+          377080.56,
+          2046098.75
+        ]
+      },
+      {
+        "id": "osm:node/11274112986",
+        "name": "Inari Bistro",
+        "kind": "amenity=restaurant",
+        "point": [
+          376998.76,
+          2046928.16
+        ]
+      },
+      {
+        "id": "osm:node/11274112987",
+        "name": "Takshashila Restaurant and Bar",
+        "kind": "amenity=bar",
+        "point": [
+          377012.93,
+          2046785.97
+        ]
+      },
+      {
+        "id": "osm:node/11274112988",
+        "name": "Westyard Cafe",
+        "kind": "amenity=cafe",
+        "point": [
+          377035.45,
+          2046750.79
+        ]
+      },
+      {
+        "id": "osm:node/11274118271",
+        "name": "Shangrila Restaurant",
+        "kind": "amenity=restaurant",
+        "point": [
+          376613.88,
+          2046990.45
+        ]
+      },
+      {
+        "id": "osm:node/11274118272",
+        "name": "Sarthi",
+        "kind": "amenity=restaurant",
+        "point": [
+          377028.89,
+          2047090.86
+        ]
+      },
+      {
+        "id": "osm:node/11771854003",
+        "name": "Bank of Maharashtra ATM",
+        "kind": "amenity=atm",
+        "point": [
+          377874.98,
+          2047794.63
+        ]
+      },
+      {
+        "id": "osm:node/11832251998",
+        "name": "Justbooks Kothrud",
+        "kind": "amenity=library",
+        "point": [
+          376224.02,
+          2045977.34
+        ]
+      },
+      {
+        "id": "osm:node/11832252023",
+        "name": "Ahilya Library",
+        "kind": "amenity=library",
+        "point": [
+          378022.74,
+          2046675.05
+        ]
+      },
+      {
+        "id": "osm:node/11832252038",
+        "name": "mylibrary.in",
+        "kind": "amenity=library",
+        "point": [
+          377013.35,
+          2046466.71
+        ]
+      },
+      {
+        "id": "osm:node/12041116685",
+        "name": "Durr India Private Limited",
+        "kind": "office=company",
+        "point": [
+          376587.58,
+          2046770.44
+        ]
+      },
+      {
+        "id": "osm:node/12127600501",
+        "name": "The Box",
+        "kind": "amenity=events_venue",
+        "point": [
+          376306.78,
+          2046559.76
+        ]
+      },
+      {
+        "id": "osm:node/12127600502",
+        "name": "The Box Bistro",
+        "kind": "amenity=cafe",
+        "point": [
+          376295.5,
+          2046560.04
+        ]
+      },
+      {
+        "id": "osm:node/12169131815",
+        "name": "Dr. Kalmadi Shamarao High School and Junior College",
+        "kind": "office=educational_institution",
+        "point": [
+          376159.8,
+          2046139.44
+        ]
+      },
+      {
+        "id": "osm:node/12843844311",
+        "name": "Brewing Partners",
+        "kind": "amenity=cafe",
+        "point": [
+          377104.29,
+          2047920.15
+        ]
+      },
+      {
+        "id": "osm:node/13616189466",
+        "name": "Khas Kolhapuri Chappal Store",
+        "kind": "shop=shoes",
+        "point": [
+          377982.87,
+          2047355.43
+        ]
+      },
+      {
+        "id": "osm:node/13616206943",
+        "name": "Shri Nav Graha Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377922.18,
+          2047280.42
+        ]
+      },
+      {
+        "id": "osm:node/13624352781",
+        "name": "Zeno Health",
+        "kind": "shop=medical_supply",
+        "point": [
+          377918.1,
+          2046933.29
+        ]
+      },
+      {
+        "id": "osm:node/13624359909",
+        "name": "Suvarna Jewellers",
+        "kind": "shop=jewelry",
+        "point": [
+          377918.64,
+          2046925.22
+        ]
+      },
+      {
+        "id": "osm:node/13633146667",
+        "name": "MSEB",
+        "kind": "office=energy_supplier",
+        "point": [
+          376244.29,
+          2046693.37
+        ]
+      },
+      {
+        "id": "osm:node/13633172213",
+        "name": "Kalyan Jewellers",
+        "kind": "shop=jewelry",
+        "point": [
+          376967.02,
+          2047061.99
+        ]
+      },
+      {
+        "id": "osm:node/13637448480",
+        "name": "Poonam Collection",
+        "kind": "shop=clothes",
+        "point": [
+          377713.56,
+          2047801.13
+        ]
+      },
+      {
+        "id": "osm:node/13637466462",
+        "name": "Nav Maharashtra Oil Mill",
+        "kind": "shop=farm",
+        "point": [
+          377743.17,
+          2047480.74
+        ]
+      },
+      {
+        "id": "osm:node/13637467804",
+        "name": "Motorola Service Centre",
+        "kind": "shop=mobile_phone_accessories",
+        "point": [
+          376632.96,
+          2046829.48
+        ]
+      },
+      {
+        "id": "osm:node/13637478623",
+        "name": "Cotton Cottage",
+        "kind": "shop=clothes",
+        "point": [
+          377199.07,
+          2047175.12
+        ]
+      },
+      {
+        "id": "osm:node/13637485962",
+        "name": "Westside",
+        "kind": "shop=clothes",
+        "point": [
+          377694.1,
+          2047907.43
+        ]
+      },
+      {
+        "id": "osm:node/13644332244",
+        "name": "Richie Rich Coffee",
+        "kind": "shop=coffee",
+        "point": [
+          377698.8,
+          2047915.12
+        ]
+      },
+      {
+        "id": "osm:node/13672024594",
+        "name": "Tulja Bhavani Temple",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377446.78,
+          2045951.34
+        ]
+      },
+      {
+        "id": "osm:node/13672035479",
+        "name": "Shree Gramdaivat Mhasoba Pratishthan Trust",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377464.01,
+          2045985.69
+        ]
+      },
+      {
+        "id": "osm:node/13672036384",
+        "name": "Madar Teresa Garden",
+        "kind": "leisure=park",
+        "point": [
+          377312.35,
+          2046142.68
+        ]
+      },
+      {
+        "id": "osm:node/13672065473",
+        "name": "Shree Vighnaharta Maruti Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377444.71,
+          2046228.94
+        ]
+      },
+      {
+        "id": "osm:node/13852030762",
+        "name": "Open Gym",
+        "kind": "leisure=fitness_centre",
+        "point": [
+          376701.06,
+          2047664.31
+        ]
+      },
+      {
+        "id": "osm:node/13875503955",
+        "name": "General Store",
+        "kind": "shop=general",
+        "point": [
+          377945.61,
+          2046833.34
+        ]
+      },
+      {
+        "id": "osm:node/13875554605",
+        "name": "Bakery",
+        "kind": "shop=bakery",
+        "point": [
+          377898.9,
+          2046985.76
+        ]
+      },
+      {
+        "id": "osm:way/53273671",
+        "name": "ILS Law College",
+        "kind": "amenity=college",
+        "point": [
+          376283.04,
+          2047803.32
+        ]
+      },
+      {
+        "id": "osm:way/125483711",
+        "name": "Deccan Gymkhana Cricket Ground",
+        "kind": "leisure=pitch",
+        "point": [
+          377668.35,
+          2047560.83
+        ]
+      },
+      {
+        "id": "osm:way/132813468",
+        "name": "Dr. Kalmadi Shamarao High School",
+        "kind": "amenity=school",
+        "point": [
+          376145.97,
+          2046167.85
+        ]
+      },
+      {
+        "id": "osm:way/174274776",
+        "name": "Shyama Prasad Mukherjee Udyan",
+        "kind": "leisure=park",
+        "point": [
+          376466.44,
+          2045907.54
+        ]
+      },
+      {
+        "id": "osm:way/197313929",
+        "name": "Film and Television Institute of India",
+        "kind": "amenity=college",
+        "point": [
+          376132.05,
+          2047374.99
+        ]
+      },
+      {
+        "id": "osm:way/202062068",
+        "name": "Bal Shikshan Mandir",
+        "kind": "amenity=school",
+        "point": [
+          377486.94,
+          2047903.1
+        ]
+      },
+      {
+        "id": "osm:way/202296449",
+        "name": "The Oakwood Hotel",
+        "kind": "tourism=hotel",
+        "point": [
+          377647.37,
+          2047833.46
+        ]
+      },
+      {
+        "id": "osm:way/202301136",
+        "name": "Krishna Hotel And Restaurant",
+        "kind": "tourism=hotel",
+        "point": [
+          376341.66,
+          2047557.25
+        ]
+      },
+      {
+        "id": "osm:way/202301141",
+        "name": "National Film Archive of India",
+        "kind": "amenity=library",
+        "point": [
+          376436.78,
+          2047656.44
+        ]
+      },
+      {
+        "id": "osm:way/204906699",
+        "name": "Bhandarkar Oriental Research Institute",
+        "kind": "amenity=college",
+        "point": [
+          376414.79,
+          2048046.66
+        ]
+      },
+      {
+        "id": "osm:way/207872390",
+        "name": "Abasaheb Garware College",
+        "kind": "amenity=college",
+        "point": [
+          377421.59,
+          2047193.22
+        ]
+      },
+      {
+        "id": "osm:way/207872391",
+        "name": "Deenanath Mangeshkar Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          376789.15,
+          2046125.7
+        ]
+      },
+      {
+        "id": "osm:way/207872400",
+        "name": "New English School , Tilak Road",
+        "kind": "amenity=school",
+        "point": [
+          378029.21,
+          2047080.78
+        ]
+      },
+      {
+        "id": "osm:way/207872411",
+        "name": "Vimlabai Garware Prashala",
+        "kind": "amenity=school",
+        "point": [
+          377618.17,
+          2047394.54
+        ]
+      },
+      {
+        "id": "osm:way/207872421",
+        "name": "Centro Mall",
+        "kind": "shop=mall",
+        "point": [
+          377402.94,
+          2047056.16
+        ]
+      },
+      {
+        "id": "osm:way/208588882",
+        "name": "SNDT Women's University",
+        "kind": "amenity=university",
+        "point": [
+          376220.28,
+          2046888.54
+        ]
+      },
+      {
+        "id": "osm:way/208958215",
+        "name": "Raja Mantri Udyan",
+        "kind": "leisure=park",
+        "point": [
+          376840.45,
+          2046600.48
+        ]
+      },
+      {
+        "id": "osm:way/208958216",
+        "name": "Sachin Tendulkar Jogging Park",
+        "kind": "leisure=park",
+        "point": [
+          377581.16,
+          2046376.1
+        ]
+      },
+      {
+        "id": "osm:way/210576106",
+        "name": "Nivara",
+        "kind": "amenity=social_facility",
+        "point": [
+          377694.69,
+          2046854.71
+        ]
+      },
+      {
+        "id": "osm:way/210717983",
+        "name": "Kaka Halwai",
+        "kind": "shop=confectionery",
+        "point": [
+          377999.63,
+          2046613.53
+        ]
+      },
+      {
+        "id": "osm:way/214161056",
+        "name": "Nanasaheb Peshwe Samadhi",
+        "kind": "historic=memorial",
+        "point": [
+          377811.18,
+          2047231.38
+        ]
+      },
+      {
+        "id": "osm:way/214161057",
+        "name": "Savarkar Memorial",
+        "kind": "historic=memorial",
+        "point": [
+          377651.23,
+          2047340.75
+        ]
+      },
+      {
+        "id": "osm:way/215998827",
+        "name": "Alka Talkies",
+        "kind": "amenity=cinema",
+        "point": [
+          377904.69,
+          2047246.8
+        ]
+      },
+      {
+        "id": "osm:way/217271035",
+        "name": "Deccan Gymkhana",
+        "kind": "leisure=sports_centre",
+        "point": [
+          377604.87,
+          2047574.46
+        ]
+      },
+      {
+        "id": "osm:way/217271038",
+        "name": "Poona Youth Club",
+        "kind": "leisure=sports_centre",
+        "point": [
+          377479.6,
+          2047776.47
+        ]
+      },
+      {
+        "id": "osm:way/217271039",
+        "name": "Tilak Tank",
+        "kind": "leisure=sports_centre",
+        "point": [
+          377513.35,
+          2047395.82
+        ]
+      },
+      {
+        "id": "osm:way/217431353",
+        "name": "Apte Prashala & Jn. College",
+        "kind": "amenity=school",
+        "point": [
+          377909.09,
+          2047923.75
+        ]
+      },
+      {
+        "id": "osm:way/217431359",
+        "name": "Prayag Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377849.71,
+          2047830.65
+        ]
+      },
+      {
+        "id": "osm:way/217431364",
+        "name": "Phadke Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377965.98,
+          2047924.18
+        ]
+      },
+      {
+        "id": "osm:way/217773616",
+        "name": "Poona Hospital and Research Centre",
+        "kind": "amenity=hospital",
+        "point": [
+          377756.46,
+          2047073.93
+        ]
+      },
+      {
+        "id": "osm:way/218059567",
+        "name": "Kulkarni Petrol Pump",
+        "kind": "amenity=fuel",
+        "point": [
+          378053.07,
+          2047343.84
+        ]
+      },
+      {
+        "id": "osm:way/218078553",
+        "name": "Kohinoor Executive",
+        "kind": "tourism=hotel",
+        "point": [
+          377876.04,
+          2047898.25
+        ]
+      },
+      {
+        "id": "osm:way/218422372",
+        "name": "Sahyadri Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          377482.13,
+          2047342.59
+        ]
+      },
+      {
+        "id": "osm:way/218697330",
+        "name": "Erandvana Fire Station",
+        "kind": "amenity=fire_station",
+        "point": [
+          376788.43,
+          2046646.6
+        ]
+      },
+      {
+        "id": "osm:way/218834781",
+        "name": "Panditrao Agashe School",
+        "kind": "amenity=school",
+        "point": [
+          376521.2,
+          2047826.57
+        ]
+      },
+      {
+        "id": "osm:way/230078114",
+        "name": "Gogate Petrol Pump",
+        "kind": "amenity=fuel",
+        "point": [
+          376866.24,
+          2047016.17
+        ]
+      },
+      {
+        "id": "osm:way/230078117",
+        "name": "Sure Petroleum",
+        "kind": "amenity=fuel",
+        "point": [
+          376818.91,
+          2046991.53
+        ]
+      },
+      {
+        "id": "osm:way/248993358",
+        "name": "Gandhi Plaza",
+        "kind": "amenity=bank",
+        "point": [
+          376452.99,
+          2047053.59
+        ]
+      },
+      {
+        "id": "osm:way/248993363",
+        "name": "Lenovo",
+        "kind": "shop=computer",
+        "point": [
+          376505.31,
+          2047026.86
+        ]
+      },
+      {
+        "id": "osm:way/248993367",
+        "name": "Nirmittee",
+        "kind": "shop=furniture",
+        "point": [
+          376463.25,
+          2047019.84
+        ]
+      },
+      {
+        "id": "osm:way/248993374",
+        "name": "Syndicate Bank",
+        "kind": "amenity=bank",
+        "point": [
+          376475.95,
+          2046999.66
+        ]
+      },
+      {
+        "id": "osm:way/249148067",
+        "name": "Sumbiosis School",
+        "kind": "leisure=pitch",
+        "point": [
+          376597.75,
+          2047648.53
+        ]
+      },
+      {
+        "id": "osm:way/249252730",
+        "name": "Navalmal Firodiya Super-Speciality Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          376818.54,
+          2047794.54
+        ]
+      },
+      {
+        "id": "osm:way/250116190",
+        "name": "Maharshi Karve Telephone Exchange",
+        "kind": "office=telecommunication",
+        "point": [
+          376524.98,
+          2046759.62
+        ]
+      },
+      {
+        "id": "osm:way/250116195",
+        "name": "Saint Crispin's Church",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          376715.67,
+          2046802.55
+        ]
+      },
+      {
+        "id": "osm:way/251878753",
+        "name": "Dhondumama Sathe Homoeopathic Medical College",
+        "kind": "amenity=college",
+        "point": [
+          377186.94,
+          2046981.08
+        ]
+      },
+      {
+        "id": "osm:way/251878756",
+        "name": "Sevasadan English Medium School",
+        "kind": "amenity=school",
+        "point": [
+          376707.51,
+          2046020.2
+        ]
+      },
+      {
+        "id": "osm:way/255661295",
+        "name": "Sanjeevan Hospital, Pune",
+        "kind": "amenity=hospital",
+        "point": [
+          377245.31,
+          2047023.91
+        ]
+      },
+      {
+        "id": "osm:way/274027021",
+        "name": "Manohar Mangal Karyalay",
+        "kind": "amenity=community_centre",
+        "point": [
+          376636.61,
+          2046470.69
+        ]
+      },
+      {
+        "id": "osm:way/275490285",
+        "name": "Shri Vitthal Rukmini Mandir Dattawadi",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          377445.04,
+          2045980.12
+        ]
+      },
+      {
+        "id": "osm:way/281844133",
+        "name": "Amruteshwar Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          376803.63,
+          2046612.97
+        ]
+      },
+      {
+        "id": "osm:way/281844134",
+        "name": "Anusayabai Khilare Shala",
+        "kind": "amenity=school",
+        "point": [
+          376826.25,
+          2046640.64
+        ]
+      },
+      {
+        "id": "osm:way/281844140",
+        "name": "Yashwant Vishnu Tharkude Davakhana",
+        "kind": "amenity=clinic",
+        "point": [
+          376827.53,
+          2046673.64
+        ]
+      },
+      {
+        "id": "osm:way/282961103",
+        "name": "HP",
+        "kind": "amenity=fuel",
+        "point": [
+          378078.71,
+          2047967.38
+        ]
+      },
+      {
+        "id": "osm:way/290034473",
+        "name": "Vasantrao Vaidya Vidyalay",
+        "kind": "amenity=school",
+        "point": [
+          377643.59,
+          2046373.13
+        ]
+      },
+      {
+        "id": "osm:way/298298055",
+        "name": "Kalmadi Shamrao Highschool",
+        "kind": "amenity=school",
+        "point": [
+          376884.35,
+          2047196.9
+        ]
+      },
+      {
+        "id": "osm:way/331532100",
+        "name": "Madar Teresa Garden",
+        "kind": "leisure=park",
+        "point": [
+          377311.51,
+          2046136.76
+        ]
+      },
+      {
+        "id": "osm:way/331532102",
+        "name": "Erandawane Madhyamik Vidyalay",
+        "kind": "amenity=school",
+        "point": [
+          376405.58,
+          2046981.1
+        ]
+      },
+      {
+        "id": "osm:way/331532103",
+        "name": "Income Tax Department",
+        "kind": "office=government",
+        "point": [
+          376716.81,
+          2047183.01
+        ]
+      },
+      {
+        "id": "osm:way/331532106",
+        "name": "Satyanarayan Shivlal Agarwal Shala",
+        "kind": "amenity=school",
+        "point": [
+          377736.74,
+          2045969.82
+        ]
+      },
+      {
+        "id": "osm:way/331532108",
+        "name": "Sinhagad Spring Dale School",
+        "kind": "amenity=school",
+        "point": [
+          377077.29,
+          2046780.8
+        ]
+      },
+      {
+        "id": "osm:way/360241293",
+        "name": "Garuda",
+        "kind": "tourism=hotel",
+        "point": [
+          376398.31,
+          2046766.76
+        ]
+      },
+      {
+        "id": "osm:way/360288227",
+        "name": "Niwara Gym - V3 Fitness",
+        "kind": "leisure=fitness_centre",
+        "point": [
+          377655.88,
+          2046896.45
+        ]
+      },
+      {
+        "id": "osm:way/360510345",
+        "name": "Amrut Mrutyunjay Ganesh mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          376721.27,
+          2046175.41
+        ]
+      },
+      {
+        "id": "osm:way/448218695",
+        "name": "Bombay Stationers",
+        "kind": "shop=stationery",
+        "point": [
+          376181.94,
+          2046085.54
+        ]
+      },
+      {
+        "id": "osm:way/614274883",
+        "name": "Dr. kalmadi Shamarao High School and Junior College",
+        "kind": "office=educational_institution",
+        "point": [
+          376162.0,
+          2046145.29
+        ]
+      },
+      {
+        "id": "osm:way/780409951",
+        "name": "FTII Director's office",
+        "kind": "office=yes",
+        "point": [
+          376199.71,
+          2047344.63
+        ]
+      },
+      {
+        "id": "osm:way/852697721",
+        "name": "Indradhanushya Environment Centre",
+        "kind": "amenity=community_centre",
+        "point": [
+          377489.07,
+          2046394.22
+        ]
+      },
+      {
+        "id": "osm:way/1030015753",
+        "name": "Kamala Nehru Park",
+        "kind": "leisure=park",
+        "point": [
+          377007.96,
+          2047781.74
+        ]
+      },
+      {
+        "id": "osm:way/1033522067",
+        "name": "Balranjan Kendra",
+        "kind": "leisure=playground",
+        "point": [
+          376754.3,
+          2047206.92
+        ]
+      },
+      {
+        "id": "osm:way/1033695023",
+        "name": "Royalty",
+        "kind": "tourism=hotel",
+        "point": [
+          376845.75,
+          2047475.24
+        ]
+      },
+      {
+        "id": "osm:way/1207204846",
+        "name": "San Garden",
+        "kind": "leisure=garden",
+        "point": [
+          376229.27,
+          2047526.38
+        ]
+      },
+      {
+        "id": "osm:way/1207211164",
+        "name": "Aasings Kitchen",
+        "kind": "amenity=fast_food",
+        "point": [
+          376351.66,
+          2047456.92
+        ]
+      },
+      {
+        "id": "osm:way/1376915740",
+        "name": "Dr. Nimisha's DentHeal Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          376905.7,
+          2046499.27
+        ]
+      },
+      {
+        "id": "osm:way/1423426157",
+        "name": "Punjab National Bank",
+        "kind": "amenity=bank",
+        "point": [
+          377311.34,
+          2047433.32
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,3097 @@
+{
+  "key": {
+    "source_adapter": "overpass",
+    "product": "osm_named_places",
+    "bbox": {
+      "crs": "EPSG:32643",
+      "bounds": [
+        378195.0,
+        2045865.0,
+        380205.0,
+        2047875.0
+      ]
+    },
+    "date_range": {
+      "start": "2026-09-14",
+      "end": "2026-09-14",
+      "months": []
+    }
+  },
+  "stored_utc": "2026-09-14T14:41:21+00:00",
+  "arrays": {},
+  "metadata": {
+    "osm_base": "2026-09-14T14:40:02Z",
+    "attribution": "Map data \u00a9 OpenStreetMap contributors, ODbL 1.0",
+    "places": [
+      {
+        "id": "osm:node/1054641704",
+        "name": "Karva Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378188.75,
+          2046001.99
+        ]
+      },
+      {
+        "id": "osm:node/1392873184",
+        "name": "Anand Magal Karyalaya",
+        "kind": "amenity=community_centre",
+        "point": [
+          379147.02,
+          2046002.19
+        ]
+      },
+      {
+        "id": "osm:node/1534841981",
+        "name": "Indian Oil",
+        "kind": "amenity=fuel",
+        "point": [
+          378209.54,
+          2046008.38
+        ]
+      },
+      {
+        "id": "osm:node/1788989257",
+        "name": "Varadshree Karyalay",
+        "kind": "amenity=events_venue",
+        "point": [
+          379017.27,
+          2047046.62
+        ]
+      },
+      {
+        "id": "osm:node/1883742271",
+        "name": "The Phoenix Library",
+        "kind": "amenity=library",
+        "point": [
+          378515.13,
+          2047357.3
+        ]
+      },
+      {
+        "id": "osm:node/1909536882",
+        "name": "Ganesh Peth Police station",
+        "kind": "amenity=police",
+        "point": [
+          379897.48,
+          2047673.4
+        ]
+      },
+      {
+        "id": "osm:node/2131939811",
+        "name": "Akash Tours and Travels",
+        "kind": "office=travel_agent",
+        "point": [
+          378582.59,
+          2047312.79
+        ]
+      },
+      {
+        "id": "osm:node/2270799490",
+        "name": "Chitale Bandhu Mithaiwale",
+        "kind": "shop=confectionery",
+        "point": [
+          378994.27,
+          2047389.66
+        ]
+      },
+      {
+        "id": "osm:node/2270799491",
+        "name": "Khunya Murlidhar Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378665.95,
+          2047173.33
+        ]
+      },
+      {
+        "id": "osm:node/2274995528",
+        "name": "Baadshahi",
+        "kind": "amenity=restaurant",
+        "point": [
+          378482.99,
+          2046854.36
+        ]
+      },
+      {
+        "id": "osm:node/2289023584",
+        "name": "Dulya Maruti",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379959.18,
+          2047680.26
+        ]
+      },
+      {
+        "id": "osm:node/2296727259",
+        "name": "Sarvajanik Kaka",
+        "kind": "historic=memorial",
+        "point": [
+          378999.61,
+          2047210.09
+        ]
+      },
+      {
+        "id": "osm:node/2358247542",
+        "name": "Vishrambag Wada",
+        "kind": "amenity=post_office",
+        "point": [
+          378944.16,
+          2047411.74
+        ]
+      },
+      {
+        "id": "osm:node/2410718625",
+        "name": "Perugate Police Chowki",
+        "kind": "amenity=police",
+        "point": [
+          378477.91,
+          2047153.19
+        ]
+      },
+      {
+        "id": "osm:node/2410718629",
+        "name": "Someshwar Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379715.59,
+          2047413.52
+        ]
+      },
+      {
+        "id": "osm:node/2517303171",
+        "name": "Mati Ganapati Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378269.2,
+          2047647.91
+        ]
+      },
+      {
+        "id": "osm:node/2517303172",
+        "name": "New Poona Bakery",
+        "kind": "shop=bakery",
+        "point": [
+          379115.31,
+          2047793.67
+        ]
+      },
+      {
+        "id": "osm:node/2550695929",
+        "name": "Narayan Peth Police Chowki",
+        "kind": "amenity=police",
+        "point": [
+          378385.17,
+          2047685.83
+        ]
+      },
+      {
+        "id": "osm:node/2580386967",
+        "name": "Patrya Maruti",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378629.12,
+          2047584.51
+        ]
+      },
+      {
+        "id": "osm:node/2618478633",
+        "name": "Jamnalal Bajaj",
+        "kind": "historic=memorial",
+        "point": [
+          379040.82,
+          2046039.72
+        ]
+      },
+      {
+        "id": "osm:node/2618478634",
+        "name": "Lokashahir Annabhau Sathe",
+        "kind": "historic=memorial",
+        "point": [
+          379043.84,
+          2046068.05
+        ]
+      },
+      {
+        "id": "osm:node/2618478635",
+        "name": "Natraj",
+        "kind": "amenity=restaurant",
+        "point": [
+          379264.91,
+          2046116.8
+        ]
+      },
+      {
+        "id": "osm:node/2689382623",
+        "name": "Makkah Masjid",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379917.67,
+          2046470.58
+        ]
+      },
+      {
+        "id": "osm:node/2689384315",
+        "name": "Farog E Nabavi Masjid",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379935.49,
+          2046589.9
+        ]
+      },
+      {
+        "id": "osm:node/2689384762",
+        "name": "Mominpura Kabrastan Masjid",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          380062.56,
+          2046444.72
+        ]
+      },
+      {
+        "id": "osm:node/2701228386",
+        "name": "Shani Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379002.82,
+          2047341.7
+        ]
+      },
+      {
+        "id": "osm:node/2701228387",
+        "name": "Tambdi Jogeshwari",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379113.86,
+          2047717.82
+        ]
+      },
+      {
+        "id": "osm:node/2716630534",
+        "name": "Nityaa Technosys Pvt Ltd",
+        "kind": "office=it",
+        "point": [
+          379115.88,
+          2047683.34
+        ]
+      },
+      {
+        "id": "osm:node/2858176018",
+        "name": "Bank of Maharashtra",
+        "kind": "amenity=bank",
+        "point": [
+          379025.23,
+          2047404.76
+        ]
+      },
+      {
+        "id": "osm:node/2858176019",
+        "name": "D. G. Copiers",
+        "kind": "shop=copyshop",
+        "point": [
+          378572.38,
+          2047382.31
+        ]
+      },
+      {
+        "id": "osm:node/2858176020",
+        "name": "Hanuman Mandir Nagnath Paar",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378636.0,
+          2047261.87
+        ]
+      },
+      {
+        "id": "osm:node/2858176021",
+        "name": "IDBI Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378388.79,
+          2047367.14
+        ]
+      },
+      {
+        "id": "osm:node/2858176023",
+        "name": "Lokmanya Vachanalay",
+        "kind": "amenity=library",
+        "point": [
+          378205.02,
+          2046851.6
+        ]
+      },
+      {
+        "id": "osm:node/2858176025",
+        "name": "Sujata Mastani",
+        "kind": "amenity=ice_cream",
+        "point": [
+          378824.19,
+          2047189.15
+        ]
+      },
+      {
+        "id": "osm:node/2859985524",
+        "name": "Jaihind Collections",
+        "kind": "shop=clothes",
+        "point": [
+          378835.72,
+          2047469.65
+        ]
+      },
+      {
+        "id": "osm:node/2868930217",
+        "name": "Samadhan",
+        "kind": "amenity=restaurant",
+        "point": [
+          379289.5,
+          2047632.96
+        ]
+      },
+      {
+        "id": "osm:node/2868930220",
+        "name": "Tamboli Masjid",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379648.78,
+          2047674.36
+        ]
+      },
+      {
+        "id": "osm:node/2892723723",
+        "name": "Sonya Maruti",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379603.85,
+          2047662.0
+        ]
+      },
+      {
+        "id": "osm:node/2929239715",
+        "name": "Grahak Peth",
+        "kind": "shop=supermarket",
+        "point": [
+          378690.89,
+          2046738.0
+        ]
+      },
+      {
+        "id": "osm:node/2929239719",
+        "name": "State Bank of India",
+        "kind": "amenity=bank",
+        "point": [
+          379220.82,
+          2046258.07
+        ]
+      },
+      {
+        "id": "osm:node/2935676185",
+        "name": "Swargate Police Station",
+        "kind": "amenity=police",
+        "point": [
+          379566.72,
+          2045973.18
+        ]
+      },
+      {
+        "id": "osm:node/2939229810",
+        "name": "Agraj",
+        "kind": "shop=convenience",
+        "point": [
+          378397.48,
+          2046930.67
+        ]
+      },
+      {
+        "id": "osm:node/2940513802",
+        "name": "Prabhag 51 B",
+        "kind": "tourism=information",
+        "point": [
+          378638.58,
+          2046750.06
+        ]
+      },
+      {
+        "id": "osm:node/2940513804",
+        "name": "Vasantdada Patil",
+        "kind": "historic=memorial",
+        "point": [
+          378980.03,
+          2046481.72
+        ]
+      },
+      {
+        "id": "osm:node/3017579733",
+        "name": "Agraj",
+        "kind": "shop=convenience",
+        "point": [
+          378195.08,
+          2047574.07
+        ]
+      },
+      {
+        "id": "osm:node/3238255107",
+        "name": "Naik Hospital, Pune",
+        "kind": "amenity=hospital",
+        "point": [
+          379606.09,
+          2047023.77
+        ]
+      },
+      {
+        "id": "osm:node/3309053861",
+        "name": "Salt and Pepper",
+        "kind": "amenity=restaurant",
+        "point": [
+          378642.05,
+          2046797.14
+        ]
+      },
+      {
+        "id": "osm:node/3637303225",
+        "name": "U.J. Solanki",
+        "kind": "shop=stationery",
+        "point": [
+          379692.35,
+          2047380.15
+        ]
+      },
+      {
+        "id": "osm:node/3637303226",
+        "name": "Agatya",
+        "kind": "amenity=restaurant",
+        "point": [
+          379062.2,
+          2047485.05
+        ]
+      },
+      {
+        "id": "osm:node/3696693817",
+        "name": "Bora Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          379931.8,
+          2047151.76
+        ]
+      },
+      {
+        "id": "osm:node/3816609181",
+        "name": "FIITJEE",
+        "kind": "office=educational_institution",
+        "point": [
+          379943.52,
+          2045859.09
+        ]
+      },
+      {
+        "id": "osm:node/3836998960",
+        "name": "Belbag Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379202.36,
+          2047621.8
+        ]
+      },
+      {
+        "id": "osm:node/3837531763",
+        "name": "Bhajiram Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378374.47,
+          2047665.89
+        ]
+      },
+      {
+        "id": "osm:node/3872878964",
+        "name": "Hotel Abhijeet New Sweet Home",
+        "kind": "tourism=hotel",
+        "point": [
+          378802.92,
+          2047393.39
+        ]
+      },
+      {
+        "id": "osm:node/4023798207",
+        "name": "Monginis",
+        "kind": "shop=pastry",
+        "point": [
+          378825.27,
+          2046603.04
+        ]
+      },
+      {
+        "id": "osm:node/4265099883",
+        "name": "Manyavar",
+        "kind": "shop=clothes",
+        "point": [
+          378991.77,
+          2047610.34
+        ]
+      },
+      {
+        "id": "osm:node/4265147889",
+        "name": "Natraj Book Depot",
+        "kind": "shop=books",
+        "point": [
+          379137.28,
+          2047723.24
+        ]
+      },
+      {
+        "id": "osm:node/4677869894",
+        "name": "ICICI Bank",
+        "kind": "amenity=atm",
+        "point": [
+          378632.11,
+          2047284.13
+        ]
+      },
+      {
+        "id": "osm:node/4730189289",
+        "name": "Corporation Bank",
+        "kind": "amenity=bank",
+        "point": [
+          379031.35,
+          2045863.86
+        ]
+      },
+      {
+        "id": "osm:node/4938936477",
+        "name": "Satwik Thali",
+        "kind": "amenity=restaurant",
+        "point": [
+          378505.79,
+          2046891.62
+        ]
+      },
+      {
+        "id": "osm:node/5065697727",
+        "name": "Namoh Cards",
+        "kind": "shop=stationery",
+        "point": [
+          378887.45,
+          2047697.31
+        ]
+      },
+      {
+        "id": "osm:node/5682056653",
+        "name": "NG park",
+        "kind": "leisure=park",
+        "point": [
+          379746.77,
+          2047771.04
+        ]
+      },
+      {
+        "id": "osm:node/5832547676",
+        "name": "Chinchechi Talim",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379181.2,
+          2046837.5
+        ]
+      },
+      {
+        "id": "osm:node/5832547677",
+        "name": "Raymond",
+        "kind": "shop=clothes",
+        "point": [
+          379370.71,
+          2046142.25
+        ]
+      },
+      {
+        "id": "osm:node/5832547678",
+        "name": "HDFC Bank",
+        "kind": "amenity=bank",
+        "point": [
+          379283.94,
+          2046236.74
+        ]
+      },
+      {
+        "id": "osm:node/5832547679",
+        "name": "Bank of India",
+        "kind": "amenity=bank",
+        "point": [
+          379199.11,
+          2046279.01
+        ]
+      },
+      {
+        "id": "osm:node/5832547680",
+        "name": "ICICI Bank",
+        "kind": "amenity=atm",
+        "point": [
+          379112.68,
+          2046359.15
+        ]
+      },
+      {
+        "id": "osm:node/5832547681",
+        "name": "H. V. Mehendale and Sons",
+        "kind": "shop=musical_instrument",
+        "point": [
+          379000.01,
+          2046498.91
+        ]
+      },
+      {
+        "id": "osm:node/5832547682",
+        "name": "Kaka Halwai",
+        "kind": "shop=confectionery",
+        "point": [
+          378890.53,
+          2046549.85
+        ]
+      },
+      {
+        "id": "osm:node/5832547683",
+        "name": "Monarch Yamaha",
+        "kind": "shop=car",
+        "point": [
+          378874.9,
+          2046563.04
+        ]
+      },
+      {
+        "id": "osm:node/5832547684",
+        "name": "Vijay Sales",
+        "kind": "shop=electronics",
+        "point": [
+          378827.73,
+          2046626.82
+        ]
+      },
+      {
+        "id": "osm:node/5832548485",
+        "name": "Bank of Maharashtra",
+        "kind": "amenity=bank",
+        "point": [
+          378785.79,
+          2046633.13
+        ]
+      },
+      {
+        "id": "osm:node/5832548486",
+        "name": "Gurunath Travels",
+        "kind": "shop=travel_agency",
+        "point": [
+          378734.93,
+          2046674.37
+        ]
+      },
+      {
+        "id": "osm:node/5832548487",
+        "name": "ICICI Bank",
+        "kind": "amenity=atm",
+        "point": [
+          378742.81,
+          2046667.67
+        ]
+      },
+      {
+        "id": "osm:node/5832548488",
+        "name": "ICICI Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378736.02,
+          2046673.2
+        ]
+      },
+      {
+        "id": "osm:node/5832548489",
+        "name": "SP's Biryani",
+        "kind": "amenity=restaurant",
+        "point": [
+          378636.43,
+          2046813.1
+        ]
+      },
+      {
+        "id": "osm:node/5832548490",
+        "name": "Abhijat",
+        "kind": "shop=books",
+        "point": [
+          378628.98,
+          2046784.41
+        ]
+      },
+      {
+        "id": "osm:node/5832548491",
+        "name": "Parag Stationers",
+        "kind": "shop=stationery",
+        "point": [
+          378627.47,
+          2046785.57
+        ]
+      },
+      {
+        "id": "osm:node/5832548492",
+        "name": "Tilak Automobiles",
+        "kind": "shop=car_parts",
+        "point": [
+          378599.96,
+          2046802.08
+        ]
+      },
+      {
+        "id": "osm:node/5832548493",
+        "name": "State Bank of India",
+        "kind": "amenity=atm",
+        "point": [
+          378593.9,
+          2046806.33
+        ]
+      },
+      {
+        "id": "osm:node/5832548494",
+        "name": "IndusInd Bank",
+        "kind": "amenity=atm",
+        "point": [
+          378563.8,
+          2046831.72
+        ]
+      },
+      {
+        "id": "osm:node/5832548495",
+        "name": "IndusInd Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378561.34,
+          2046833.98
+        ]
+      },
+      {
+        "id": "osm:node/5832548496",
+        "name": "Shakti Sports",
+        "kind": "shop=sports",
+        "point": [
+          378454.87,
+          2046873.36
+        ]
+      },
+      {
+        "id": "osm:node/5832548497",
+        "name": "Arihant Medicals",
+        "kind": "amenity=pharmacy",
+        "point": [
+          378407.4,
+          2046923.7
+        ]
+      },
+      {
+        "id": "osm:node/5832548498",
+        "name": "Darja Misal",
+        "kind": "amenity=restaurant",
+        "point": [
+          378269.46,
+          2046939.43
+        ]
+      },
+      {
+        "id": "osm:node/5832548499",
+        "name": "Rohit Coffee Corner",
+        "kind": "amenity=cafe",
+        "point": [
+          378269.77,
+          2046945.83
+        ]
+      },
+      {
+        "id": "osm:node/5832579348",
+        "name": "New Apoorwai",
+        "kind": "amenity=restaurant",
+        "point": [
+          378204.67,
+          2047470.69
+        ]
+      },
+      {
+        "id": "osm:node/5832579349",
+        "name": "Master Leather Works",
+        "kind": "shop=bag",
+        "point": [
+          378274.46,
+          2047434.08
+        ]
+      },
+      {
+        "id": "osm:node/5832579350",
+        "name": "Kotak Mahindra Bank",
+        "kind": "amenity=atm",
+        "point": [
+          378294.62,
+          2047444.61
+        ]
+      },
+      {
+        "id": "osm:node/5832579351",
+        "name": "State Bank of India",
+        "kind": "amenity=atm",
+        "point": [
+          378289.42,
+          2047443.98
+        ]
+      },
+      {
+        "id": "osm:node/5832579353",
+        "name": "Bhangini Nivedita Sahakari Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378297.4,
+          2047445.61
+        ]
+      },
+      {
+        "id": "osm:node/5832579354",
+        "name": "Guruji Talim",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379101.71,
+          2047553.64
+        ]
+      },
+      {
+        "id": "osm:node/5832579355",
+        "name": "Lodha and Sons",
+        "kind": "shop=convenience",
+        "point": [
+          379609.06,
+          2047361.56
+        ]
+      },
+      {
+        "id": "osm:node/5832579356",
+        "name": "Shri Niyanand Bhuvan",
+        "kind": "amenity=restaurant",
+        "point": [
+          379511.23,
+          2047293.64
+        ]
+      },
+      {
+        "id": "osm:node/5832579357",
+        "name": "TJSB Bank",
+        "kind": "amenity=bank",
+        "point": [
+          379404.72,
+          2047332.73
+        ]
+      },
+      {
+        "id": "osm:node/6015253124",
+        "name": "Phadke Dining Hall",
+        "kind": "amenity=restaurant",
+        "point": [
+          378737.95,
+          2046838.86
+        ]
+      },
+      {
+        "id": "osm:node/6241949022",
+        "name": "Sujata Mastani",
+        "kind": "amenity=ice_cream",
+        "point": [
+          378843.49,
+          2047179.66
+        ]
+      },
+      {
+        "id": "osm:node/6244656798",
+        "name": "Tanishq",
+        "kind": "shop=jewelry",
+        "point": [
+          378614.85,
+          2047427.34
+        ]
+      },
+      {
+        "id": "osm:node/6244656799",
+        "name": "ICICI Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378631.8,
+          2047287.4
+        ]
+      },
+      {
+        "id": "osm:node/6244656805",
+        "name": "Cosmos Bank",
+        "kind": "amenity=atm",
+        "point": [
+          378867.21,
+          2047481.11
+        ]
+      },
+      {
+        "id": "osm:node/6244656806",
+        "name": "Cosmos Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378872.76,
+          2047485.57
+        ]
+      },
+      {
+        "id": "osm:node/6244656812",
+        "name": "Shrikunthunath Shwetambar Jain Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379344.26,
+          2047846.22
+        ]
+      },
+      {
+        "id": "osm:node/6388666884",
+        "name": "Happy Selection",
+        "kind": "shop=jewelry",
+        "point": [
+          379162.34,
+          2047414.71
+        ]
+      },
+      {
+        "id": "osm:node/6897390629",
+        "name": "Poona Serological Institute Blood Bank",
+        "kind": "amenity=blood_bank",
+        "point": [
+          380150.83,
+          2047798.91
+        ]
+      },
+      {
+        "id": "osm:node/7042939578",
+        "name": "Yashda Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          379617.58,
+          2047745.28
+        ]
+      },
+      {
+        "id": "osm:node/7044175339",
+        "name": "Chaitanya Stem Cell Center",
+        "kind": "amenity=hospital",
+        "point": [
+          378641.19,
+          2045893.48
+        ]
+      },
+      {
+        "id": "osm:node/7045823776",
+        "name": "Umarji Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          379426.57,
+          2047207.2
+        ]
+      },
+      {
+        "id": "osm:node/7048871849",
+        "name": "Purandare Hospital, Pune",
+        "kind": "amenity=hospital",
+        "point": [
+          379515.53,
+          2046139.44
+        ]
+      },
+      {
+        "id": "osm:node/7049292470",
+        "name": "Gokhale Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          379346.26,
+          2046127.28
+        ]
+      },
+      {
+        "id": "osm:node/7050589614",
+        "name": "Ashakiran Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378345.95,
+          2047644.57
+        ]
+      },
+      {
+        "id": "osm:node/7050627585",
+        "name": "Sant Dnyaneswar Medical Education Research Centre",
+        "kind": "amenity=hospital",
+        "point": [
+          378365.75,
+          2047418.16
+        ]
+      },
+      {
+        "id": "osm:node/7051070009",
+        "name": "Patankar Nursing Home",
+        "kind": "amenity=clinic",
+        "point": [
+          379052.18,
+          2045929.57
+        ]
+      },
+      {
+        "id": "osm:node/7051345893",
+        "name": "Shaishav Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          378367.12,
+          2047422.69
+        ]
+      },
+      {
+        "id": "osm:node/7066374692",
+        "name": "Pabalkar Nursing Home",
+        "kind": "amenity=clinic",
+        "point": [
+          379289.31,
+          2046548.17
+        ]
+      },
+      {
+        "id": "osm:node/7068218601",
+        "name": "S P Deshpande Eye Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          378309.18,
+          2047639.81
+        ]
+      },
+      {
+        "id": "osm:node/7069569120",
+        "name": "Vibhute Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378796.16,
+          2046338.51
+        ]
+      },
+      {
+        "id": "osm:node/7073895620",
+        "name": "Godbole Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378745.92,
+          2047131.03
+        ]
+      },
+      {
+        "id": "osm:node/7079411416",
+        "name": "Manoj Clinic / Gore Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378479.36,
+          2047195.92
+        ]
+      },
+      {
+        "id": "osm:node/7080269671",
+        "name": "Ram Krishna Hospital, Pune",
+        "kind": "amenity=hospital",
+        "point": [
+          378429.93,
+          2046915.88
+        ]
+      },
+      {
+        "id": "osm:node/7087491750",
+        "name": "Harijivan Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          379046.64,
+          2045904.69
+        ]
+      },
+      {
+        "id": "osm:node/7226727370",
+        "name": "Sutika Seva Mandir",
+        "kind": "amenity=hospital",
+        "point": [
+          378244.85,
+          2047433.59
+        ]
+      },
+      {
+        "id": "osm:node/7651453315",
+        "name": "Pratham Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          378502.48,
+          2047347.09
+        ]
+      },
+      {
+        "id": "osm:node/7651453318",
+        "name": "Date Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378841.73,
+          2047023.32
+        ]
+      },
+      {
+        "id": "osm:node/7651453319",
+        "name": "Dr. Saha Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          379658.15,
+          2047851.1
+        ]
+      },
+      {
+        "id": "osm:node/7651453320",
+        "name": "Morya General Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378444.29,
+          2047529.38
+        ]
+      },
+      {
+        "id": "osm:node/7651453331",
+        "name": "Dr. K M Gangwal",
+        "kind": "amenity=doctors",
+        "point": [
+          378636.5,
+          2047443.81
+        ]
+      },
+      {
+        "id": "osm:node/7651453341",
+        "name": "Asava Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          378599.76,
+          2047673.68
+        ]
+      },
+      {
+        "id": "osm:node/7651453343",
+        "name": "Behere Dental Clinic",
+        "kind": "amenity=dentist",
+        "point": [
+          379018.49,
+          2047869.33
+        ]
+      },
+      {
+        "id": "osm:node/7651453348",
+        "name": "Dr. Chetan Deshmukh",
+        "kind": "amenity=doctors",
+        "point": [
+          378241.16,
+          2047044.37
+        ]
+      },
+      {
+        "id": "osm:node/7651453352",
+        "name": "Lupus Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          379292.37,
+          2046270.71
+        ]
+      },
+      {
+        "id": "osm:node/7651453359",
+        "name": "Dr. Nitin Abhyankar",
+        "kind": "amenity=doctors",
+        "point": [
+          378674.98,
+          2047089.15
+        ]
+      },
+      {
+        "id": "osm:node/7651453367",
+        "name": "Kalyani Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          379575.08,
+          2046401.66
+        ]
+      },
+      {
+        "id": "osm:node/7651453369",
+        "name": "Yogesh Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378382.17,
+          2047048.16
+        ]
+      },
+      {
+        "id": "osm:node/7651453370",
+        "name": "Gokhale Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          379351.12,
+          2046129.02
+        ]
+      },
+      {
+        "id": "osm:node/7651453379",
+        "name": "Shaishav Children's Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378357.66,
+          2047419.56
+        ]
+      },
+      {
+        "id": "osm:node/7651453390",
+        "name": "Shintre Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378600.64,
+          2047246.21
+        ]
+      },
+      {
+        "id": "osm:node/7651453393",
+        "name": "Kalavati Mavale Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378231.05,
+          2047558.63
+        ]
+      },
+      {
+        "id": "osm:node/7651453396",
+        "name": "Nirmal Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          378534.39,
+          2047577.11
+        ]
+      },
+      {
+        "id": "osm:node/7651453406",
+        "name": "Dr. Shriram Athavale Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          379897.35,
+          2046976.6
+        ]
+      },
+      {
+        "id": "osm:node/7651453412",
+        "name": "Chajed Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          379955.67,
+          2046382.16
+        ]
+      },
+      {
+        "id": "osm:node/7651453416",
+        "name": "Shrutij Panchkarm Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          378770.78,
+          2047690.65
+        ]
+      },
+      {
+        "id": "osm:node/7651453419",
+        "name": "Joshi Dental Clinic",
+        "kind": "amenity=dentist",
+        "point": [
+          378361.97,
+          2046922.83
+        ]
+      },
+      {
+        "id": "osm:node/7651453422",
+        "name": "Chavan Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          379493.79,
+          2046129.66
+        ]
+      },
+      {
+        "id": "osm:node/8204734780",
+        "name": "dental health care",
+        "kind": "amenity=hospital",
+        "point": [
+          379933.13,
+          2046571.35
+        ]
+      },
+      {
+        "id": "osm:node/8257641008",
+        "name": "Pain Management Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          378795.12,
+          2047714.49
+        ]
+      },
+      {
+        "id": "osm:node/8261333009",
+        "name": "Innoveda Dr Mehta",
+        "kind": "amenity=clinic",
+        "point": [
+          378622.89,
+          2046525.88
+        ]
+      },
+      {
+        "id": "osm:node/8502820800",
+        "name": "Dr. Pramod Bhilare Orthopaedic Spine Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          379310.44,
+          2046543.43
+        ]
+      },
+      {
+        "id": "osm:node/8813394447",
+        "name": "Matoshri Ramabai Ambedkar Prasutigriha",
+        "kind": "amenity=hospital",
+        "point": [
+          378601.65,
+          2046199.84
+        ]
+      },
+      {
+        "id": "osm:node/8813476678",
+        "name": "Savitribai Phule Meternity Home",
+        "kind": "amenity=hospital",
+        "point": [
+          379784.93,
+          2046422.17
+        ]
+      },
+      {
+        "id": "osm:node/8814103200",
+        "name": "Apollo Spectra Hospitals",
+        "kind": "amenity=hospital",
+        "point": [
+          378814.73,
+          2046220.02
+        ]
+      },
+      {
+        "id": "osm:node/9090385305",
+        "name": "Tapadiya's Dental Casa",
+        "kind": "amenity=clinic",
+        "point": [
+          379266.07,
+          2046307.19
+        ]
+      },
+      {
+        "id": "osm:node/9128644997",
+        "name": "Jagtap Clinic and Research Centre",
+        "kind": "amenity=clinic",
+        "point": [
+          379114.65,
+          2046348.16
+        ]
+      },
+      {
+        "id": "osm:node/9174929917",
+        "name": "Mehta Publishing House",
+        "kind": "office=publisher",
+        "point": [
+          378941.32,
+          2046701.8
+        ]
+      },
+      {
+        "id": "osm:node/9189721323",
+        "name": "Deshmukh Clinic & Research Centre",
+        "kind": "amenity=clinic",
+        "point": [
+          378235.68,
+          2047047.74
+        ]
+      },
+      {
+        "id": "osm:node/9229645115",
+        "name": "Hotel Peacock",
+        "kind": "amenity=restaurant",
+        "point": [
+          379131.78,
+          2046420.12
+        ]
+      },
+      {
+        "id": "osm:node/9229710106",
+        "name": "Girija Juice Bar",
+        "kind": "amenity=restaurant",
+        "point": [
+          378850.32,
+          2046564.79
+        ]
+      },
+      {
+        "id": "osm:node/9229799735",
+        "name": "Arya Beauty Parlour",
+        "kind": "shop=beauty",
+        "point": [
+          378410.82,
+          2047010.2
+        ]
+      },
+      {
+        "id": "osm:node/9230274760",
+        "name": "Ganjraj",
+        "kind": "amenity=restaurant",
+        "point": [
+          379021.07,
+          2046905.72
+        ]
+      },
+      {
+        "id": "osm:node/9278156725",
+        "name": "Rahul Pharma",
+        "kind": "amenity=pharmacy",
+        "point": [
+          378354.41,
+          2047044.32
+        ]
+      },
+      {
+        "id": "osm:node/9303624682",
+        "name": "New Poona Bakery",
+        "kind": "shop=bakery",
+        "point": [
+          378268.62,
+          2047636.28
+        ]
+      },
+      {
+        "id": "osm:node/9388135295",
+        "name": "New Poona Boarding House",
+        "kind": "amenity=restaurant",
+        "point": [
+          378462.15,
+          2047185.4
+        ]
+      },
+      {
+        "id": "osm:node/9433019694",
+        "name": "Swamini Saree",
+        "kind": "shop=clothes",
+        "point": [
+          378910.04,
+          2047391.81
+        ]
+      },
+      {
+        "id": "osm:node/9433019696",
+        "name": "Tathastu",
+        "kind": "shop=clothes",
+        "point": [
+          378340.09,
+          2047324.71
+        ]
+      },
+      {
+        "id": "osm:node/9742728991",
+        "name": "Dr Madhusudan Asawa | The Heart Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          378383.64,
+          2046026.59
+        ]
+      },
+      {
+        "id": "osm:node/9774691823",
+        "name": "Unmesh Orthopedic Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          378470.7,
+          2046048.96
+        ]
+      },
+      {
+        "id": "osm:node/9967125222",
+        "name": "Shrimanti Misal and Snacks",
+        "kind": "amenity=restaurant",
+        "point": [
+          378890.53,
+          2046544.4
+        ]
+      },
+      {
+        "id": "osm:node/10172884663",
+        "name": "sooth indian dosa shop",
+        "kind": "amenity=restaurant",
+        "point": [
+          378485.33,
+          2047095.34
+        ]
+      },
+      {
+        "id": "osm:node/10172886115",
+        "name": "vedanti mess",
+        "kind": "amenity=restaurant",
+        "point": [
+          378436.19,
+          2047076.22
+        ]
+      },
+      {
+        "id": "osm:node/10172893808",
+        "name": "sandip poha",
+        "kind": "amenity=restaurant",
+        "point": [
+          378704.64,
+          2046985.83
+        ]
+      },
+      {
+        "id": "osm:node/10172893809",
+        "name": "kaku chi mess",
+        "kind": "amenity=restaurant",
+        "point": [
+          378705.71,
+          2047004.18
+        ]
+      },
+      {
+        "id": "osm:node/10172920942",
+        "name": "bhola tea shop",
+        "kind": "amenity=restaurant",
+        "point": [
+          378457.94,
+          2047170.02
+        ]
+      },
+      {
+        "id": "osm:node/10172924683",
+        "name": "minal veg thali",
+        "kind": "amenity=restaurant",
+        "point": [
+          378491.33,
+          2046929.7
+        ]
+      },
+      {
+        "id": "osm:node/10172925426",
+        "name": "Bora Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          380078.66,
+          2047039.27
+        ]
+      },
+      {
+        "id": "osm:node/10172926524",
+        "name": "Omkar tea shop",
+        "kind": "amenity=restaurant",
+        "point": [
+          378469.29,
+          2047091.61
+        ]
+      },
+      {
+        "id": "osm:node/10172926525",
+        "name": "Ani kay hav tea shop",
+        "kind": "amenity=restaurant",
+        "point": [
+          378505.84,
+          2047096.8
+        ]
+      },
+      {
+        "id": "osm:node/10172926811",
+        "name": "nagar misal shop",
+        "kind": "amenity=restaurant",
+        "point": [
+          378509.28,
+          2046931.5
+        ]
+      },
+      {
+        "id": "osm:node/10172927209",
+        "name": "bhigavan fish dishes",
+        "kind": "amenity=restaurant",
+        "point": [
+          378477.94,
+          2047040.61
+        ]
+      },
+      {
+        "id": "osm:node/10172927776",
+        "name": "krishna veg thali",
+        "kind": "amenity=restaurant",
+        "point": [
+          378481.14,
+          2046991.23
+        ]
+      },
+      {
+        "id": "osm:node/10172928581",
+        "name": "bhosale maratha mess",
+        "kind": "amenity=restaurant",
+        "point": [
+          378465.28,
+          2047016.18
+        ]
+      },
+      {
+        "id": "osm:node/10172930139",
+        "name": "satvik veg thali",
+        "kind": "amenity=restaurant",
+        "point": [
+          378492.11,
+          2046952.63
+        ]
+      },
+      {
+        "id": "osm:node/10172933066",
+        "name": "raghu vadapav",
+        "kind": "amenity=restaurant",
+        "point": [
+          378708.37,
+          2046943.58
+        ]
+      },
+      {
+        "id": "osm:node/10172942164",
+        "name": "Umarji Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          379426.68,
+          2047207.35
+        ]
+      },
+      {
+        "id": "osm:node/10172943423",
+        "name": "premacha chaha",
+        "kind": "amenity=restaurant",
+        "point": [
+          378710.51,
+          2046981.06
+        ]
+      },
+      {
+        "id": "osm:node/10172943821",
+        "name": "jagadamba tea",
+        "kind": "amenity=restaurant",
+        "point": [
+          378709.91,
+          2046975.39
+        ]
+      },
+      {
+        "id": "osm:node/10172943822",
+        "name": "sudhirbhaucha katta",
+        "kind": "amenity=restaurant",
+        "point": [
+          378770.53,
+          2047011.73
+        ]
+      },
+      {
+        "id": "osm:node/10172977868",
+        "name": "Seth Tarachand Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          380092.88,
+          2047848.98
+        ]
+      },
+      {
+        "id": "osm:node/10172979846",
+        "name": "Sanas Ground",
+        "kind": "leisure=park",
+        "point": [
+          378929.38,
+          2046244.49
+        ]
+      },
+      {
+        "id": "osm:node/10172979851",
+        "name": "St. Hildas Schoole Ground",
+        "kind": "leisure=park",
+        "point": [
+          379757.36,
+          2046491.37
+        ]
+      },
+      {
+        "id": "osm:node/10172979852",
+        "name": "Epiphany School Ground",
+        "kind": "leisure=park",
+        "point": [
+          379702.65,
+          2046528.41
+        ]
+      },
+      {
+        "id": "osm:node/10172979853",
+        "name": "Talaee Ground",
+        "kind": "leisure=park",
+        "point": [
+          379693.34,
+          2046686.32
+        ]
+      },
+      {
+        "id": "osm:node/10172994192",
+        "name": "Ganpati Temple",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378374.59,
+          2047586.86
+        ]
+      },
+      {
+        "id": "osm:node/10172994194",
+        "name": "Tulshibaug Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379189.64,
+          2047406.44
+        ]
+      },
+      {
+        "id": "osm:node/10172994211",
+        "name": "Chinchechi Talim",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379184.17,
+          2046830.37
+        ]
+      },
+      {
+        "id": "osm:node/10173004111",
+        "name": "Madar Chala Masjid",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379844.57,
+          2047559.52
+        ]
+      },
+      {
+        "id": "osm:node/10173004113",
+        "name": "Bagbban Masjid",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379791.69,
+          2047334.0
+        ]
+      },
+      {
+        "id": "osm:node/10173007224",
+        "name": "Makkah Masjid",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379919.42,
+          2046470.07
+        ]
+      },
+      {
+        "id": "osm:node/10173007225",
+        "name": "Saint Teresa Church",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379771.67,
+          2046318.86
+        ]
+      },
+      {
+        "id": "osm:node/10173007819",
+        "name": "HARIJIVAN HOSPITAL",
+        "kind": "amenity=hospital",
+        "point": [
+          379054.36,
+          2045903.33
+        ]
+      },
+      {
+        "id": "osm:node/10278237144",
+        "name": "Masemari",
+        "kind": "amenity=restaurant",
+        "point": [
+          378837.52,
+          2046516.47
+        ]
+      },
+      {
+        "id": "osm:node/10596043998",
+        "name": "Islamiya Bakery",
+        "kind": "shop=bakery",
+        "point": [
+          379936.95,
+          2046448.26
+        ]
+      },
+      {
+        "id": "osm:node/10596055593",
+        "name": "Noble English School",
+        "kind": "amenity=school",
+        "point": [
+          379903.28,
+          2046546.85
+        ]
+      },
+      {
+        "id": "osm:node/10596059693",
+        "name": "Taqwa Jewellers",
+        "kind": "shop=jewelry",
+        "point": [
+          379942.73,
+          2046521.9
+        ]
+      },
+      {
+        "id": "osm:node/10596063740",
+        "name": "Arabia Tours and Travels",
+        "kind": "office=guide",
+        "point": [
+          379943.7,
+          2046463.29
+        ]
+      },
+      {
+        "id": "osm:node/10596069727",
+        "name": "U P Yaadgar Bakery",
+        "kind": "shop=bakery",
+        "point": [
+          379940.99,
+          2046424.7
+        ]
+      },
+      {
+        "id": "osm:node/10603339622",
+        "name": "Datta Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379189.75,
+          2046829.51
+        ]
+      },
+      {
+        "id": "osm:node/10609324954",
+        "name": "Rasik Sahitya",
+        "kind": "shop=books",
+        "point": [
+          379062.39,
+          2047736.52
+        ]
+      },
+      {
+        "id": "osm:node/10609324955",
+        "name": "New Pradeep book depo",
+        "kind": "shop=books",
+        "point": [
+          379079.16,
+          2047770.26
+        ]
+      },
+      {
+        "id": "osm:node/10609324956",
+        "name": "Pragati book centre",
+        "kind": "shop=books",
+        "point": [
+          379101.07,
+          2047743.96
+        ]
+      },
+      {
+        "id": "osm:node/10609333645",
+        "name": "Pradeep book depo",
+        "kind": "shop=books",
+        "point": [
+          379069.04,
+          2047700.47
+        ]
+      },
+      {
+        "id": "osm:node/10968771876",
+        "name": "Eknath Mangal Karyalay",
+        "kind": "amenity=community_centre",
+        "point": [
+          379543.8,
+          2047865.5
+        ]
+      },
+      {
+        "id": "osm:node/11111071005",
+        "name": "Bedekar Mis",
+        "kind": "amenity=restaurant",
+        "point": [
+          378603.21,
+          2047530.53
+        ]
+      },
+      {
+        "id": "osm:node/11370957570",
+        "name": "Indian Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378628.48,
+          2047184.63
+        ]
+      },
+      {
+        "id": "osm:node/11370975969",
+        "name": "Durvankur Dining Hall",
+        "kind": "amenity=restaurant",
+        "point": [
+          378196.64,
+          2047077.25
+        ]
+      },
+      {
+        "id": "osm:node/11610654157",
+        "name": "Jagganath Pan Center",
+        "kind": "shop=yes",
+        "point": [
+          378992.75,
+          2047210.95
+        ]
+      },
+      {
+        "id": "osm:node/11610747750",
+        "name": "Vaze Talim",
+        "kind": "leisure=park",
+        "point": [
+          378739.45,
+          2047189.49
+        ]
+      },
+      {
+        "id": "osm:node/11610768538",
+        "name": "Shri Sadguru Dattatray Temple",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379065.71,
+          2047267.92
+        ]
+      },
+      {
+        "id": "osm:node/11832252022",
+        "name": "Studyrooms library",
+        "kind": "amenity=library",
+        "point": [
+          378711.89,
+          2046850.84
+        ]
+      },
+      {
+        "id": "osm:node/11832252028",
+        "name": "Lokmanya Vachanalay",
+        "kind": "amenity=library",
+        "point": [
+          378204.51,
+          2046862.08
+        ]
+      },
+      {
+        "id": "osm:node/11832252034",
+        "name": "S.P. College Library",
+        "kind": "amenity=library",
+        "point": [
+          378553.34,
+          2046762.89
+        ]
+      },
+      {
+        "id": "osm:node/11832252035",
+        "name": "Saraswati Abhyasika",
+        "kind": "amenity=library",
+        "point": [
+          378868.05,
+          2046453.66
+        ]
+      },
+      {
+        "id": "osm:node/11832252045",
+        "name": "Phoenix Library",
+        "kind": "amenity=library",
+        "point": [
+          378511.92,
+          2047361.49
+        ]
+      },
+      {
+        "id": "osm:node/11832252047",
+        "name": "Pune Nagar Vachan Mandir",
+        "kind": "amenity=library",
+        "point": [
+          379247.32,
+          2047609.14
+        ]
+      },
+      {
+        "id": "osm:node/11832252049",
+        "name": "Government District Library Pune",
+        "kind": "amenity=library",
+        "point": [
+          379852.59,
+          2047704.49
+        ]
+      },
+      {
+        "id": "osm:node/12005356769",
+        "name": "Mamledar Kacheri",
+        "kind": "office=government",
+        "point": [
+          379490.56,
+          2046636.81
+        ]
+      },
+      {
+        "id": "osm:node/12005356770",
+        "name": "S.B.B alias Appasaheb Jedhe Arts, Commerce & Science College",
+        "kind": "amenity=college",
+        "point": [
+          379362.97,
+          2046651.41
+        ]
+      },
+      {
+        "id": "osm:node/12005357769",
+        "name": "Tehsildar Office",
+        "kind": "office=government",
+        "point": [
+          379498.69,
+          2046641.96
+        ]
+      },
+      {
+        "id": "osm:node/12077260069",
+        "name": "BSNL Exchange",
+        "kind": "office=company",
+        "point": [
+          379013.96,
+          2046725.71
+        ]
+      },
+      {
+        "id": "osm:node/12176170904",
+        "name": "Nimbalkar Talim Ganpati Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378841.61,
+          2047210.06
+        ]
+      },
+      {
+        "id": "osm:node/12230963101",
+        "name": "H2O Fitness Center",
+        "kind": "leisure=fitness_centre",
+        "point": [
+          379385.06,
+          2046581.34
+        ]
+      },
+      {
+        "id": "osm:node/13038677806",
+        "name": "AtoZShop",
+        "kind": "shop=hardware",
+        "point": [
+          379982.28,
+          2047690.46
+        ]
+      },
+      {
+        "id": "osm:node/13055788801",
+        "name": "K C Bhide Blockmakers",
+        "kind": "shop=bookmaker",
+        "point": [
+          378963.63,
+          2046604.86
+        ]
+      },
+      {
+        "id": "osm:node/13279332544",
+        "name": "Zudio",
+        "kind": "shop=clothes",
+        "point": [
+          378265.19,
+          2047433.33
+        ]
+      },
+      {
+        "id": "osm:node/13382555651",
+        "name": "Laxmi sweet shop",
+        "kind": "shop=yes",
+        "point": [
+          379651.48,
+          2047652.2
+        ]
+      },
+      {
+        "id": "osm:node/13382581014",
+        "name": "Vijay Jewelrs",
+        "kind": "shop=jewelry",
+        "point": [
+          379632.36,
+          2047652.23
+        ]
+      },
+      {
+        "id": "osm:node/13392139830",
+        "name": "Jai Shri Nanumal Bhojraj",
+        "kind": "amenity=restaurant",
+        "point": [
+          379438.45,
+          2046046.25
+        ]
+      },
+      {
+        "id": "osm:node/13433002499",
+        "name": "Zingworks LLP",
+        "kind": "office=company",
+        "point": [
+          378195.03,
+          2046854.41
+        ]
+      },
+      {
+        "id": "osm:node/13433002500",
+        "name": "Bank of Baroda",
+        "kind": "amenity=bank",
+        "point": [
+          378189.4,
+          2046853.89
+        ]
+      },
+      {
+        "id": "osm:node/13442739579",
+        "name": "Robin Men's Salon",
+        "kind": "shop=hairdresser",
+        "point": [
+          378247.06,
+          2046821.96
+        ]
+      },
+      {
+        "id": "osm:node/13442771642",
+        "name": "Sathe Motors (Shree Ram Motors)",
+        "kind": "shop=car",
+        "point": [
+          378199.42,
+          2046837.95
+        ]
+      },
+      {
+        "id": "osm:node/13875645101",
+        "name": "Soo, be it Cafe",
+        "kind": "amenity=cafe",
+        "point": [
+          378588.9,
+          2046814.97
+        ]
+      },
+      {
+        "id": "osm:node/13875647401",
+        "name": "Tea Emporium",
+        "kind": "shop=tea",
+        "point": [
+          378589.6,
+          2046809.91
+        ]
+      },
+      {
+        "id": "osm:node/13959161786",
+        "name": "Maharashtra Media Group",
+        "kind": "office=newspaper",
+        "point": [
+          378997.61,
+          2047684.33
+        ]
+      },
+      {
+        "id": "osm:node/13959194087",
+        "name": "Nkgsb Co-operative Bank Ltd",
+        "kind": "amenity=bank",
+        "point": [
+          378999.06,
+          2047693.01
+        ]
+      },
+      {
+        "id": "osm:node/13959199789",
+        "name": "\u0928\u0935\u0940\u0928 \u092e\u0930\u093e\u0920\u0940 \u0936\u093e\u0933\u093e",
+        "kind": "office=educational_institution",
+        "point": [
+          378494.42,
+          2047878.44
+        ]
+      },
+      {
+        "id": "osm:node/13959202189",
+        "name": "Delhi Mehandi Designers",
+        "kind": "shop=craft",
+        "point": [
+          379009.62,
+          2047716.29
+        ]
+      },
+      {
+        "id": "osm:node/13959209071",
+        "name": "Chirag Katariya And Associates",
+        "kind": "office=accountant",
+        "point": [
+          378998.26,
+          2047686.55
+        ]
+      },
+      {
+        "id": "osm:node/13959220240",
+        "name": "Laxmi Stainless Steel Works",
+        "kind": "shop=kitchen",
+        "point": [
+          378957.33,
+          2047699.57
+        ]
+      },
+      {
+        "id": "osm:node/13959220262",
+        "name": "Aadarsha Books",
+        "kind": "shop=books",
+        "point": [
+          379022.57,
+          2047702.48
+        ]
+      },
+      {
+        "id": "osm:node/13959222371",
+        "name": "Kulkarni Food Corner",
+        "kind": "amenity=fast_food",
+        "point": [
+          379005.11,
+          2047716.45
+        ]
+      },
+      {
+        "id": "osm:node/13959236047",
+        "name": "Saraswat co-op bank Ltd",
+        "kind": "amenity=bank",
+        "point": [
+          379022.08,
+          2047681.81
+        ]
+      },
+      {
+        "id": "osm:node/13959236407",
+        "name": "Bhivpathaki Event Hall",
+        "kind": "amenity=events_venue",
+        "point": [
+          379003.59,
+          2047687.31
+        ]
+      },
+      {
+        "id": "osm:node/13959237823",
+        "name": "\u0935\u0930\u094d\u092e\u093e \u092c\u0941\u0915 \u0938\u0947\u0902\u091f\u0930",
+        "kind": "shop=books",
+        "point": [
+          378959.92,
+          2047698.12
+        ]
+      },
+      {
+        "id": "osm:node/13959241240",
+        "name": "Trimurti Traders",
+        "kind": "shop=stationery",
+        "point": [
+          378973.46,
+          2047697.01
+        ]
+      },
+      {
+        "id": "osm:node/13964030293",
+        "name": "\u0935\u093f\u0926\u094d\u092f\u093e\u092d\u0935\u0928 \u0935\u0938\u0924\u093f\u0917\u0943\u0939",
+        "kind": "tourism=hostel",
+        "point": [
+          378192.86,
+          2047206.26
+        ]
+      },
+      {
+        "id": "osm:node/13964036431",
+        "name": "Swamini Abhyasika",
+        "kind": "amenity=prep_school",
+        "point": [
+          378223.19,
+          2047204.19
+        ]
+      },
+      {
+        "id": "osm:node/13964049010",
+        "name": "Purewhite Owlery Ventures LLP kent purifier shop",
+        "kind": "shop=houseware",
+        "point": [
+          378521.65,
+          2047849.44
+        ]
+      },
+      {
+        "id": "osm:node/13979743105",
+        "name": "\u092e\u0939\u093e\u0930\u093e\u0937\u094d\u091f\u094d\u0930 \u0932\u0918\u0941\u0909\u0926\u094d\u092f\u094b\u0917 \u0935\u093f\u0915\u093e\u0938 \u092e\u0939\u093e\u092e\u0902\u0921\u0933 \u092e\u0930\u094d\u092f\u093e",
+        "kind": "office=government",
+        "point": [
+          379037.98,
+          2047832.64
+        ]
+      },
+      {
+        "id": "osm:node/14006139708",
+        "name": "Vaidya Upahar Gruha",
+        "kind": "amenity=restaurant",
+        "point": [
+          379580.45,
+          2047871.79
+        ]
+      },
+      {
+        "id": "osm:node/14008515384",
+        "name": "S.P. Chaiwala",
+        "kind": "amenity=cafe",
+        "point": [
+          378594.7,
+          2046734.26
+        ]
+      },
+      {
+        "id": "osm:node/14010980601",
+        "name": "Tilak Canteen",
+        "kind": "amenity=cafe",
+        "point": [
+          378409.33,
+          2046764.22
+        ]
+      },
+      {
+        "id": "osm:way/53272975",
+        "name": "Sarasbaug",
+        "kind": "tourism=attraction",
+        "point": [
+          378896.32,
+          2045981.55
+        ]
+      },
+      {
+        "id": "osm:way/53273142",
+        "name": "Ganesh Kala Krida Rangamanch",
+        "kind": "amenity=theatre",
+        "point": [
+          379306.38,
+          2046064.66
+        ]
+      },
+      {
+        "id": "osm:way/65486228",
+        "name": "Mahatma Phule Mandai",
+        "kind": "amenity=marketplace",
+        "point": [
+          379272.82,
+          2047316.07
+        ]
+      },
+      {
+        "id": "osm:way/121896447",
+        "name": "Hutatma Babu Genu Parking",
+        "kind": "amenity=parking",
+        "point": [
+          379232.48,
+          2047410.96
+        ]
+      },
+      {
+        "id": "osm:way/125482924",
+        "name": "Swargate ST Stand",
+        "kind": "amenity=bus_station",
+        "point": [
+          379577.01,
+          2045815.13
+        ]
+      },
+      {
+        "id": "osm:way/160919295",
+        "name": "Prakash Woolen Cloths",
+        "kind": "shop=clothes",
+        "point": [
+          379278.46,
+          2047844.63
+        ]
+      },
+      {
+        "id": "osm:way/180528992",
+        "name": "Madar Chala Masjid",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379844.51,
+          2047560.76
+        ]
+      },
+      {
+        "id": "osm:way/180530085",
+        "name": "Moula Mohammed Ali Johar Urdu School",
+        "kind": "amenity=school",
+        "point": [
+          379812.25,
+          2047529.35
+        ]
+      },
+      {
+        "id": "osm:way/197954177",
+        "name": "Baburao Sanas Ground",
+        "kind": "leisure=sports_centre",
+        "point": [
+          378921.02,
+          2046250.55
+        ]
+      },
+      {
+        "id": "osm:way/197954183",
+        "name": "Peshve Udyan",
+        "kind": "leisure=park",
+        "point": [
+          378762.14,
+          2046038.92
+        ]
+      },
+      {
+        "id": "osm:way/207872410",
+        "name": "Sir Parshurambhau College",
+        "kind": "amenity=school",
+        "point": [
+          378454.08,
+          2046580.06
+        ]
+      },
+      {
+        "id": "osm:way/207899908",
+        "name": "Talyatala Ganapati",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378911.26,
+          2045987.17
+        ]
+      },
+      {
+        "id": "osm:way/208240055",
+        "name": "New English School Ramanbag",
+        "kind": "amenity=school",
+        "point": [
+          378521.36,
+          2047799.13
+        ]
+      },
+      {
+        "id": "osm:way/208958228",
+        "name": "SP College Swimming Pool",
+        "kind": "leisure=swimming_pool",
+        "point": [
+          378445.61,
+          2046739.2
+        ]
+      },
+      {
+        "id": "osm:way/210576104",
+        "name": "Navin Marathi Shala",
+        "kind": "amenity=school",
+        "point": [
+          378522.66,
+          2047927.09
+        ]
+      },
+      {
+        "id": "osm:way/210718055",
+        "name": "Vijayanagar Colony Udyan",
+        "kind": "leisure=park",
+        "point": [
+          378758.46,
+          2046451.21
+        ]
+      },
+      {
+        "id": "osm:way/215535659",
+        "name": "Jawaharlal Nehru Cricket Stadium",
+        "kind": "leisure=stadium",
+        "point": [
+          379192.51,
+          2046126.81
+        ]
+      },
+      {
+        "id": "osm:way/217773603",
+        "name": "Ahilyadevi Girls' Highschool",
+        "kind": "amenity=school",
+        "point": [
+          378759.67,
+          2047917.27
+        ]
+      },
+      {
+        "id": "osm:way/217773605",
+        "name": "Bharat Naatya Mandir",
+        "kind": "amenity=theatre",
+        "point": [
+          378527.07,
+          2047070.06
+        ]
+      },
+      {
+        "id": "osm:way/217773606",
+        "name": "Gopal Highschool",
+        "kind": "amenity=school",
+        "point": [
+          378791.12,
+          2047072.08
+        ]
+      },
+      {
+        "id": "osm:way/217773607",
+        "name": "Hamalwada Parking",
+        "kind": "amenity=parking",
+        "point": [
+          378752.68,
+          2047553.16
+        ]
+      },
+      {
+        "id": "osm:way/217773608",
+        "name": "His Highness Chintamanrao Patwardhan Highschool",
+        "kind": "amenity=school",
+        "point": [
+          378928.89,
+          2047557.61
+        ]
+      },
+      {
+        "id": "osm:way/217773609",
+        "name": "Janata Sahakari Bank",
+        "kind": "amenity=bank",
+        "point": [
+          378582.05,
+          2047715.98
+        ]
+      },
+      {
+        "id": "osm:way/217773610",
+        "name": "Maharana Pratap Udyan",
+        "kind": "leisure=park",
+        "point": [
+          378943.37,
+          2046796.42
+        ]
+      },
+      {
+        "id": "osm:way/217773612",
+        "name": "Nutan Marathi Vidyalaya",
+        "kind": "amenity=school",
+        "point": [
+          379070.43,
+          2047592.68
+        ]
+      },
+      {
+        "id": "osm:way/217773613",
+        "name": "Nutan Marathi Vidyalaya",
+        "kind": "amenity=school",
+        "point": [
+          378955.4,
+          2047751.19
+        ]
+      },
+      {
+        "id": "osm:way/217773614",
+        "name": "Perugate Bhave School",
+        "kind": "amenity=school",
+        "point": [
+          378321.61,
+          2047108.27
+        ]
+      },
+      {
+        "id": "osm:way/217773618",
+        "name": "Pune Vidyarthi Gruha",
+        "kind": "amenity=school",
+        "point": [
+          378790.73,
+          2046900.01
+        ]
+      },
+      {
+        "id": "osm:way/217773619",
+        "name": "Renuka Swaroop Highschool",
+        "kind": "amenity=school",
+        "point": [
+          378571.9,
+          2047015.93
+        ]
+      },
+      {
+        "id": "osm:way/217773620",
+        "name": "Shrimati Nathibai Damodar Thakarsi Kanyashala",
+        "kind": "amenity=school",
+        "point": [
+          378740.83,
+          2047670.67
+        ]
+      },
+      {
+        "id": "osm:way/217773622",
+        "name": "Tilak Smarak Mandir",
+        "kind": "amenity=theatre",
+        "point": [
+          378487.88,
+          2046803.56
+        ]
+      },
+      {
+        "id": "osm:way/217773628",
+        "name": "Kibe Laxmi Theatre",
+        "kind": "amenity=cinema",
+        "point": [
+          379052.53,
+          2047754.88
+        ]
+      },
+      {
+        "id": "osm:way/217773654",
+        "name": "Kridamaharshi Haribhau Sane Parking",
+        "kind": "amenity=parking",
+        "point": [
+          378412.3,
+          2047542.98
+        ]
+      },
+      {
+        "id": "osm:way/218059562",
+        "name": "Gogate Prashala",
+        "kind": "amenity=school",
+        "point": [
+          378269.98,
+          2047550.14
+        ]
+      },
+      {
+        "id": "osm:way/218881239",
+        "name": "Pune Main Fire Station",
+        "kind": "amenity=fire_station",
+        "point": [
+          380211.22,
+          2046602.89
+        ]
+      },
+      {
+        "id": "osm:way/218881240",
+        "name": "Shrimant Bhairavsingh Ghorpade Udyan",
+        "kind": "leisure=park",
+        "point": [
+          379897.63,
+          2046107.36
+        ]
+      },
+      {
+        "id": "osm:way/218881241",
+        "name": "St. Teresa's Church",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379770.45,
+          2046319.26
+        ]
+      },
+      {
+        "id": "osm:way/219767488",
+        "name": "Modi Ganpati",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378377.3,
+          2047586.42
+        ]
+      },
+      {
+        "id": "osm:way/219767496",
+        "name": "Chhatrapati Shivaji Maharaj Udyan",
+        "kind": "leisure=park",
+        "point": [
+          378927.29,
+          2046384.73
+        ]
+      },
+      {
+        "id": "osm:way/219798486",
+        "name": "Limaye Natya-Chitra Mandir",
+        "kind": "amenity=cinema",
+        "point": [
+          378346.43,
+          2047463.24
+        ]
+      },
+      {
+        "id": "osm:way/219798489",
+        "name": "SNDT Kanyashala Ground",
+        "kind": "leisure=pitch",
+        "point": [
+          378683.53,
+          2047836.8
+        ]
+      },
+      {
+        "id": "osm:way/220562868",
+        "name": "Garware Balbhavan",
+        "kind": "leisure=park",
+        "point": [
+          379034.67,
+          2046161.38
+        ]
+      },
+      {
+        "id": "osm:way/229873819",
+        "name": "Nilayam",
+        "kind": "amenity=cinema",
+        "point": [
+          378646.29,
+          2046220.43
+        ]
+      },
+      {
+        "id": "osm:way/232879052",
+        "name": "Bharat Itihas Sanshodhak Mandal",
+        "kind": "tourism=museum",
+        "point": [
+          378554.98,
+          2047072.32
+        ]
+      },
+      {
+        "id": "osm:way/243921283",
+        "name": "Pasodya Vithoba Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379472.98,
+          2047756.57
+        ]
+      },
+      {
+        "id": "osm:way/244401342",
+        "name": "Abhinav Kala Mahavidyalaya",
+        "kind": "amenity=college",
+        "point": [
+          378944.25,
+          2046493.09
+        ]
+      },
+      {
+        "id": "osm:way/244401343",
+        "name": "Lifecycle",
+        "kind": "shop=bicycle",
+        "point": [
+          379038.41,
+          2046469.28
+        ]
+      },
+      {
+        "id": "osm:way/256157756",
+        "name": "Ashtang Ayurved Mahavidyalaya",
+        "kind": "amenity=college",
+        "point": [
+          378706.52,
+          2046586.68
+        ]
+      },
+      {
+        "id": "osm:way/264276391",
+        "name": "Shreemant Dagdusheth Halwai Ganpati Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379253.02,
+          2047701.39
+        ]
+      },
+      {
+        "id": "osm:way/264281528",
+        "name": "Raja Dinkar Kelkar Museum",
+        "kind": "tourism=museum",
+        "point": [
+          379082.8,
+          2047079.53
+        ]
+      },
+      {
+        "id": "osm:way/264444880",
+        "name": "Faraskhana Police Station",
+        "kind": "amenity=police",
+        "point": [
+          379227.45,
+          2047707.29
+        ]
+      },
+      {
+        "id": "osm:way/264444881",
+        "name": "Sevasadan",
+        "kind": "amenity=school",
+        "point": [
+          378920.45,
+          2047457.39
+        ]
+      },
+      {
+        "id": "osm:way/264444882",
+        "name": "Vishrambagwada Kshetriya Karyalay",
+        "kind": "office=government",
+        "point": [
+          378968.67,
+          2047342.57
+        ]
+      },
+      {
+        "id": "osm:way/281844139",
+        "name": "Scouts Ground",
+        "kind": "leisure=pitch",
+        "point": [
+          378809.7,
+          2046858.85
+        ]
+      },
+      {
+        "id": "osm:way/282054946",
+        "name": "Annabhau Sathe Shalagruh",
+        "kind": "amenity=school",
+        "point": [
+          378666.97,
+          2047410.33
+        ]
+      },
+      {
+        "id": "osm:way/282054951",
+        "name": "Vishweshwar Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378636.91,
+          2047359.97
+        ]
+      },
+      {
+        "id": "osm:way/282961089",
+        "name": "Ashtabhuja Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378247.98,
+          2047800.61
+        ]
+      },
+      {
+        "id": "osm:way/282961094",
+        "name": "City Post",
+        "kind": "amenity=post_office",
+        "point": [
+          379319.9,
+          2047599.86
+        ]
+      },
+      {
+        "id": "osm:way/282961100",
+        "name": "Gurusingh Sabha Gurudwara",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379865.58,
+          2047858.29
+        ]
+      },
+      {
+        "id": "osm:way/282961110",
+        "name": "Sadashiv Peth Post Office",
+        "kind": "amenity=post_office",
+        "point": [
+          378526.8,
+          2047381.75
+        ]
+      },
+      {
+        "id": "osm:way/289375520",
+        "name": "Bharat Petroleum",
+        "kind": "amenity=fuel",
+        "point": [
+          379299.44,
+          2046173.17
+        ]
+      },
+      {
+        "id": "osm:way/289375521",
+        "name": "C'lai",
+        "kind": "shop=clothes",
+        "point": [
+          378965.15,
+          2046527.81
+        ]
+      },
+      {
+        "id": "osm:way/289375522",
+        "name": "Hindustan Petroleum",
+        "kind": "amenity=fuel",
+        "point": [
+          379477.54,
+          2046047.97
+        ]
+      },
+      {
+        "id": "osm:way/290034466",
+        "name": "Acharya Vinoba Bhave Vidyalay",
+        "kind": "amenity=school",
+        "point": [
+          380219.08,
+          2046828.68
+        ]
+      },
+      {
+        "id": "osm:way/290034469",
+        "name": "Indian Oil",
+        "kind": "amenity=fuel",
+        "point": [
+          379157.53,
+          2046894.35
+        ]
+      },
+      {
+        "id": "osm:way/290034472",
+        "name": "Sardar Kanhoji Angre Vidyalay",
+        "kind": "amenity=school",
+        "point": [
+          379515.51,
+          2046869.91
+        ]
+      },
+      {
+        "id": "osm:way/290528069",
+        "name": "Acharya Atre Sabhagruha",
+        "kind": "amenity=community_centre",
+        "point": [
+          379014.19,
+          2046519.62
+        ]
+      },
+      {
+        "id": "osm:way/290528071",
+        "name": "Adambag Masjid",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          378956.67,
+          2046400.31
+        ]
+      },
+      {
+        "id": "osm:way/296193749",
+        "name": "Tilak Ayurveda Mahavidyalay",
+        "kind": "amenity=college",
+        "point": [
+          379938.67,
+          2047916.0
+        ]
+      },
+      {
+        "id": "osm:way/365487862",
+        "name": "My Speech & Hearing Clinic",
+        "kind": "amenity=clinic",
+        "point": [
+          378759.42,
+          2046696.48
+        ]
+      },
+      {
+        "id": "osm:way/365664651",
+        "name": "Bagban Masjid",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379792.89,
+          2047333.46
+        ]
+      },
+      {
+        "id": "osm:way/380363652",
+        "name": "Adarsh Vidyalay",
+        "kind": "amenity=school",
+        "point": [
+          379118.65,
+          2047031.13
+        ]
+      },
+      {
+        "id": "osm:way/380363666",
+        "name": "Saraswati Mandir",
+        "kind": "amenity=school",
+        "point": [
+          379041.01,
+          2046986.49
+        ]
+      },
+      {
+        "id": "osm:way/380363669",
+        "name": "Tulshibaug Ram Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379189.13,
+          2047407.22
+        ]
+      },
+      {
+        "id": "osm:way/631747389",
+        "name": "Swami Samarth Park",
+        "kind": "leisure=park",
+        "point": [
+          380076.01,
+          2047128.78
+        ]
+      },
+      {
+        "id": "osm:way/758253943",
+        "name": "Shintre Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          378584.29,
+          2047236.71
+        ]
+      },
+      {
+        "id": "osm:way/817474247",
+        "name": "Swargate MSRTC Bus Stand",
+        "kind": "amenity=bus_station",
+        "point": [
+          379550.06,
+          2045880.6
+        ]
+      },
+      {
+        "id": "osm:way/817532714",
+        "name": "Swargate PMPML Bus Stand",
+        "kind": "amenity=bus_station",
+        "point": [
+          379432.49,
+          2045792.7
+        ]
+      },
+      {
+        "id": "osm:way/987628348",
+        "name": "rushda store",
+        "kind": "shop=department_store",
+        "point": [
+          379907.69,
+          2047150.36
+        ]
+      },
+      {
+        "id": "osm:way/1489755536",
+        "name": "Shri Mahalaxmi Mandir",
+        "kind": "amenity=place_of_worship",
+        "point": [
+          379039.05,
+          2045882.01
+        ]
+      },
+      {
+        "id": "osm:relation/5664301",
+        "name": "Seth Tarachand Hospital",
+        "kind": "amenity=hospital",
+        "point": [
+          380077.39,
+          2047847.09
+        ]
+      }
+    ]
+  }
+}

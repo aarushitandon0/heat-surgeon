@@ -127,14 +127,16 @@ export interface BasemapWay {
   path: PointUTM[]
 }
 
-/** A named OSM building, for a handful of recognisable place labels. Display only. */
+/** A named OSM building or place (shop, bank, school, temple, park), for place labels. Display only. */
 export interface BasemapFeature {
   name: string
-  /** OSM building value verbatim, e.g. 'university', 'yes'. */
+  /** OSM tag verbatim as key=value, e.g. 'building=university', 'amenity=bank'. */
   kind: string
-  /** A point inside the footprint, where the label goes. */
+  origin: 'osm_building' | 'osm_place'
+  /** Where the label goes: a point inside a building footprint, or the place's position. */
   anchor: PointUTM
-  footprint_area_m2: number
+  /** Building footprint area; null for a place. */
+  footprint_area_m2: number | null
 }
 
 /** Major roads and rivers across the city, so the 2 km window can be shown in its city context. */

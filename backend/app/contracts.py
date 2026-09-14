@@ -182,12 +182,13 @@ class BasemapWay(Contract):
 
 
 class BasemapFeature(Contract):
-    """A named OSM building, for a handful of recognisable place labels. Display only."""
+    """A named OSM building or place (shop, bank, school, temple, park), for place labels. Display only."""
 
     name: str
-    kind: str = Field(description="OSM building value verbatim, e.g. 'university', 'yes'.")
-    anchor: PointUTM = Field(description="A point inside the footprint, where the label goes.")
-    footprint_area_m2: float = Field(gt=0)
+    kind: str = Field(description="OSM tag verbatim as key=value, e.g. 'building=university', 'amenity=bank'.")
+    origin: Literal["osm_building", "osm_place"]
+    anchor: PointUTM = Field(description="Where the label goes: a point inside a building footprint, or the place's position.")
+    footprint_area_m2: float | None = Field(gt=0, description="Building footprint area; null for a place.")
 
 
 class CityLocator(Contract):

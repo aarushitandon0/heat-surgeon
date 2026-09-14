@@ -5,9 +5,11 @@ import { boxesOverlap, rotatedBox, uprightAngle, type Box } from '../lib/labels.
 import type { SceneLabel } from '../lib/sceneLabels.ts'
 import { utmToScene, type SceneOrigin } from './frame.ts'
 
-/** Road names float just above the ground; building names at roughly roof height. Display only. */
+/** Road names float just above the ground. Display only. */
 const ROAD_LABEL_Y_M = 1.5
-const PLACE_LABEL_Y_M = 14
+/** A name on a drawn building sits this far above its roof; a place not inside one sits at head height. */
+const ROOF_CLEARANCE_M = 2
+const STREET_LEVEL_PLACE_Y_M = 3
 const LABEL_PAD_PX = 4
 const EDGE_PX = 4
 
@@ -40,14 +42,19 @@ export function SceneLabelLayer({ labels, elements }: { labels: SceneLabel[]; el
 export function SceneLabelProjector({ labels, origin, elements }: { labels: SceneLabel[]; origin: SceneOrigin; elements: LabelElements }) {
   const world = useMemo(
     () =>
-      labels.map((label) => {
-        const y = label.kind === 'place' ? PLACE_LABEL_Y_M : ROAD_LABEL_Y_M
-        return label.candidates.map((candidate) => {
+      labels.map((label) =>
+        label.candidates.map((candidate) => {
+          const y =
+            candidate.height_m !== null
+              ? candidate.height_m + ROOF_CLEARANCE_M
+              : label.kind === 'place'
+                ? STREET_LEVEL_PLACE_Y_M
+                : ROAD_LABEL_Y_M
           const [x, z] = utmToScene(origin, ...candidate.anchor)
           const toward = candidate.toward ? utmToScene(origin, ...candidate.toward) : null
           return { at: new Vector3(x, y, z), toward: toward ? new Vector3(toward[0], y, toward[1]) : null }
-        })
-      }),
+        }),
+      ),
     [labels, origin],
   )
   const last = useRef({ matrix: new Matrix4(), width: 0, height: 0, world: null as unknown })

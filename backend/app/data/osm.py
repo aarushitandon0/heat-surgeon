@@ -114,6 +114,51 @@ def load_osm(bbox: BBox, allow_network: bool | None = None) -> dict:
     return get_or_fetch(osm_key(bbox), fetch, allow_network=allow_network).metadata
 
 
+# --- Named places in the window (shops, banks, schools, temples, parks), for display only -------
+
+PLACES_PRODUCT = "osm_named_places"
+PLACE_KEYS = ("amenity", "shop", "office", "tourism", "leisure", "historic")
+
+
+def places_query(bounds_wgs84: tuple[float, float, float, float]) -> str:
+    west, south, east, north = bounds_wgs84
+    box = f"{south},{west},{north},{east}"
+    clauses = "".join(f'nwr["name"]["{key}"]({box});' for key in PLACE_KEYS)
+    return f"[out:json][timeout:180];({clauses});out center tags;"
+
+
+def parse_places(payload: dict, crs: str) -> dict:
+    """Overpass JSON to {places: [{id, name, kind, point}], osm_base}. kind is the first place tag as key=value
+    verbatim; point is a node's position or a way's or relation's centre, in the window CRS."""
+    rows = []
+    for element in payload.get("elements", []):
+        tags = element.get("tags", {})
+        name = tags.get("name:en") or tags.get("name")
+        key = next((k for k in PLACE_KEYS if k in tags), None)
+        position = element.get("center") or ({"lat": element["lat"], "lon": element["lon"]} if "lat" in element else None)
+        if not name or key is None or position is None:
+            continue
+        rows.append((f"osm:{element['type']}/{element['id']}", name, f"{key}={tags[key]}", position))
+    points = _to_utm([position for *_, position in rows], crs) if rows else []
+    return {
+        "osm_base": payload.get("osm3s", {}).get("timestamp_osm_base"),
+        "attribution": "Map data © OpenStreetMap contributors, ODbL 1.0",
+        "places": [{"id": osm_id, "name": name, "kind": kind, "point": point}
+                   for (osm_id, name, kind, _), point in zip(rows, points)],
+    }
+
+
+def load_places(bbox: BBox, allow_network: bool | None = None) -> dict:
+    """Named OSM places intersecting `bbox`, from cache or (if allowed) from Overpass."""
+    snapshot = config.OSM_SNAPSHOT_DATE
+    key = CacheKey(SOURCE_ADAPTER, PLACES_PRODUCT, bbox, DateRange(start=snapshot, end=snapshot, months=()))
+
+    def fetch() -> CachedResult:
+        bounds_wgs84 = transform_bounds(bbox.crs, "EPSG:4326", *bbox.bounds)
+        return CachedResult(arrays={}, metadata=parse_places(_post_overpass(places_query(bounds_wgs84)), bbox.crs))
+    return get_or_fetch(key, fetch, allow_network=allow_network).metadata
+
+
 # --- City locator: major roads and rivers at city scale, for display only ---------------------
 
 CITY_PRODUCT = "osm_city_major_roads_rivers"

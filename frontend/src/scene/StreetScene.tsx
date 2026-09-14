@@ -51,7 +51,8 @@ const SCENE_LABEL_OPTIONS: SceneLabelOptions = {
   maxCrossStreets: 3,
   // Close up, local streets are what locate a place, so they are named too, after the larger roads.
   maxRoads: 14,
-  maxPlaces: 4,
+  // Named buildings and places (shops, banks, schools, temples), nearest the street first; collisions thin them out.
+  maxPlaces: 12,
   maxRoadRank: 4,
 }
 
@@ -62,9 +63,16 @@ export function StreetScene({ result, geometry, domain, after, progress, basemap
   const labels = useMemo(
     () =>
       basemap
-        ? sceneLabels(basemap.roads, basemap.features, design, { osmName: basemap.street_osm_name, label: streetLabel }, SCENE_LABEL_OPTIONS)
+        ? sceneLabels(
+            basemap.roads,
+            basemap.features,
+            design,
+            { osmName: basemap.street_osm_name, label: streetLabel },
+            SCENE_LABEL_OPTIONS,
+            geometry.buildings,
+          )
         : [],
-    [basemap, design, streetLabel],
+    [basemap, design, streetLabel, geometry.buildings],
   )
   const labelElements = useRef<(HTMLSpanElement | null)[]>([])
   const pose = useMemo(() => {

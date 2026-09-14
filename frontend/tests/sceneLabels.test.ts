@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { sceneLabels } from '../src/lib/sceneLabels.ts'
+import { pointInRing, sceneLabels } from '../src/lib/sceneLabels.ts'
 import type { BasemapFeature, DesignGrid } from '../src/types/contracts.ts'
 
 // Bearing 0, 2 m cells, origin (0, 0), 100 rows by 20 columns: rows run 200 m north, columns 40 m east.
@@ -8,9 +8,15 @@ import type { BasemapFeature, DesignGrid } from '../src/types/contracts.ts'
 const DESIGN: DesignGrid = { crs: 'EPSG:32643', origin_e_m: 0, origin_n_m: 0, bearing_deg: 0, cell_size_m: 2, shape: [100, 20] }
 const OPTIONS = { radius_m: 350, maxCrossStreets: 3, maxRoads: 8, maxPlaces: 4, maxRoadRank: 3 }
 
-const feature = (name: string, anchor: [number, number]): BasemapFeature => ({ name, kind: 'yes', anchor, footprint_area_m2: 100 })
+const feature = (name: string, anchor: [number, number], origin: BasemapFeature['origin'] = 'osm_building'): BasemapFeature => ({
+  name,
+  kind: origin === 'osm_building' ? 'building=yes' : 'amenity=bank',
+  origin,
+  anchor,
+  footprint_area_m2: origin === 'osm_building' ? 100 : null,
+})
 
-test('sceneLabels orders the street, its cross street, other roads, then places, and drops what is far away', () => {
+test('sceneLabels orders the street, its cross streets, other roads, then places, and drops what is far away', () => {
   const labels = sceneLabels(
     [
       { kind: 'primary', name: 'Gopal Krushna Gokhale Path', path: [[20, -100], [20, 300]] },
@@ -43,5 +49,32 @@ test('sceneLabels orders the street, its cross street, other roads, then places,
   assert.ok(main.length > 1 && main.every((c) => c.anchor[1] === 300 && c.toward !== null))
   const distance = (c: (typeof main)[number]) => Math.hypot(c.anchor[0] - 20, c.anchor[1] - 100)
   assert.ok(main.every((c, i) => i === 0 || distance(main[i - 1]) <= distance(c)))
-  assert.deepEqual(labels[4].candidates, [{ anchor: [60, 120], toward: null }])
+  // No drawn building given, so the place sits at street level.
+  assert.deepEqual(labels[4].candidates, [{ anchor: [60, 120], toward: null, height_m: null }])
+})
+
+test('place names go nearest the street first, once each, on the roof of the building they fall inside', () => {
+  const labels = sceneLabels(
+    [],
+    [
+      feature('Far bank', [300, 100], 'osm_place'),
+      feature('Near hall', [60, 120]),
+      feature('Near hall', [62, 122], 'osm_place'),
+    ],
+    DESIGN,
+    { osmName: 'Street', label: 'Street' },
+    OPTIONS,
+    [{ footprint: [[50, 110], [70, 110], [70, 130], [50, 130], [50, 110]], height_m: 12 }],
+  ).filter((l) => l.kind === 'place')
+  // Near hall is 44.7 m from the centre (20, 100), Far bank 280 m; the duplicate name is dropped.
+  assert.deepEqual(labels.map((l) => l.text), ['Near hall', 'Far bank'])
+  assert.equal(labels[0].candidates[0].height_m, 12)
+  assert.equal(labels[1].candidates[0].height_m, null)
+})
+
+test('pointInRing, hand-checked on a 10 m square', () => {
+  const square: [number, number][] = [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]
+  assert.equal(pointInRing([5, 5], square), true)
+  assert.equal(pointInRing([15, 5], square), false)
+  assert.equal(pointInRing([5, -1], square), false)
 })
