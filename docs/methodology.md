@@ -370,7 +370,7 @@ These are display choices, not model constants. They live in `frontend/src/lib/f
   - What it changes: the view is not a map. The subtitle says it is drawn along the street and gives the bearing. Stage 01's measured window stays north-up on its UTM grid, and the 3D scene (Day 6) returns to true geography.
 - **Scrambled characters contain no digits.** A readout still being acquired never shows something that reads as a real number.
 - **Decode timing.** The scramble runs exactly as long as the window thermal request. When data lands, rows resolve 90 ms apart at 16 ms per character. That is about 0.6 s for the longest row, and it starts only after the data exists. Returning to stage 01 later shows the final text with no replay.
-- **Reveal timing.** 1.5 s, ease-in-out cubic. The grid interpolation and the delta count read one progress value, so they land on the same frame. It plays the first time the after view is shown; later toggles are instant. Cost and the comparison table appear when it lands. `prefers-reduced-motion` skips both motions.
+- **Reveal timing.** 1.5 s, ease-in-out cubic. The grid interpolation and the delta count read one progress value, so they land on the same frame. Cost and the comparison table appear when it lands. `prefers-reduced-motion` skips both motions. (Day 7: the reveal now also drives the 3D ground shader and is started by "Apply the searched layout"; see Day 7, second half.)
 
 ## Day 6: 3D scene, before state
 
@@ -490,15 +490,107 @@ The y axis is scaled to the conservative end only, padded by 10% of its range (a
 
 ### 3D scene
 
-- **Trees read as trees.** Each tree is drawn as a 3 m trunk and a canopy 4.5 m across and 2.6 m deep. Everything is still merged into one instanced draw call.
-  - **Assumption, display only:** the canopy is a young street tree a few years after planting.
-  - The model's crown stays 8 m (`TREE_CROWN_DIAMETER_M`), and the flat 8 m ring stays on the ground to show the extent the model treats as shaded. The drawn canopy is therefore smaller than the modelled shade.
+- **Trees read as trees.** Each tree is a trunk and a canopy, merged into one instanced draw call. (First drawn with a 4.5 m canopy; corrected later on Day 7 to the modelled 8 m crown, see Day 7, second half.)
 - **Building outlines at 22% opacity**, so the modelled ground carries the frame.
 
 ### Contract changes (both files, same commit)
 
 - `GET /api/street/{id}/basemap` returns `StreetBasemap`: roads (`BasemapWay`), building rings, the window's bounds in metres, a `CityLocator`, and attribution.
 - `OptimizeJobHandle` gains `design_grid`, so stage 02 can place a layout preview on the street before the result exists.
+
+## Day 7, second half: what the numbers can and cannot claim, the capacity curve, labels and the reveal
+
+### Two separate statements about error
+
+**(i) The absolute modelled change carries the model's error.**
+- The trees-only result on FC Road, −0.70 °C, comes from coefficients fitted with a hold-out RMSE of ±1.40 °C per 90 m calibration cell, against 2.03 °C for predicting the mean.
+- The coefficients a tree acts through have standard errors of about 1.1 °C: canopy against paved is −5.68 ±1.11 °C, bare against paved +2.29 ±1.17 °C.
+- So −0.70 °C is a model output with that error attached. It is not a measured drop, and it is not known to a precision of 0.01 °C, even though it is displayed to two decimals so the ranking between arms stays visible.
+
+**(ii) The ranking between layouts does not carry that error in the same way.**
+- Every arm (random, greedy, design guideline, searched) is evaluated by the same calibrated model on the same street and the same design grid.
+- An error in the fitted coefficients therefore moves every arm together. For the comparison it is common-mode: it changes how much each layout cools, not which one cools most.
+- **The relevant stability evidence is seed-to-seed agreement.** Three GA seeds (42, 7, 2026), 20 trees, trees only:
+
+| Street | Searched layout, three seeds | Spread | Design guideline | Search over guideline |
+|---|---|---|---|---|
+| FC Road | −0.696, −0.694, −0.695 °C | 0.002 °C | −0.597 °C | 16.4–16.7% |
+| North Main Road | −0.698, −0.698, −0.698 °C | 0.000 °C | −0.641 °C | 8.9–9.0% |
+| Bajirao Road | −0.674, −0.669, −0.671 °C | 0.005 °C | −0.607 °C | 10.1–11.0% |
+| Karve Road | −0.936, −0.936, −0.944 °C | 0.008 °C | −0.845 °C | 10.8–11.7% |
+
+  The searched result agrees across seeds within 0.008 °C on every street, and within 0.002 °C on FC Road. That is roughly ten times smaller than the 0.06–0.10 °C margin over the guideline.
+
+- **Limit of (ii).** Common-mode holds for an error that scales every arm alike. An error in the *ratio* between coefficients, for example bare against canopy, could reorder two layouts that plant over different surfaces. Their gap would then move with that ratio, not with the overall error. The ranking is robust to the model being uniformly too strong or too weak; it is not immune to every coefficient error.
+
+### The capacity curve: the search matters when there is a choice
+
+FC Road, trees only, one GA seed (42) per budget, 400 generations (`python -m app.optimizer.capacity_curve`, figure `figures/capacity-curve.png`). The street's plantable strips hold 30 trees at the IRC:SP:21 minimum spacing.
+
+| Tree budget | Searched | Design guideline | Random | Search over guideline |
+|---|---|---|---|---|
+| 4 | −0.148 °C | −0.130 °C | −0.128 °C | 14.0% |
+| 8 | −0.296 °C | −0.228 °C | −0.259 °C | 29.8% |
+| 12 | −0.437 °C | −0.356 °C | −0.384 °C | 22.9% |
+| 16 | −0.568 °C | −0.484 °C | −0.505 °C | 17.4% |
+| 20 | −0.696 °C | −0.597 °C | −0.626 °C | 16.7% |
+| 24 | −0.793 °C | −0.726 °C | −0.741 °C | 9.2% |
+| 28 | −0.865 °C | −0.817 °C | −0.769 °C (26 trees) | 5.9% |
+| 30 (capacity) | −0.879 °C (29 trees) | −0.877 °C | −0.769 °C (26 trees) | 0.2% |
+
+**Result.** Below capacity the search beats the guideline clearly: 17% at 20 trees on FC Road, and 9–17% across the four streets. At full capacity the guideline is already near-optimal, and the search's edge is 0.2%.
+
+**Mechanism.** The search's advantage is choosing *which* pits to plant: those clear of existing crowns, over the surfaces a new crown cools most. When there are more plantable pits than trees, that choice matters. When every plantable pit is used, there is nothing left to choose, and any competent even spacing gets the same answer.
+
+- Above 8 trees, the margin falls steadily as the budget approaches capacity.
+- At 4 trees it is lower (14%): with so few trees, the guideline's evenly spaced positions can land on clear ground by chance. Each budget is one seed, so the small-budget points are the noisiest.
+- At capacity the search placed 29 of 30 trees; the GA does not always fill the last pit.
+
+### Why the carriageway reads cooler than the verge
+
+In the modelled surface, the carriageway and footways read cooler than the unshaded ground beside them. That is a fitted result, not a rendering error.
+- **The fit.** On FC Road's window, bare ground is fitted hotter than paved surface: +2.29 °C for a full calibration cell, standard error 1.17 °C (`k_bare`; pre-monsoon composite, 10:57 IST overpass).
+- **Where it shows.** On the design grid, cells classified bare (unshaded, unbuilt ground outside the paved bands) average 44.8 °C in the before state. Carriageway averages 42.3 °C and footway 42.4 °C.
+- **What bare means.** Bare is everything that is neither canopy, building nor mapped paving: in pre-monsoon Pune, mostly dry exposed earth and unmapped hard surfaces.
+- **How to read it.** The difference is smaller than twice its standard error. It is a finding about this neighbourhood's pre-monsoon surfaces, not a general claim that asphalt is cool.
+- This is also why a tree over bare ground cools more in the model than a tree over paving: k_canopy + k_bare = 7.98 °C per full cell on FC Road.
+
+### Place-name labels (display only)
+
+Labels are chrome, not data: body face, `--paper-dim`, with a thin `--base` halo, never mono and never the thermal ramp. All names come from the cached OSM data; nothing new is fetched.
+- **Stage 01 roads.**
+  - Up to 10 labels, set along the centreline on a stretch that bends less than 3 px under the label, turned upright.
+  - The design street comes first, under its display name (FC Road for the OSM way named Gopal Krushna Gokhale Path). Then trunk, primary and secondary roads by drawn length. Tertiary roads fill only the slots that remain; residential and smaller roads are never labelled.
+  - A label that would collide with another, with the locator inset, or with the canvas edge is dropped, not moved.
+- **Stage 01 places.**
+  - Up to 4 named OSM buildings, largest footprint first, placed after the roads.
+  - Names that start with a lower-case letter ("cs department") are mapper notes, not place names, and are skipped.
+  - Parks, water and amenities are not in the cached window query, so only buildings are named.
+- **Stages 02 and 03.** The design street, and its three nearest cross streets where they meet the lines one cell outside the grid's long edges. That catches T-junctions as well as through roads.
+- **Locator.** Up to 4 names: at most 2 rivers, then trunk roads, by length inside the extent.
+- **Assumptions.** The caps (10, 4, 3, 4), the 3 px bend limit and the lower-case rule are display choices, not citations. Changing them changes only which names appear.
+
+### The reveal (motion moment two)
+
+- **The trigger.** Stage 03 opens on today's street with the searched layout placed but not applied. "Apply the searched layout" starts the reveal.
+- **What moves.**
+  - The 3D ground shader interpolates each cell's modelled temperature from before to after. Both grids are uploaded once as one float texture, and only a uniform changes.
+  - The 2D grid interpolates the same way.
+  - The delta numeral counts from 0 to its final value.
+  - All three read one progress value: 1.5 s, ease-in-out cubic. They land on the same frame.
+- **Temperatures, not colours.** Interpolating temperatures means every intermediate frame is a valid position on the same colour scale.
+- **After the reveal.** A Before/After toggle, and the coating band toggle when the band exists, switch instantly for inspection. The reveal does not replay.
+- **Reduced motion.** `prefers-reduced-motion` lands the ground and the numeral on their final values immediately.
+
+### 3D trees at the modelled crown
+
+- **The canopy is 8 m across**, the same `TREE_CROWN_DIAMETER_M` the model uses to decide which cells a tree shades, so the drawn tree and the modelled shade match exactly.
+- **Assumption, display only:** the trunk is 4 m tall and the canopy 2.2 m deep, so that from the opening three-quarter view the cooled ground under the crown stays visible.
+- The flat crown ring is removed; it drew the same extent as the canopy.
+
+### Contract changes (both files, same commit)
+
+`StreetBasemap` gains `street_osm_name` and `features` (`BasemapFeature`: name, OSM building value, an anchor inside the footprint, and `footprint_area_m2`). Road names prefer OSM `name:en`.
 
 ## Earlier data-layer assumptions
 
