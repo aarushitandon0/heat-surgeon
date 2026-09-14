@@ -255,7 +255,10 @@ export interface CityLabelCandidate {
   anchors: XY[]
 }
 
-/** Rivers, then trunk roads, by length inside the extent: the few names that make a city recognisable. */
+/** At most this many river names lead the list, so trunk roads still get a place in a small inset. */
+const CITY_RIVER_LABELS_MAX = 2
+
+/** Up to two rivers, then trunk roads, each by length inside the extent: the few names that make a city recognisable. */
 export function cityLabelCandidates(ways: BasemapWay[], bounds_m: [number, number, number, number]): CityLabelCandidate[] {
   const [minE, minN, maxE, maxN] = bounds_m
   const inside = ([e, n]: XY) => e > minE && e < maxE && n > minN && n < maxN
@@ -271,8 +274,11 @@ export function cityLabelCandidates(ways: BasemapWay[], bounds_m: [number, numbe
     if (length > pathLength(group.longest)) group.longest = points
     groups.set(way.name, group)
   }
-  return [...groups.entries()]
-    .sort(([, a], [, b]) => Number(b.river) - Number(a.river) || b.length - a.length)
+  const byLength = [...groups.entries()].sort(([, a], [, b]) => b.length - a.length)
+  return [
+    ...byLength.filter(([, g]) => g.river).slice(0, CITY_RIVER_LABELS_MAX),
+    ...byLength.filter(([, g]) => !g.river),
+  ]
     .map(([text, g]) => ({
       text,
       anchors: [0.5, 0.3, 0.7, 0.15, 0.85].map((f) => g.longest[Math.min(g.longest.length - 1, Math.floor(f * g.longest.length))]),

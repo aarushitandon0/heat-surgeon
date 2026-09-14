@@ -324,11 +324,11 @@ function LayoutPreview({ design, preview }: { design: DesignGrid; preview: Inter
         {labels.map((label) => (
           <text
             key={label.text}
-            className="map-label"
+            className="place-label"
             x={label.x / px_per_cell}
             y={label.y / px_per_cell}
-            fontSize={LABEL_FONT_PX / px_per_cell}
-            strokeWidth={LABEL_HALO_PX / px_per_cell}
+            // Inline, in user units (cells here), so no stylesheet font size can override the scale.
+            style={{ fontSize: `${LABEL_FONT_PX / px_per_cell}px`, strokeWidth: `${LABEL_HALO_PX / px_per_cell}px` }}
             textAnchor={label.align === 'center' ? 'middle' : label.align === 'right' ? 'end' : 'start'}
             dominantBaseline="central"
           >

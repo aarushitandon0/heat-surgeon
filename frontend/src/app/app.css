@@ -613,8 +613,9 @@ input {
   stroke-width: 1.5;
 }
 
-/* Place names in SVG maps: chrome, not data. Body face, --paper-dim, a --base halo drawn under the fill. */
-.map-label {
+/* Place names in SVG maps: chrome, not data. Body face, --paper-dim, a --base halo drawn under the fill.
+   Not .map-label: that is the stage 00 street map's label, in --paper. */
+.place-label {
   font-family: var(--font-body);
   fill: var(--paper-dim);
   stroke: var(--base);

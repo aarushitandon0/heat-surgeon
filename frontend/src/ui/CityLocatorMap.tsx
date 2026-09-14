@@ -68,11 +68,11 @@ export function CityLocatorMap({ city, window_bounds_m }: CityLocatorMapProps) {
           {labels.map((label) => (
             <text
               key={label.text}
-              className="map-label"
+              className="place-label"
               x={label.x * m_per_px}
               y={label.y * m_per_px}
-              fontSize={LOCATOR_LABEL_FONT_PX * m_per_px}
-              strokeWidth={LABEL_HALO_PX * m_per_px}
+              // Inline, in user units (metres here), so no stylesheet font size can override the scale.
+              style={{ fontSize: `${LOCATOR_LABEL_FONT_PX * m_per_px}px`, strokeWidth: `${LABEL_HALO_PX * m_per_px}px` }}
               textAnchor="middle"
               dominantBaseline="central"
             >
