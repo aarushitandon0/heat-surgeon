@@ -681,7 +681,22 @@ The frontend tests are hand-checked numeric tests for:
 
 Across the four windows, hold-out RMSE is 1.2–1.7 °C per 90 m cell.
 
-### Matched-budget comparison
+### Default run: trees only
+
+This is what the app opens on. Every arm gets 20 trees and no coating; GA population 120, 400 generations, seed 42. Change is in mean modelled surface temperature over the 200 m × 40 m design area.
+
+| Street | Random (mean of 30) | Greedy | Design guideline | Searched layout | Search over strongest baseline | Cost, estimate |
+|---|---|---|---|---|---|---|
+| FC Road | −0.626 °C | −0.547 °C | −0.597 °C | −0.696 °C | 11% (random) | ₹74,400–1,18,040 |
+| Karve Road | −0.851 °C | −0.771 °C | −0.844 °C | −0.936 °C | 10% (random) | ₹74,400–1,18,040 |
+| North Main Road | −0.667 °C | −0.650 °C | −0.641 °C | −0.698 °C | 5% (random) | ₹74,400–1,18,040 |
+| Bajirao Road | −0.636 °C | −0.592 °C | −0.607 °C | −0.674 °C | 6% (random) | ₹74,400–1,18,040 |
+
+- **The strongest baseline is random, not the guideline.** On all four streets the mean random layout cools slightly more than the evenly spaced guideline layout, and greedy (hottest cell first) cools least. In a linear model a tree's gain does not depend on how hot a cell is, and even spacing ignores which pits sit under existing crowns.
+- Three GA seeds agree within 0.008 °C on every street, several times smaller than the margin over the strongest baseline (0.03–0.09 °C).
+- The margin comes from choosing which pits to plant. At full tree capacity (30 on FC Road) every pit is planted and the margin falls to 0.2% (`docs/figures/capacity-curve.png`).
+
+### Matched-budget comparison, trees and coating
 
 - **Budget.** 20 trees and 150 coated cells (600 m²) for every arm.
 - **Search.** GA with population 120 and 400 generations over 3 seeds; the table shows the worst seed. Random is the mean of 30 seeds.

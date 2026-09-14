@@ -626,6 +626,37 @@ The 3D scene carries road centrelines and names, so the street can be located wi
 
 `StreetBasemap` gains `street_osm_name` and `features` (`BasemapFeature`: name, OSM building value, an anchor inside the footprint, and `footprint_area_m2`). Road names prefer OSM `name:en`.
 
+## Day 7, close: the measured gap between streets
+
+The pitch opens on how far apart the fixture streets are in measured surface temperature. These are measured values, not model output: the mean of every valid 30 m delivered pixel inside each street's extent (`/api/street/{id}/thermal?scope=street`), from the March–May 2024–2026 per-pixel median composite at the 10:57 IST overpass. Distances are between street-extent centres.
+
+| Street | Mean | Median | Valid pixels |
+|---|---|---|---|
+| Bajirao Road | 42.01 °C | 42.39 °C | 1,273 |
+| FC Road | 40.57 °C | 40.37 °C | 728 |
+| Karve Road | 39.87 °C | 39.69 °C | 1,974 |
+| North Main Road | 39.10 °C | 38.99 °C | 260 |
+
+- **Largest gap.** Bajirao Road against North Main Road: 2.9 °C, 5.3 km apart.
+- **Nearest pair with a clear gap.** Bajirao Road against FC Road: 1.4 °C, 2.0 km apart.
+- **Limits (gap).** Street extents differ in size, so the valid pixel counts differ (260–1,974). Delivered 30 m pixels resample a 100 m native signal, so neighbouring pixels are not independent. The gap is a difference in typical pre-monsoon mid-morning surface temperature, not in what a person feels.
+
+## Day 7, close: the strongest baseline is random, not the guideline
+
+Trees only, 20 trees for every arm, computed through the same calls the job runner makes. Random is the mean over `RANDOM_BASELINE_SEEDS` (30); searched is GA seed 42 from the seed table above.
+
+| Street | Random | Greedy | Design guideline | Searched | Over strongest baseline |
+|---|---|---|---|---|---|
+| FC Road | −0.626 °C | −0.547 °C | −0.597 °C | −0.696 °C | 11.2% (random) |
+| Karve Road | −0.851 °C | −0.771 °C | −0.844 °C | −0.936 °C | 10.0% (random) |
+| North Main Road | −0.667 °C | −0.650 °C | −0.641 °C | −0.698 °C | 4.6% (random) |
+| Bajirao Road | −0.636 °C | −0.592 °C | −0.607 °C | −0.674 °C | 6.0% (random) |
+
+- **Ordering on every street.** Searched, then random, then guideline, then greedy. Before this, the pitch and README led with the margin over the guideline (9–17%), which is the margin over a weaker arm.
+- **Why random beats the guideline.** Even spacing is blind to existing crowns and to what surface a new crown covers. A random draw of 20 from 27–44 feasible pits lands, on average, on slightly better ground than evenly spaced pits do on these streets. That says the guideline is a naive design heuristic, not that random placement is good practice.
+- **Why greedy is worst.** In the linear model a tree's gain depends on the surface its crown replaces, not on how hot the cell is. The hottest cells are often roofs and paving next to buildings, where pits cluster.
+- **What the claim is now.** The search beats the strongest matched-budget baseline by 5–11% (0.03–0.09 °C). The seed spread (at most 0.008 °C) is below that on every street; the absolute error (±1.16–1.68 °C per 90 m cell) is not, and is common-mode across arms.
+
 ## Earlier data-layer assumptions
 
 ### Scene-level cloud cover pre-filter: `SCENE_CLOUD_COVER_MAX_PERCENT = 40`
