@@ -7,26 +7,42 @@ import {
   DELTA_DECIMALS,
   ERROR_DECIMALS,
   INTERVENTION_LABELS,
+  PERCENT_DECIMALS,
   TEMP_DECIMALS,
   formatBand,
   formatCount,
+  formatCountRange,
   formatDeltaBand,
   formatInrRange,
   formatNumber,
   formatSigned,
 } from '../lib/format.ts'
+import { designGridContext } from '../lib/basemap.ts'
 import { streetFrameAffine } from '../lib/geometry.ts'
-import { ARM_ORDER, budgetMatched } from '../lib/model.ts'
+import { ARM_ORDER, coolingMarginPercent, countRange } from '../lib/model.ts'
 import { gridDomain } from '../lib/thermal.ts'
 import { StreetScene } from '../scene/StreetScene.tsx'
 import { useStore } from '../store/store.ts'
 import type { Building, Comparison, ComparisonArm, OptimizationResult } from '../types/contracts.ts'
+import { strokeGridContext, type ContextStyle } from '../ui/basemapDraw.ts'
 import { HeatCanvas, type OverlayContext } from '../ui/HeatCanvas.tsx'
 import { Numeral } from '../ui/Numeral.tsx'
 import { Readout } from '../ui/Readout.tsx'
 import { ThermalScale } from '../ui/ThermalScale.tsx'
 import { useReveal } from '../ui/hooks.ts'
 import { readSurfaceColor } from '../ui/tokens.ts'
+
+/** Room across the street, each side of the design grid, for the buildings that line it. */
+const STREET_CONTEXT_MARGIN_M = 14
+/** Hairlines over modelled data: light enough that the surface temperature still carries the frame. */
+const GRID_CONTEXT_STYLE: ContextStyle = {
+  buildingAlpha: 0.5,
+  minorAlpha: 0.6,
+  majorAlpha: 0.7,
+  buildingWidth_px: 0.75,
+  minorWidth_px: 0.75,
+  majorWidth_px: 1,
+}
 
 type View = 'before' | 'after'
 type BandEnd = 'high' | 'low'
@@ -195,9 +211,24 @@ function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEn
   const after = bandEnd === 'high' ? result.after_lst_c_high : result.after_lst_c_low
   const bandsDiffer = formatSigned(result.temp_delta_c_low, DELTA_DECIMALS) !== formatSigned(result.temp_delta_c_high, DELTA_DECIMALS)
   const design_m = formatCount(result.resolution.design_resolution_m)
+  const basemap = useStore((s) => s.basemap)
+  const context = useMemo(
+    () =>
+      basemap.status === 'ready'
+        ? designGridContext(basemap.data.roads, basemap.data.buildings, result.design_grid, STREET_CONTEXT_MARGIN_M)
+        : null,
+    [basemap, result.design_grid],
+  )
+  // The street frame with room across the street for the buildings on either side.
+  const frame = useMemo(() => {
+    const [rows, cols] = result.design_grid.shape
+    const cell_m = result.design_grid.cell_size_m
+    return { min_e_m: 0, max_e_m: rows * cell_m, min_n_m: -cols * cell_m - STREET_CONTEXT_MARGIN_M, max_n_m: STREET_CONTEXT_MARGIN_M }
+  }, [result.design_grid])
 
   const overlay = useCallback(
     ({ ctx, cellToScreen, cell_px }: OverlayContext) => {
+      if (context) strokeGridContext(ctx, context, cellToScreen, GRID_CONTEXT_STYLE)
       if (view !== 'after') return
       const paper = readSurfaceColor('--paper')
       const paperDim = readSurfaceColor('--paper-dim')
@@ -232,7 +263,7 @@ function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEn
         }
       }
     },
-    [view, result.interventions],
+    [view, result.interventions, context],
   )
 
   return (
@@ -300,23 +331,31 @@ function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEn
           affine={affine}
           shape={result.design_grid.shape}
           domain={domain}
+          frame={frame}
           overlay={overlay}
           ariaLabel={`Modelled surface temperature ${view}, at ${design_m} m design resolution`}
         />
       )}
 
       <div className="viewport-foot">
-        {domain && <ThermalScale domain={domain} caption={`Surface temperature, °C, modelled at ${design_m} m design resolution`} />}
-        {(mode === 'scene' || view === 'after') && (
+        <div className="viewport-foot-rows">
+          {domain && <ThermalScale domain={domain} caption={`Surface temperature, °C, modelled at ${design_m} m design resolution`} />}
           <div className="legend">
-            {result.interventions.map((iv) => (
-              <span className="legend-item" key={iv.type}>
-                <span className={iv.type === 'tree' ? 'legend-tree' : 'legend-coated'} aria-hidden="true" />
-                {mode === 'scene' ? `Planned ${INTERVENTION_LABELS[iv.type]}` : INTERVENTION_LABELS[iv.type]}
+            {(mode === 'scene' || view === 'after') &&
+              result.interventions.map((iv) => (
+                <span className="legend-item" key={iv.type}>
+                  <span className={iv.type === 'tree' ? 'legend-tree' : 'legend-coated'} aria-hidden="true" />
+                  {mode === 'scene' ? `Planned ${INTERVENTION_LABELS[iv.type]}` : INTERVENTION_LABELS[iv.type]}
+                </span>
+              ))}
+            {mode === 'grid' && context && (
+              <span className="legend-item">
+                <span className="legend-context" aria-hidden="true" />
+                Road centrelines and building footprints, OpenStreetMap and Overture
               </span>
-            ))}
+            )}
           </div>
-        )}
+        </div>
       </div>
     </>
   )
@@ -327,11 +366,39 @@ function ArmCost({ arm }: { arm: ComparisonArm }) {
   return range ? <span className="mono">{range}</span> : <>Not priced</>
 }
 
+/** "All layouts place 25–26 trees and no coating. The searched layout cools 13% more than the design-guideline layout." */
+function ComparisonCaption({ comparison }: { comparison: Comparison }) {
+  const arms = ARM_ORDER.map((key) => comparison[key])
+  const trees = countRange(arms.map((arm) => arm.trees))
+  const coated = countRange(arms.map((arm) => arm.reflective_cells))
+  const margin = coolingMarginPercent(comparison.ga, comparison.design_guideline)
+  const banded = arms.some((arm) => formatDeltaBand(arm.temp_delta_c_low, arm.temp_delta_c_high).includes(' to '))
+  return (
+    <p className="result-heading">
+      All layouts place <span className="mono">{formatCountRange(trees)}</span> trees
+      {coated[1] === 0 ? (
+        ' and no coating.'
+      ) : (
+        <>
+          {' '}
+          and <span className="mono">{formatCountRange(coated)}</span> coated cells.
+        </>
+      )}
+      {margin !== null && (
+        <>
+          {' '}
+          The searched layout cools <span className="mono">{formatNumber(Math.abs(margin), PERCENT_DECIMALS)}%</span>{' '}
+          {margin >= 0 ? 'more' : 'less'} than the design-guideline layout{banded ? ', at the conservative end' : ''}.
+        </>
+      )}
+    </p>
+  )
+}
+
 function ResultBar({ result, revealed, progress }: { result: OptimizationResult; revealed: boolean; progress: number }) {
   const landed = revealed && progress >= 1
   const cost = formatInrRange(result.cost_inr_low, result.cost_inr_high)
   const bandsDiffer = formatDeltaBand(result.temp_delta_c_low, result.temp_delta_c_high).includes(' to ')
-  const ga = result.comparison.ga
 
   // Before the reveal there is no delta on screen, so the bar is one line and the viewport keeps the height.
   if (!revealed) {
@@ -387,16 +454,7 @@ function ResultBar({ result, revealed, progress }: { result: OptimizationResult;
 
       {landed && (
         <div className="result-block">
-          <p className="result-heading">
-            {budgetMatched(result.comparison) ? (
-              <>
-                Same budget for every layout: <span className="mono">{formatCount(ga.trees)}</span> trees,{' '}
-                <span className="mono">{formatCount(ga.reflective_cells)}</span> coated cells.
-              </>
-            ) : (
-              'The layouts placed different counts, so this is not a matched-budget comparison.'
-            )}
-          </p>
+          <ComparisonCaption comparison={result.comparison} />
           <div className="table-scroll">
             <table className="comparison">
               <thead>

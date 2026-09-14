@@ -142,6 +142,8 @@ Searched within the 90-minute cost timebox and **not** usable:
 
 Building footprints and highway geometry: © OpenStreetMap contributors, available under the Open Database License (ODbL 1.0), https://www.openstreetmap.org/copyright. Pulled via the Overpass API (https://overpass-api.de); database timestamp 2026-09-13T19:08:06Z, stored with the cached result.
 
+City locator (display only): Pune's motorway, trunk, primary and secondary roads and waterway=river ways, © OpenStreetMap contributors, ODbL 1.0. Pulled 2026-09-14 from the overpass.kumi.systems mirror of the Overpass API, after overpass-api.de answered 504; mirror database timestamp 2026-05-31T22:37:44Z, stored with the cached result.
+
 ## Physical constants
 
 | Constant | Value | Source |

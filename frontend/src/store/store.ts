@@ -11,6 +11,7 @@ import type {
   OptimizeMessage,
   OptimizeProgress,
   OptimizeRequest,
+  StreetBasemap,
   StreetGeometry,
   StreetSummary,
   ThermalGrid,
@@ -43,10 +44,16 @@ export interface JobState {
   message: string | null
 }
 
-/** The Day 4 run settings in docs/methodology.md: 20 trees, 150 coated cells, population 120, 400 generations. */
+/**
+ * Coated cells used when coating is switched on: the Day 4 run settings in docs/methodology.md.
+ * Coating is unpriced and carries the published coefficient band, so it is off by default (Day 7).
+ */
+export const COATED_CELLS_WHEN_ON = 150
+
+/** Trees only: a priced layout whose change has only model error attached. Population 120, 400 generations. */
 export const DEFAULT_REQUEST: OptimizeRequest = {
   trees_max: 20,
-  reflective_cells_max: 150,
+  reflective_cells_max: 0,
   budget_inr_max: null,
   generations: 400,
   population: 120,
@@ -62,6 +69,8 @@ interface State {
   streets: Load<StreetSummary[]>
   street: StreetSummary | null
   geometry: Load<StreetGeometry>
+  /** OSM roads and footprints for the window, and the city locator. Display context, never data. */
+  basemap: Load<StreetBasemap>
   thermalWindow: Load<ThermalGrid>
   thermalStreet: Load<ThermalGrid>
   calibration: Load<CalibrationResult>
@@ -92,7 +101,7 @@ function closeSocket() {
   socket = null
 }
 
-type LoadKey = 'geometry' | 'thermalWindow' | 'thermalStreet' | 'calibration'
+type LoadKey = 'geometry' | 'basemap' | 'thermalWindow' | 'thermalStreet' | 'calibration'
 
 function track<K extends LoadKey>(key: K, promise: Promise<State[K] extends Load<infer T> ? T : never>, token: number) {
   promise.then(
@@ -127,6 +136,7 @@ export const useStore = create<Store>()((set, get) => ({
   streets: { status: 'idle' },
   street: null,
   geometry: { status: 'idle' },
+  basemap: { status: 'idle' },
   thermalWindow: { status: 'idle' },
   thermalStreet: { status: 'idle' },
   calibration: { status: 'idle' },
@@ -151,6 +161,7 @@ export const useStore = create<Store>()((set, get) => ({
       stage: 'diagnose',
       street,
       geometry: { status: 'loading' },
+      basemap: { status: 'loading' },
       thermalWindow: { status: 'loading' },
       thermalStreet: { status: 'loading' },
       calibration: { status: 'loading' },
@@ -163,6 +174,8 @@ export const useStore = create<Store>()((set, get) => ({
     track('calibration', api.calibrate(street.id, { holdout_fraction: 0.2, seed: 42 }), token)
     // Buildings for the stage 03 scene; small, so fetched up front with the rest.
     track('geometry', api.geometry(street.id), token)
+    // Streets and footprints under the stage 01 tile and over the stage 02 and 03 design grid.
+    track('basemap', api.basemap(street.id), token)
   },
 
   setRequest: (patch) => set((state) => ({ request: { ...state.request, ...patch } })),

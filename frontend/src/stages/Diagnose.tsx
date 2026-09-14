@@ -15,17 +15,36 @@ import {
   formatLatitude,
   formatLongitude,
 } from '../lib/format.ts'
-import { affineFromTransform, cellToUtm, utmToScreen } from '../lib/geometry.ts'
+import { expandBounds } from '../lib/basemap.ts'
+import { affineFromTransform, cellToUtm, gridBounds, utmToScreen } from '../lib/geometry.ts'
 import { DECODE_ROW_STAGGER_MS } from '../lib/motion.ts'
 import { contrastAgainst } from '../lib/model.ts'
-import { useStore } from '../store/store.ts'
+import { COATED_CELLS_WHEN_ON, useStore } from '../store/store.ts'
 import type { CalibrationResult, Provenance, ThermalGrid } from '../types/contracts.ts'
+import { strokeBasemap, type ContextStyle } from '../ui/basemapDraw.ts'
+import { CityLocatorMap } from '../ui/CityLocatorMap.tsx'
 import { Decode } from '../ui/Decode.tsx'
 import { HeatCanvas, type OverlayContext } from '../ui/HeatCanvas.tsx'
 import { NumberField } from '../ui/NumberField.tsx'
 import { Readout } from '../ui/Readout.tsx'
 import { ThermalScale } from '../ui/ThermalScale.tsx'
 import { readSurfaceColor } from '../ui/tokens.ts'
+
+/** Streets shown this far past the measured window on every side. */
+const WINDOW_CONTEXT_MARGIN_M = 150
+/**
+ * The measured tile is drawn see-through so the streets under it show. Display choice (docs/methodology.md,
+ * Day 7); the legend bar is drawn at the same opacity, so a colour on the map still matches the key.
+ */
+const MEASURED_OPACITY_OVER_STREETS = 0.78
+const WINDOW_CONTEXT_STYLE: ContextStyle = {
+  buildingAlpha: 0.28,
+  minorAlpha: 0.55,
+  majorAlpha: 0.85,
+  buildingWidth_px: 0.5,
+  minorWidth_px: 0.75,
+  majorWidth_px: 1.5,
+}
 
 interface StackRow {
   /** Stable across pending and ready, so a row keeps its Decode instance when the data lands. */
@@ -74,6 +93,8 @@ export function DiagnosePanel() {
   const provenance = thermalWindow.status === 'ready' ? thermalWindow.data.provenance : null
   const [lon, lat] = [(street.bbox_street[0] + street.bbox_street[2]) / 2, (street.bbox_street[1] + street.bbox_street[3]) / 2]
   const searchRunning = job.status === 'starting' || job.status === 'searching' || job.status === 'loading_result'
+  const coatingOn = request.reflective_cells_max > 0
+  const [coatedWhenOn, setCoatedWhenOn] = useState(COATED_CELLS_WHEN_ON)
 
   return (
     <>
@@ -170,21 +191,42 @@ export function DiagnosePanel() {
         <p className="panel-note">
           The search, random layouts, greedy placement and the design-guideline layout all get the same budget.
         </p>
+        <div className="segmented" role="group" aria-label="Interventions">
+          <button
+            type="button"
+            aria-pressed={!coatingOn}
+            onClick={() => {
+              if (coatingOn) setCoatedWhenOn(request.reflective_cells_max)
+              setRequest({ reflective_cells_max: 0 })
+            }}
+          >
+            Trees only
+          </button>
+          <button type="button" aria-pressed={coatingOn} onClick={() => setRequest({ reflective_cells_max: coatedWhenOn })}>
+            Trees and coating
+          </button>
+        </div>
         <div className="fields">
           <NumberField label="Trees, at most" value={request.trees_max} min={0} onChange={(v) => setRequest({ trees_max: v })} />
-          <NumberField
-            label="Coated cells, at most"
-            value={request.reflective_cells_max}
-            min={0}
-            onChange={(v) => setRequest({ reflective_cells_max: v })}
-          />
+          {coatingOn && (
+            <NumberField
+              label="Coated cells, at most"
+              value={request.reflective_cells_max}
+              min={1}
+              onChange={(v) => setRequest({ reflective_cells_max: v })}
+            />
+          )}
           <NumberField label="Generations" value={request.generations} min={1} onChange={(v) => setRequest({ generations: v })} />
           <NumberField label="Population" value={request.population} min={2} onChange={(v) => setRequest({ population: v })} />
         </div>
-        {request.reflective_cells_max > 0 && (
+        {coatingOn ? (
           <p className="panel-note">
-            Reflective coating has no sourced rate, so a layout that uses it is shown without a cost. Set coated cells
-            to 0 for a priced, trees-only search.
+            Reflective coating has no sourced rate, so a layout that uses it is shown without a cost. Its modelled
+            change is a band from the published coating coefficient range.
+          </p>
+        ) : (
+          <p className="panel-note">
+            Trees only: every layout is priced, and the modelled change carries only the model error.
           </p>
         )}
         <button
@@ -289,10 +331,23 @@ export function DiagnoseViewport() {
 }
 
 function MeasuredWindow({ grid, street }: { grid: ThermalGrid; street: ThermalGrid | null }) {
+  const basemapLoad = useStore((s) => s.basemap)
+  const basemap = basemapLoad.status === 'ready' ? basemapLoad.data : null
   const affine = useMemo(() => affineFromTransform(grid.transform), [grid.transform])
   const domain = useMemo(() => ({ min_c: grid.stats.min_c, max_c: grid.stats.max_c }), [grid.stats])
+  // A margin around the window, so the streets visibly carry on past the measured tile.
+  const frame = useMemo(() => expandBounds(gridBounds(affine, grid.shape), WINDOW_CONTEXT_MARGIN_M), [affine, grid.shape])
   const p = grid.provenance
   const [rows, cols] = grid.shape
+  const gridOpacity = basemap ? MEASURED_OPACITY_OVER_STREETS : 1
+
+  const underlay = useCallback(
+    ({ ctx, view }: OverlayContext) => {
+      if (!basemap) return
+      strokeBasemap(ctx, basemap.roads, basemap.buildings, (e_m, n_m) => utmToScreen(view, e_m, n_m), WINDOW_CONTEXT_STYLE)
+    },
+    [basemap],
+  )
 
   const overlay = useCallback(
     ({ ctx, view }: OverlayContext) => {
@@ -322,7 +377,7 @@ function MeasuredWindow({ grid, street }: { grid: ThermalGrid; street: ThermalGr
         <p className="viewport-sub">
           Per-pixel median of {formatCount(p.scene_count)} scenes at the {formatOverpass(p.overpass_local_time)} overpass,{' '}
           {formatSeasons(p.months, p.date_range)}. A composite, not a single acquisition. {formatCount(cols * grid.cell_size_m)} m
-          window, {grid.crs}.
+          window, {grid.crs}, north up.
         </p>
       </div>
       <HeatCanvas
@@ -330,17 +385,41 @@ function MeasuredWindow({ grid, street }: { grid: ThermalGrid; street: ThermalGr
         affine={affine}
         shape={grid.shape}
         domain={domain}
+        frame={frame}
+        underlay={underlay}
+        gridOpacity={gridOpacity}
         overlay={overlay}
-        ariaLabel={`Measured surface temperature, ${rows} by ${cols} cells at ${formatCount(grid.cell_size_m)} m`}
+        inset={basemap && <CityLocatorMap city={basemap.city} window_bounds_m={basemap.window_bounds_m} />}
+        ariaLabel={`Measured surface temperature, ${rows} by ${cols} cells at ${formatCount(grid.cell_size_m)} m, over OpenStreetMap streets`}
       />
       <div className="viewport-foot">
-        <ThermalScale domain={domain} caption={`Surface temperature, °C, measured, ${formatCount(p.delivered_resolution_m)} m`} />
-        {street && (
-          <p className="legend-item legend">
-            <span className="legend-outline" aria-hidden="true" />
-            Street extent
-          </p>
-        )}
+        <div className="viewport-foot-rows">
+          <ThermalScale
+            domain={domain}
+            opacity={gridOpacity}
+            caption={`Surface temperature, °C, measured, ${formatCount(p.delivered_resolution_m)} m`}
+          />
+          <div className="legend">
+            {street && (
+              <span className="legend-item">
+                <span className="legend-outline" aria-hidden="true" />
+                Street extent
+              </span>
+            )}
+            {basemap && (
+              <span className="legend-item">
+                <span className="legend-context" aria-hidden="true" />
+                Roads and building footprints, under the measured tile
+              </span>
+            )}
+          </div>
+          {basemapLoad.status === 'error' && (
+            <p className="attribution status-error" role="alert">
+              Street geometry did not load, so the tile is drawn without it. {basemapLoad.message}
+            </p>
+          )}
+          {basemap && <p className="attribution">{basemap.attribution}</p>}
+        </div>
       </div>
     </>
   )

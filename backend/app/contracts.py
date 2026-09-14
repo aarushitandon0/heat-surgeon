@@ -173,6 +173,41 @@ class StreetGeometry(Contract):
     cross_section: CrossSection
 
 
+# --- Basemap (display only) ----------------------------------------------------
+
+class BasemapWay(Contract):
+    kind: str = Field(description="OSM highway or waterway value verbatim, e.g. 'primary', 'residential', 'river'.")
+    name: str | None
+    path: list[PointUTM]
+
+
+class CityLocator(Contract):
+    """Major roads and rivers across the city, so the 2 km window can be shown in its city context."""
+
+    city: str
+    bbox_wgs84: BBoxWGS84
+    bounds_m: tuple[float, float, float, float] = Field(
+        description="[min_e, min_n, max_e, max_n] of the locator extent, in metres in the basemap's crs."
+    )
+    ways: list[BasemapWay]
+
+
+class StreetBasemap(Contract):
+    """Context geometry for display: every OSM highway and merged building footprint in the 2 km window, and the
+    city locator. Simplified for drawing. Never a model input and never a measurement."""
+
+    street_id: str
+    crs: CrsCode
+    window_bounds_m: tuple[float, float, float, float] = Field(
+        description="[min_e, min_n, max_e, max_n] of the 2 km window, in metres in crs."
+    )
+    roads: list[BasemapWay]
+    buildings: list[list[PointUTM]]
+    city: CityLocator
+    attribution: str
+    osm_base: str | None
+
+
 # --- Thermal grid --------------------------------------------------------------
 
 class ThermalStats(Contract):
@@ -282,6 +317,7 @@ class OptimizeJobHandle(Contract):
     grid_shape: GridShape
     cells: int = Field(gt=0)
     states_per_cell: int = Field(gt=0)
+    design_grid: "DesignGrid" = Field(description="The grid layout previews index into, so they can be placed on the street.")
 
 
 class Intervention(Contract):
@@ -384,6 +420,9 @@ class DesignGrid(Contract):
                 f"design grid {rows}x{cols} = {rows * cols} cells exceeds the {MAX_DESIGN_GRID_CELLS}-cell cap"
             )
         return self
+
+
+OptimizeJobHandle.model_rebuild()
 
 
 class Resolution(Contract):

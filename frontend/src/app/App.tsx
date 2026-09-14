@@ -29,9 +29,10 @@ export default function App() {
     <div className="app">
       <Header />
       <main className="workspace">
-        {stage === 'locate' && <Workspace panel={<LocatePanel />} viewport={<LocateViewport />} />}
-        {stage === 'diagnose' && street && <Workspace panel={<DiagnosePanel />} viewport={<DiagnoseViewport />} />}
-        {stage === 'optimize' && street && <Workspace panel={<OptimizePanel />} viewport={<OptimizeViewport />} />}
+        {/* Keyed by stage so each panel gets a fresh element and opens scrolled to the top, never mid-content. */}
+        {stage === 'locate' && <Workspace key="locate" panel={<LocatePanel />} viewport={<LocateViewport />} />}
+        {stage === 'diagnose' && street && <Workspace key={`diagnose-${street.id}`} panel={<DiagnosePanel />} viewport={<DiagnoseViewport />} />}
+        {stage === 'optimize' && street && <Workspace key={`optimize-${street.id}`} panel={<OptimizePanel />} viewport={<OptimizeViewport />} />}
         {stage === 'operate' && result && <OperateStage key={result.job_id} />}
       </main>
     </div>

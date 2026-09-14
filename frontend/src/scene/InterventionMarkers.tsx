@@ -1,17 +1,21 @@
 import { Instance, Instances } from '@react-three/drei'
 import { useEffect, useMemo } from 'react'
-import { CylinderGeometry, RingGeometry } from 'three'
+import { BufferAttribute, Color, CylinderGeometry, RingGeometry, SphereGeometry, type BufferGeometry } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import type { DesignGrid, Intervention } from '../types/contracts.ts'
 import { readSurfaceColor } from '../ui/tokens.ts'
 import { interventionPositions, streetRotationY_rad, type SceneOrigin } from './frame.ts'
 
-// Display sizes, not model inputs. The ring matches backend TREE_CROWN_DIAMETER_M (an ASSUMPTION logged in
-// docs/methodology.md), so it outlines the ground the model treats as shaded without hiding the heat under it.
+// The ring matches backend TREE_CROWN_DIAMETER_M (an ASSUMPTION logged in docs/methodology.md): the ground the
+// model treats as shaded. It stays flat, so it outlines that extent without hiding the heat under it.
 const TREE_CROWN_DIAMETER_M = 8
 const TREE_RING_WIDTH_M = 0.3
-const TREE_STAKE_HEIGHT_M = 6
-const TREE_STAKE_RADIUS_M = 0.2
+// Display only, not model inputs (docs/methodology.md, Day 7): a young street tree a few years after planting,
+// so the intervention reads as a tree at true scale rather than as a pin.
+const TREE_CANOPY_DIAMETER_M = 4.5
+const TREE_CANOPY_DEPTH_M = 2.6
+const TREE_TRUNK_HEIGHT_M = 3
+const TREE_TRUNK_RADIUS_M = 0.18
 const MARKER_Y_M = 0.15
 const COATED_OUTLINE_M = 0.2
 
@@ -21,23 +25,37 @@ interface InterventionMarkersProps {
   origin: SceneOrigin
 }
 
+/** Gives every vertex of a geometry one colour, so differently coloured parts merge into one draw call. */
+function painted(geometry: BufferGeometry, color: Color): BufferGeometry {
+  const count = geometry.getAttribute('position').count
+  const colors = new Float32Array(count * 3)
+  for (let i = 0; i < count; i++) colors.set([color.r, color.g, color.b], i * 3)
+  geometry.setAttribute('color', new BufferAttribute(colors, 3))
+  return geometry
+}
+
 /**
- * Where the searched layout places each intervention, as outline markers over the before-state ground.
+ * Where the searched layout places each intervention, over the before-state ground.
  * One instanced draw call per intervention type, however many cells the layout uses.
  */
 export function InterventionMarkers({ design, interventions, origin }: InterventionMarkersProps) {
   const positions = useMemo(() => interventionPositions(design, interventions, origin), [design, interventions, origin])
-  const colors = useMemo(() => ({ tree: readSurfaceColor('--paper'), coated: readSurfaceColor('--paper-dim') }), [])
+  const coatedColor = useMemo(() => readSurfaceColor('--paper-dim'), [])
 
-  // A stake at the planting position and a flat ring at crown extent, merged so trees stay one draw call.
+  // Trunk, canopy and the flat crown ring, merged with per-vertex colour so trees stay one draw call.
   const tree = useMemo(() => {
+    const paper = new Color(readSurfaceColor('--paper'))
+    const paperDim = new Color(readSurfaceColor('--paper-dim'))
     const ring = new RingGeometry(TREE_CROWN_DIAMETER_M / 2 - TREE_RING_WIDTH_M, TREE_CROWN_DIAMETER_M / 2, 48)
     ring.rotateX(-Math.PI / 2)
-    const stake = new CylinderGeometry(TREE_STAKE_RADIUS_M, TREE_STAKE_RADIUS_M, TREE_STAKE_HEIGHT_M, 6)
-    stake.translate(0, TREE_STAKE_HEIGHT_M / 2, 0)
-    const merged = mergeGeometries([ring, stake], false)
-    ring.dispose()
-    stake.dispose()
+    const trunk = new CylinderGeometry(TREE_TRUNK_RADIUS_M, TREE_TRUNK_RADIUS_M, TREE_TRUNK_HEIGHT_M, 6)
+    trunk.translate(0, TREE_TRUNK_HEIGHT_M / 2, 0)
+    const canopy = new SphereGeometry(TREE_CANOPY_DIAMETER_M / 2, 16, 10)
+    canopy.scale(1, TREE_CANOPY_DEPTH_M / TREE_CANOPY_DIAMETER_M, 1)
+    canopy.translate(0, TREE_TRUNK_HEIGHT_M + TREE_CANOPY_DEPTH_M / 2 - TREE_TRUNK_RADIUS_M, 0)
+    const parts = [painted(ring, paperDim), painted(trunk, paperDim), painted(canopy, paper)]
+    const merged = mergeGeometries(parts, false)
+    parts.forEach((part) => part.dispose())
     return merged
   }, [])
   // A four-segment ring is a square outline; starting at 45° puts its edges along the cell edges.
@@ -57,7 +75,7 @@ export function InterventionMarkers({ design, interventions, origin }: Intervent
     <>
       {positions.trees.length > 0 && (
         <Instances limit={positions.trees.length} range={positions.trees.length} geometry={tree} frustumCulled={false}>
-          <meshBasicMaterial color={colors.tree} />
+          <meshLambertMaterial vertexColors />
           {positions.trees.map(([x, z], i) => (
             <Instance key={i} position={[x, MARKER_Y_M, z]} />
           ))}
@@ -65,7 +83,7 @@ export function InterventionMarkers({ design, interventions, origin }: Intervent
       )}
       {positions.coated.length > 0 && (
         <Instances limit={positions.coated.length} range={positions.coated.length} geometry={square} frustumCulled={false}>
-          <meshBasicMaterial color={colors.coated} />
+          <meshBasicMaterial color={coatedColor} />
           {positions.coated.map(([x, z], i) => (
             <Instance key={i} position={[x, MARKER_Y_M, z]} rotation={[0, rotationY, 0]} />
           ))}

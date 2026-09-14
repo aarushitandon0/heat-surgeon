@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   cellCanvasTransform,
   cellToUtm,
@@ -17,12 +17,12 @@ import { TEMP_DECIMALS, formatCount, formatNumber } from '../lib/format.ts'
 import { lerpGrid, paintGrid, type Domain, type Grid } from '../lib/thermal.ts'
 import type { GridShape } from '../types/contracts.ts'
 import { useElementSize } from './hooks.ts'
-import { readMonoFont, readSurfaceColor, readThermalRamp } from './tokens.ts'
+import { readSurfaceColor, readThermalRamp } from './tokens.ts'
 
 const MARGIN_PX = 32
 const GRATICULE_LINES = 8
-const SCALE_BAR_TARGET = 5
-const LABEL_FONT_PX = 12
+/** The scale bar is the 1, 2 or 5 × 10^k metres nearest this many pixels. */
+const SCALE_BAR_TARGET_PX = 120
 
 export type CellToScreen = (col: number, row: number) => [number, number]
 
@@ -44,13 +44,32 @@ interface HeatCanvasProps {
   domain: Domain
   /** Extent to frame; defaults to the grid's own bounds. */
   frame?: BoundsUTM
+  /** Context drawn under the grid (streets, footprints), in surface colours only. */
+  underlay?: (overlay: OverlayContext) => void
+  /** Opacity of the grid over the underlay. The legend bar must be drawn at the same opacity. */
+  gridOpacity?: number
   /** Non-data marks drawn over the grid (interventions, extents), in surface colours only. */
   overlay?: (overlay: OverlayContext) => void
+  /** A small figure pinned to the frame's top right, such as a locator. */
+  inset?: ReactNode
   ariaLabel: string
 }
 
 /** A measured or modelled surface temperature grid, north up, at its true position on a UTM graticule. */
-export function HeatCanvas({ values, valuesTo, progress = 0, affine, shape, domain, frame, overlay, ariaLabel }: HeatCanvasProps) {
+export function HeatCanvas({
+  values,
+  valuesTo,
+  progress = 0,
+  affine,
+  shape,
+  domain,
+  frame,
+  underlay,
+  gridOpacity = 1,
+  overlay,
+  inset,
+  ariaLabel,
+}: HeatCanvasProps) {
   const [wrapRef, size] = useElementSize<HTMLDivElement>()
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [hover, setHover] = useState<{ row: number; col: number } | null>(null)
@@ -75,14 +94,11 @@ export function HeatCanvas({ values, valuesTo, progress = 0, affine, shape, doma
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.clearRect(0, 0, size.width_px, size.height_px)
 
-    const rule = readSurfaceColor('--rule')
-    const paperDim = readSurfaceColor('--paper-dim')
-
     // Graticule on real UTM multiples.
     const [westE_m, northN_m] = screenToUtm(view, 0, 0)
     const [eastE_m, southN_m] = screenToUtm(view, size.width_px, size.height_px)
     const step_m = niceStep(Math.max(eastE_m - westE_m, northN_m - southN_m), GRATICULE_LINES)
-    ctx.strokeStyle = rule
+    ctx.strokeStyle = readSurfaceColor('--rule')
     ctx.lineWidth = 1
     ctx.beginPath()
     for (const e_m of stepsWithin(westE_m, eastE_m, step_m)) {
@@ -97,6 +113,15 @@ export function HeatCanvas({ values, valuesTo, progress = 0, affine, shape, doma
     }
     ctx.stroke()
 
+    const cell_px = view.scale_px_per_m * Math.hypot(affine.e_per_col_m, affine.n_per_col_m)
+    const context: OverlayContext = {
+      ctx,
+      view,
+      cell_px,
+      cellToScreen: (col, row) => utmToScreen(view, ...cellToUtm(affine, col, row)),
+    }
+    underlay?.(context)
+
     // The grid: one pixel per cell, placed and rotated by the cell affine, never smoothed.
     const [rows, cols] = shape
     const image = document.createElement('canvas')
@@ -104,28 +129,14 @@ export function HeatCanvas({ values, valuesTo, progress = 0, affine, shape, doma
     image.height = rows
     image.getContext('2d')!.putImageData(new ImageData(paintGrid(drawn, domain, readThermalRamp()), cols, rows), 0, 0)
     ctx.save()
+    ctx.globalAlpha = gridOpacity
     ctx.transform(...cellCanvasTransform(view, affine))
     ctx.imageSmoothingEnabled = false
     ctx.drawImage(image, 0, 0)
     ctx.restore()
 
-    const cell_px = view.scale_px_per_m * Math.hypot(affine.e_per_col_m, affine.n_per_col_m)
-    overlay?.({ ctx, view, cell_px, cellToScreen: (col, row) => utmToScreen(view, ...cellToUtm(affine, col, row)) })
-
-    // Scale bar, bottom left.
-    const bar_m = niceStep(size.width_px / view.scale_px_per_m, SCALE_BAR_TARGET)
-    const bar_px = bar_m * view.scale_px_per_m
-    const baseY = size.height_px - 12.5
-    ctx.strokeStyle = paperDim
-    ctx.beginPath()
-    ctx.moveTo(12, baseY)
-    ctx.lineTo(12 + bar_px, baseY)
-    ctx.stroke()
-    ctx.fillStyle = paperDim
-    ctx.font = readMonoFont(LABEL_FONT_PX)
-    ctx.textBaseline = 'bottom'
-    ctx.fillText(`${formatCount(bar_m)} m`, 12, baseY - 4)
-  }, [view, size.width_px, size.height_px, drawn, domain, affine, shape, overlay])
+    overlay?.(context)
+  }, [view, size.width_px, size.height_px, drawn, domain, affine, shape, underlay, gridOpacity, overlay])
 
   function onPointerMove(event: React.PointerEvent<HTMLCanvasElement>) {
     if (!view) return
@@ -137,6 +148,7 @@ export function HeatCanvas({ values, valuesTo, progress = 0, affine, shape, doma
   }
 
   const hoverValue = hover ? drawn[hover.row][hover.col] : null
+  const bar_m = view ? niceStep(SCALE_BAR_TARGET_PX / view.scale_px_per_m, 1) : null
 
   return (
     <div className="heat-canvas">
@@ -149,7 +161,14 @@ export function HeatCanvas({ values, valuesTo, progress = 0, affine, shape, doma
           onPointerMove={onPointerMove}
           onPointerLeave={() => setHover(null)}
         />
+        {inset && <div className="heat-canvas-inset">{inset}</div>}
       </div>
+      {view && bar_m !== null && (
+        <p className="scale-bar">
+          <span className="scale-bar-line" style={{ width: `${bar_m * view.scale_px_per_m}px` }} aria-hidden="true" />
+          <span className="mono">{formatCount(bar_m)} m</span>
+        </p>
+      )}
       <p className="heat-canvas-hover" aria-live="off">
         {hover ? (
           <>

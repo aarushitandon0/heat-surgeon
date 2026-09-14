@@ -77,23 +77,68 @@ def _plant_side(grid: StreetGrid, layout: np.ndarray, columns: np.ndarray, count
     return placed
 
 
+def _strip_packing(grid: StreetGrid, columns: np.ndarray) -> np.ndarray:
+    """[row, col] of the densest packing along one side's strip at the minimum spacing, in order along the street.
+
+    The same row-by-row packing as StreetGrid.tree_capacity(), so the two sides' packings sum to the capacity.
+    """
+    layout = np.full(grid.shape, UNCHANGED, dtype=np.int8)
+    for col in columns:
+        for row in np.flatnonzero(grid.allowed[:, col, TREE]):
+            if grid.tree_fits(layout, row, col):
+                layout[row, col] = TREE
+    trees = np.argwhere(layout == TREE)
+    return trees[np.argsort(trees[:, 0], kind="stable")]
+
+
+def _side_shares(total: int, capacities: list[int]) -> list[int]:
+    """The budget split evenly between two sides, with what one side cannot hold moved to the other."""
+    shares = [total - total // 2, total // 2]
+    for i, j in ((0, 1), (1, 0)):
+        excess = max(0, shares[i] - capacities[i])
+        shares[i] -= excess
+        shares[j] += excess
+    return [min(share, capacity) for share, capacity in zip(shares, capacities)]
+
+
+def _plant_packed_subset(grid: StreetGrid, layout: np.ndarray, packing: np.ndarray, count: int) -> int:
+    """Plant `count` trees evenly chosen from a valid packing; any subset of it keeps the minimum spacing."""
+    if count == 0 or len(packing) == 0:
+        return 0
+    picks = np.unique(np.floor(np.linspace(0, len(packing) - 1, min(count, len(packing))) + 0.5).astype(int))
+    placed = 0
+    for row, col in packing[picks]:
+        if layout[row, col] == UNCHANGED and grid.tree_fits(layout, row, col):
+            layout[row, col] = TREE
+            placed += 1
+    return placed
+
+
 def design_guideline_layout(grid: StreetGrid, budget: Budget) -> np.ndarray:
     """Good street design practice at the same budget, with no optimisation.
 
-    Trees: the budget split evenly between the plantable strips left and right of the centreline, each side
-    evenly spaced along the segment at no less than the IRC:SP:21 minimum spacing. Coating: whole rows of
+    Trees: the budget split evenly between the plantable strips left and right of the centreline (a side that
+    cannot hold its half passes the rest to the other), each side evenly spaced along the segment at no less
+    than the IRC:SP:21 minimum spacing. Where buildings or existing canopy interrupt a strip so that even
+    spacing cannot fit the side's share, the side instead takes evenly chosen positions from its densest
+    packing, so the layout reaches the matched budget whenever the street can hold it. Coating: whole rows of
     coatable paving not under a new crown, a contiguous run of the widest rows along the street.
     """
     rows, cols = grid.shape
     layout = np.full(grid.shape, UNCHANGED, dtype=np.int8)
     half = cols // 2
     sides = [np.arange(0, half), np.arange(half, cols)]
-    has_strip = [bool(grid.allowed[:, side, TREE].any()) for side in sides]
-    if all(has_strip):
-        shares = [budget.trees - budget.trees // 2, budget.trees // 2]
-    else:
-        shares = [budget.trees if has_strip[0] else 0, budget.trees if has_strip[1] else 0]
-    placed = sum(_plant_side(grid, layout, side, share) for side, share in zip(sides, shares))
+    packings = [_strip_packing(grid, side) for side in sides]
+    shares = _side_shares(budget.trees, [len(p) for p in packings])
+    placed = 0
+    for side, packing, share in zip(sides, packings, shares):
+        attempt = layout.copy()
+        spaced = _plant_side(grid, attempt, side, share)
+        if spaced < share:
+            attempt = layout.copy()
+            spaced = _plant_packed_subset(grid, attempt, packing, share)
+        layout[:] = attempt
+        placed += spaced
     # Any trees an even spacing could not fit go on the first free plantable cells along either strip.
     for row, col in np.argwhere(grid.allowed[..., TREE]):
         if placed >= budget.trees:

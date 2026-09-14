@@ -27,7 +27,7 @@ from app import config
 from app.data.cache import BBox, CachedResult, CacheKey, DateRange, cache_path, get_or_fetch, load
 from app.data.fixtures import LANDSAT_PRODUCT, S2_PRODUCT
 from app.data.footprints import load_overture_buildings, merge_footprints, overture_key
-from app.data.osm import load_osm, osm_key
+from app.data.osm import load_city_ways, load_osm, osm_key
 
 
 def utm_epsg(lon: float, lat: float) -> str:
@@ -132,6 +132,7 @@ def main(argv: list[str] | None = None) -> None:
     osm = load_osm(window, allow_network=True)
     overture = load_overture_buildings(window, allow_network=True)
     merged, footprint_counts = merge_footprints(osm["buildings"], overture["buildings"])
+    city_ways = load_city_ways(manifest["city"], window.crs, allow_network=True)
 
     manifest.update({
         "bbox_window": [round(v, 5) for v in transform_bounds(window.crs, "EPSG:4326", *window.bounds)],
@@ -188,6 +189,10 @@ def main(argv: list[str] | None = None) -> None:
     print(f"Building footprints, OSM unioned with Overture {overture['release']} non-OSM footprints")
     print(f"  Overture rows        {len(overture['buildings'])}")
     print(f"  merged buildings     {len(merged)}  {footprint_counts}")
+    print()
+    print(f"City locator, {manifest['city']}: major roads and rivers, Overpass")
+    print(f"  database timestamp   {city_ways['osm_base']}")
+    print(f"  ways                 {len(city_ways['ways'])}")
 
 
 if __name__ == "__main__":

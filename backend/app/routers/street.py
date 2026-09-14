@@ -5,7 +5,7 @@ from typing import Literal
 from fastapi import APIRouter
 
 from app import pipeline
-from app.contracts import StreetGeometry, StreetSummary, ThermalGrid
+from app.contracts import StreetBasemap, StreetGeometry, StreetSummary, ThermalGrid
 from app.routers.errors import known_street
 
 router = APIRouter()
@@ -20,6 +20,12 @@ def list_streets() -> list[StreetSummary]:
 def geometry(street_id: str) -> StreetGeometry:
     with known_street(street_id):
         return pipeline.street_geometry(street_id)
+
+
+@router.get("/api/street/{street_id}/basemap", response_model=StreetBasemap)
+def basemap(street_id: str) -> StreetBasemap:
+    with known_street(street_id):
+        return pipeline.street_basemap(street_id)
 
 
 @router.get("/api/street/{street_id}/thermal", response_model=ThermalGrid)

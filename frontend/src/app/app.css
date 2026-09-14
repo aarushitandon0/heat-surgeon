@@ -148,6 +148,10 @@ input {
   gap: var(--sp-8);
   padding: var(--sp-6);
   overflow-y: auto;
+  /* A visible, token-coloured scrollbar, so clipped content always shows there is more. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--paper-dim) var(--panel);
+  scrollbar-gutter: stable;
   background: var(--panel);
   border-right: var(--hairline);
 }
@@ -160,6 +164,10 @@ input {
   min-width: 0;
   min-height: 0;
   padding: var(--sp-6);
+  /* When the window is short, the viewport scrolls rather than letting rows overlap. */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--paper-dim) var(--base);
 }
 
 .resultbar {
@@ -419,19 +427,51 @@ input {
   color: var(--paper-dim);
 }
 
+/* Foot rows stack: key and caption, then legend, then attribution, each on its own line. An optional figure
+   (the city locator) sits to their right and wraps below them when the viewport is narrow. */
 .viewport-foot {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: var(--sp-8);
+  justify-content: space-between;
+  gap: var(--sp-4) var(--sp-8);
 }
 
+.viewport-foot-rows {
+  display: flex;
+  flex: 1 1 22rem;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.attribution {
+  max-width: var(--measure);
+  font-size: var(--fs-12);
+  color: var(--paper-dim);
+}
+
+/* Never shrinks below its frame: a short viewport scrolls instead of stacking the foot over the map. */
 .heat-canvas {
-  flex: 1;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
-  min-height: 0;
+}
+
+.scale-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-2);
+  font-size: var(--fs-12);
+  color: var(--paper-dim);
+  line-height: 1;
+}
+
+.scale-bar-line {
+  height: 0.375rem;
+  border: 1px solid var(--paper-dim);
+  border-top: 0;
 }
 
 .heat-canvas-frame {
@@ -449,7 +489,7 @@ input {
 
 .scene-frame {
   position: relative;
-  flex: 1;
+  flex: 1 0 16rem;
   min-height: 16rem;
   border: var(--hairline);
 }
@@ -498,8 +538,79 @@ input {
   border-top: 1.5px solid var(--paper);
 }
 
-.legend-line-dashed {
-  border-top: 1px dashed var(--paper-dim);
+.legend-context {
+  width: 1.25rem;
+  border-top: 1px solid var(--paper-dim);
+}
+
+.legend-band {
+  width: 1.25rem;
+  height: 0.625rem;
+  background: var(--paper-dim);
+  opacity: 0.3;
+}
+
+/* Stage 01 city locator: context in surface colours only. */
+
+.heat-canvas-inset {
+  position: absolute;
+  top: var(--sp-3);
+  right: var(--sp-3);
+}
+
+.locator {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  width: 12rem;
+  padding: var(--sp-2);
+  background: var(--base);
+  border: var(--hairline);
+}
+
+.locator svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.locator figcaption {
+  font-size: var(--fs-12);
+  color: var(--paper-dim);
+}
+
+.locator-bg {
+  fill: var(--base);
+}
+
+.locator-river,
+.locator-major,
+.locator-minor,
+.locator-window {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.locator-river {
+  stroke: var(--paper-dim);
+  stroke-width: 2;
+  stroke-opacity: 0.5;
+}
+
+.locator-major {
+  stroke: var(--paper-dim);
+  stroke-width: 1;
+}
+
+.locator-minor {
+  stroke: var(--paper-dim);
+  stroke-width: 0.5;
+  stroke-opacity: 0.6;
+}
+
+.locator-window {
+  stroke: var(--paper);
+  stroke-width: 1.5;
 }
 
 /* Stage 00 map */
@@ -580,10 +691,18 @@ input {
   stroke-width: 1.5;
 }
 
-.convergence .curve-cooling .recharts-curve {
-  stroke: var(--paper-dim);
-  stroke-width: 1;
-  stroke-dasharray: 4 3;
+.convergence .band-cooling .recharts-area-area {
+  fill: var(--paper-dim);
+  fill-opacity: 0.3;
+}
+
+.convergence .band-cooling .recharts-area-curve {
+  stroke: none;
+}
+
+.convergence .recharts-label {
+  fill: var(--paper-dim);
+  font-size: var(--fs-12);
 }
 
 .chart-axis-label {
@@ -599,8 +718,9 @@ input {
 }
 
 .layout-preview svg {
+  display: block;
   width: 100%;
-  max-height: 10rem;
+  height: auto;
   border: var(--hairline);
 }
 
@@ -610,6 +730,27 @@ input {
 
 .layout-coated {
   fill: var(--paper-dim);
+}
+
+.layout-context-building,
+.layout-context-road {
+  fill: none;
+  stroke: var(--paper);
+  vector-effect: non-scaling-stroke;
+}
+
+.layout-context-building {
+  stroke-width: 0.75;
+  stroke-opacity: 0.35;
+}
+
+.layout-context-road {
+  stroke-width: 0.75;
+  stroke-opacity: 0.5;
+}
+
+.layout-context-major {
+  stroke-width: 1.25;
 }
 
 .layout-tree {
@@ -681,12 +822,17 @@ input {
 
 .comparison th,
 .comparison td {
-  padding: var(--sp-1) var(--sp-4) var(--sp-1) 0;
+  padding: var(--sp-1) var(--sp-3) var(--sp-1) 0;
   text-align: left;
   font-weight: 400;
   color: var(--paper-dim);
   border-bottom: var(--hairline);
   white-space: nowrap;
+}
+
+/* Layout names may wrap, so the numeric columns (and the cost range) stay whole at 1280 wide. */
+.comparison tbody th {
+  white-space: normal;
 }
 
 .comparison thead th {

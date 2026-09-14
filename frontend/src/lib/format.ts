@@ -37,8 +37,16 @@ export function formatDeltaBand(low_c: number, high_c: number, decimals = DELTA_
   return low === high ? low : `${low} to ${high}`
 }
 
+/** Percent margins between layouts. Whole percent: the margins are read against a much larger model error. */
+export const PERCENT_DECIMALS = 0
+
 export function formatCount(value: number): string {
   return new Intl.NumberFormat('en-IN').format(value)
+}
+
+/** "25" or "25–26". */
+export function formatCountRange([min, max]: [number, number]): string {
+  return min === max ? formatCount(min) : `${formatCount(min)}${EN_DASH}${formatCount(max)}`
 }
 
 /** Round to significant figures, towards floor or ceiling. */

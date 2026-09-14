@@ -7,6 +7,8 @@ import type { SceneOrigin } from './frame.ts'
 
 /** Edges sharper than this are outlined, so walls and roof lines read without every triangle seam. */
 const EDGE_THRESHOLD_DEG = 20
+/** Outlines stay faint: the ground carries the data, the buildings are context. */
+const EDGE_OPACITY = 0.22
 
 /** Context, not data: surface colours only. Two draw calls for every building: faces and outlines. */
 export function Buildings({ buildings, origin }: { buildings: Building[]; origin: SceneOrigin }) {
@@ -24,7 +26,7 @@ export function Buildings({ buildings, origin }: { buildings: Building[]; origin
         <meshLambertMaterial color={colors.face} />
       </mesh>
       <lineSegments geometry={edges}>
-        <lineBasicMaterial color={colors.edge} />
+        <lineBasicMaterial color={colors.edge} transparent opacity={EDGE_OPACITY} depthWrite={false} />
       </lineSegments>
     </group>
   )

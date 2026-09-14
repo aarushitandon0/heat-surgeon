@@ -17,7 +17,9 @@ from app import config
 from app.data.cache import BBox, CachedResult, CacheKey, DateRange, get_or_fetch
 from app.data.sources import SourceError
 
-OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+# The main instance first; a public mirror serving the same database when the main one times out
+# (it answered 504 to the city locator query on 2026-09-14).
+OVERPASS_URLS = ("https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter")
 SOURCE_ADAPTER = "overpass"
 PRODUCT = "osm_buildings_highways"
 KEPT_TAGS = (
@@ -85,10 +87,11 @@ def parse_overpass(payload: dict, crs: str) -> dict:
 
 def _post_overpass(query: str) -> dict:
     body = urllib.parse.urlencode({"data": query}).encode("utf-8")
-    request = urllib.request.Request(OVERPASS_URL, data=body,
-                                     headers={"User-Agent": "heat-surgeon/0.1 (hackathon research prototype)"})
     last_error = None
     for attempt in range(4):
+        url = OVERPASS_URLS[attempt % len(OVERPASS_URLS)]
+        request = urllib.request.Request(url, data=body,
+                                         headers={"User-Agent": "heat-surgeon/0.1 (hackathon research prototype)"})
         try:
             with urllib.request.urlopen(request, timeout=240) as response:
                 return json.load(response)
@@ -109,3 +112,53 @@ def load_osm(bbox: BBox, allow_network: bool | None = None) -> dict:
         bounds_wgs84 = transform_bounds(bbox.crs, "EPSG:4326", *bbox.bounds)
         return CachedResult(arrays={}, metadata=parse_overpass(_post_overpass(overpass_query(bounds_wgs84)), bbox.crs))
     return get_or_fetch(osm_key(bbox), fetch, allow_network=allow_network).metadata
+
+
+# --- City locator: major roads and rivers at city scale, for display only ---------------------
+
+CITY_PRODUCT = "osm_city_major_roads_rivers"
+
+
+def city_overpass_query(bounds_wgs84: tuple[float, float, float, float]) -> str:
+    west, south, east, north = bounds_wgs84
+    box = f"{south},{west},{north},{east}"
+    classes = "|".join(config.CITY_LOCATOR_HIGHWAY_CLASSES)
+    return (
+        "[out:json][timeout:180];"
+        f'(way["highway"~"^({classes})$"]({box});way["waterway"="river"]({box}););'
+        "out geom;"
+    )
+
+
+def parse_city_ways(payload: dict, crs: str) -> dict:
+    """Overpass JSON to {ways: [{id, kind, name, coords}], osm_base}. kind is the highway or waterway value verbatim."""
+    ways = []
+    for element in payload.get("elements", []):
+        tags = element.get("tags", {})
+        kind = tags.get("highway") or tags.get("waterway")
+        if element["type"] != "way" or not element.get("geometry") or kind is None:
+            continue
+        ways.append({"id": f"osm:way/{element['id']}", "kind": kind, "name": tags.get("name:en") or tags.get("name"),
+                     "coords": _to_utm(element["geometry"], crs)})
+    return {
+        "osm_base": payload.get("osm3s", {}).get("timestamp_osm_base"),
+        "attribution": "Map data © OpenStreetMap contributors, ODbL 1.0",
+        "ways": ways,
+    }
+
+
+def city_bbox(city: str, crs: str) -> BBox:
+    bounds = transform_bounds("EPSG:4326", crs, *config.CITY_LOCATOR_BOUNDS_WGS84[city])
+    return BBox(crs=crs, bounds=tuple(round(v, 1) for v in bounds))
+
+
+def load_city_ways(city: str, crs: str, allow_network: bool | None = None) -> dict:
+    """Major roads and rivers across the city's locator extent, from cache or (if allowed) from Overpass."""
+    bbox = city_bbox(city, crs)
+    snapshot = config.OSM_SNAPSHOT_DATE
+    key = CacheKey(SOURCE_ADAPTER, CITY_PRODUCT, bbox, DateRange(start=snapshot, end=snapshot, months=()))
+
+    def fetch() -> CachedResult:
+        query = city_overpass_query(config.CITY_LOCATOR_BOUNDS_WGS84[city])
+        return CachedResult(arrays={}, metadata=parse_city_ways(_post_overpass(query), crs))
+    return get_or_fetch(key, fetch, allow_network=allow_network).metadata

@@ -10,8 +10,8 @@ import { HeatGround } from './HeatGround.tsx'
 import { InterventionMarkers } from './InterventionMarkers.tsx'
 
 // The opening frame: from the right of the street, turned back towards its start and raised, so the
-// segment runs diagonally across the view with buildings on both sides. Checked by eye on Bajirao Road,
-// North Main Road and FC Road (2026-09-14); not yet on Karve Road.
+// segment runs diagonally across the view with buildings on both sides. Checked by eye on all four fixture
+// streets, including Karve Road, at 1440 x 900 (2026-09-14, Day 7).
 const FIELD_OF_VIEW_DEG = 35
 const OPENING_VIEW: Omit<ThreeQuarterView, 'distance_m'> = { azimuth_deg: 38, elevation_deg: 40 }
 /** Opening distance as a multiple of the segment length. */

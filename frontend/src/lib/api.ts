@@ -7,6 +7,7 @@ import type {
   OptimizationResult,
   OptimizeJobHandle,
   OptimizeRequest,
+  StreetBasemap,
   StreetGeometry,
   StreetSummary,
   ThermalGrid,
@@ -58,6 +59,7 @@ function postJson<T>(path: string, payload: unknown): Promise<T> {
 export const api = {
   streets: () => request<StreetSummary[]>('/api/streets'),
   geometry: (streetId: string) => request<StreetGeometry>(`/api/street/${encodeURIComponent(streetId)}/geometry`),
+  basemap: (streetId: string) => request<StreetBasemap>(`/api/street/${encodeURIComponent(streetId)}/basemap`),
   thermal: (streetId: string, scope: 'street' | 'window') =>
     request<ThermalGrid>(`/api/street/${encodeURIComponent(streetId)}/thermal?scope=${scope}`),
   calibrate: (streetId: string, body: CalibrationRequest) =>

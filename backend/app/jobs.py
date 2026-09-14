@@ -100,4 +100,4 @@ def start_job(street_id: str, request: OptimizeRequest, background: bool = True)
         run_job(job)
     rows, cols = ctx.grid.shape
     return OptimizeJobHandle(job_id=job.job_id, ws_url=f"/ws/optimize/{job.job_id}", grid_shape=(rows, cols),
-                             cells=rows * cols, states_per_cell=len(STATE_NAMES))
+                             cells=rows * cols, states_per_cell=len(STATE_NAMES), design_grid=ctx.grid.design_grid)

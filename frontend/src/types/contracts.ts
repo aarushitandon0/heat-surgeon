@@ -118,6 +118,40 @@ export interface StreetGeometry {
   cross_section: CrossSection
 }
 
+// --- Basemap (display only) ---------------------------------------------------
+
+export interface BasemapWay {
+  /** OSM highway or waterway value verbatim, e.g. 'primary', 'residential', 'river'. */
+  kind: string
+  name: string | null
+  path: PointUTM[]
+}
+
+/** Major roads and rivers across the city, so the 2 km window can be shown in its city context. */
+export interface CityLocator {
+  city: string
+  bbox_wgs84: BBoxWGS84
+  /** [min_e, min_n, max_e, max_n] of the locator extent, in metres in the basemap's crs. */
+  bounds_m: [number, number, number, number]
+  ways: BasemapWay[]
+}
+
+/**
+ * Context geometry for display: every OSM highway and merged building footprint in the 2 km window, and the
+ * city locator, simplified for drawing. Never a model input and never a measurement.
+ */
+export interface StreetBasemap {
+  street_id: string
+  crs: CrsCode
+  /** [min_e, min_n, max_e, max_n] of the 2 km window, in metres in crs. */
+  window_bounds_m: [number, number, number, number]
+  roads: BasemapWay[]
+  buildings: PointUTM[][]
+  city: CityLocator
+  attribution: string
+  osm_base: string | null
+}
+
 // --- Thermal grid -------------------------------------------------------------
 
 export interface ThermalStats {
@@ -205,6 +239,8 @@ export interface OptimizeJobHandle {
   grid_shape: GridShape
   cells: number
   states_per_cell: number
+  /** The grid layout previews index into, so they can be placed on the street. */
+  design_grid: DesignGrid
 }
 
 export interface Intervention {

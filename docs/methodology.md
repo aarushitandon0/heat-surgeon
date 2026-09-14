@@ -437,6 +437,69 @@ Assumptions, stated plainly:
 - **OSM tags are used as given, including implausible ones.** A 4-level house tagged 60 m, for example. Only zero or negative values are treated as missing.
 - **Microsoft and Google footprints carry no height**, so they always take the area estimate.
 
+## Day 7: geographic context, the default run, and the comparison at capacity
+
+### Default run: trees only
+
+The app now opens on a trees-only search (`reflective_cells_max = 0`). Coating stays one toggle away in stage 01, and the band presentation returns whenever it is on.
+
+- **Reasoning.** Coating is the unpriced intervention and the only source of the temperature band, because the published coefficient spans 5–27 °C per unit albedo. Trees only gives one modelled change with only model error attached, and a real cost range.
+- **What it changes.** The headline cooling is smaller, but it is priced and needs no band.
+
+Run on 2026-09-14 through the same job runner the API uses: 20 trees, population 120, 400 generations, seed 42, and the guideline fix below. Change is the conservative end. Cost is the raw payload range; the UI rounds each end outward to 2 significant figures.
+
+| Street | Trees only: searched | Cost | Trees + 150 coated cells: searched | Guideline, trees only | Search over guideline, trees only / coated |
+|---|---|---|---|---|---|
+| FC Road | −0.70 °C | ₹74,400–1,18,040 | −1.50 to −0.80 °C, not priced | −0.60 °C | 17% / 18% |
+| Karve Road | −0.94 °C | ₹74,400–1,18,040 | −1.75 to −1.06 °C, not priced | −0.84 °C | 11% / 13% |
+| North Main Road | −0.70 °C | ₹74,400–1,18,040 | −1.51 to −0.81 °C, not priced | −0.64 °C | 9% / 11% |
+| Bajirao Road | −0.67 °C | ₹74,400–1,18,040 | −1.48 to −0.78 °C, not priced | −0.61 °C | 11% / 12% |
+
+Hold-out RMSE is 1.16–1.68 °C per 90 m calibration cell on these streets, larger than every difference between arms.
+
+### The design-guideline layout now reaches the matched budget
+
+- **The bug.** When the tree budget was near a street's capacity, the guideline placed fewer trees than the other arms: 26 of 30 on FC Road, 24 of 27 on Bajirao Road, 37 of 38 on Karve Road, 40 of 44 on North Main Road. It split trees evenly between the two sides without checking what each side's strip holds. It also spaced them evenly along strips that buildings and existing canopy interrupt.
+- **The fix.**
+  - A side that cannot hold its half passes the rest to the other side.
+  - Where even spacing cannot fit a side's share, the side takes evenly chosen positions from its densest packing at the IRC:SP:21 minimum. Any subset of a validly spaced packing is still validly spaced.
+  - Test: `test_design_guideline_reaches_capacity_when_the_strips_hold_unequal_counts`.
+- **What it exposed.** On FC Road at 30 trees (capacity), the guideline now plants all 30.
+  - Trees only: the search beats it by 0.2% (−0.879 against −0.877 °C). With coating: 2.1%.
+  - The search itself placed 29 trees, or 28 with coating; the GA does not always fill the last pit.
+  - The random arm places 26, because random sequential placement packs less densely than the maximum.
+- **What that means.** The search's advantage comes from choosing which pits to plant when there are more pits than trees. At capacity every pit is planted and there is nothing left to choose. The demo budget of 20 trees is below capacity on every street (27–44).
+- **The comparison caption states counts, not a verdict.** It reads, for example, "All layouts place 20 trees and no coating. The searched layout cools 17% more than the design-guideline layout." When arms differ by a tree, it gives the range ("25–26 trees") instead of calling the comparison unmatched. The margin is the conservative-end ratio, rounded to a whole percent.
+
+### Basemap and locator (display only)
+
+- **Stage 01.** The measured tile sits on the window's OSM highways and merged building footprints: the same cached OSM and Overture data the model classifies land cover from, with no new network call at demo time. The frame extends 150 m past the window so streets visibly carry on.
+- **Tile opacity 0.78.** A display choice, so the streets under the tile show.
+  - What it changes: a map colour is the ramp colour blended 22% towards the base and linework.
+  - The legend bar is drawn at the same opacity over the same base, so the key still matches the map.
+- **Locator.** Pune's motorway, trunk, primary and secondary roads and its rivers (Mula, Mutha, Mula-Mutha, Pavana, Ramnadi), with the 2 km window boxed.
+  - Pulled once with `prefetch` into `fixtures/cache/overpass/osm_city_major_roads_rivers/`.
+  - `CITY_LOCATOR_BOUNDS_WGS84` is an assumption: hand-chosen to cover central Pune and all four windows.
+  - **The pull came from the overpass.kumi.systems mirror.** overpass-api.de answered 504 on 2026-09-14. The mirror's database timestamp is 2026-05-31T22:37:44Z, three and a half months older than the window pulls. Major roads and rivers rarely change on that timescale.
+- **Stages 02 and 03.** Road centrelines and building outlines are drawn as hairlines over the design grid: in the layout preview, and in the 2D grid, which gains 14 m of context on each side of the street.
+- **Simplification is an assumption.** Douglas-Peucker at 1 m in the window and 15 m in the locator (`BASEMAP_WINDOW_SIMPLIFY_M`, `BASEMAP_CITY_SIMPLIFY_M`). Both are below a screen pixel at the scales drawn. The model never sees this geometry; it reads the unsimplified cache.
+
+### Convergence chart
+
+The y axis is scaled to the conservative end only, padded by 10% of its range (at least 0.02 °C each side). When the two ends differ, the more-cooling end is drawn as a shaded band from it, and the legend says the band can run past the axis. Trees-only runs have no band.
+
+### 3D scene
+
+- **Trees read as trees.** Each tree is drawn as a 3 m trunk and a canopy 4.5 m across and 2.6 m deep. Everything is still merged into one instanced draw call.
+  - **Assumption, display only:** the canopy is a young street tree a few years after planting.
+  - The model's crown stays 8 m (`TREE_CROWN_DIAMETER_M`), and the flat 8 m ring stays on the ground to show the extent the model treats as shaded. The drawn canopy is therefore smaller than the modelled shade.
+- **Building outlines at 22% opacity**, so the modelled ground carries the frame.
+
+### Contract changes (both files, same commit)
+
+- `GET /api/street/{id}/basemap` returns `StreetBasemap`: roads (`BasemapWay`), building rings, the window's bounds in metres, a `CityLocator`, and attribution.
+- `OptimizeJobHandle` gains `design_grid`, so stage 02 can place a layout preview on the street before the result exists.
+
 ## Earlier data-layer assumptions
 
 ### Scene-level cloud cover pre-filter: `SCENE_CLOUD_COVER_MAX_PERCENT = 40`

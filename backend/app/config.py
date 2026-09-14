@@ -103,6 +103,18 @@ LOCAL_UTC_OFFSET_MINUTES = 330
 # names the day it was pulled; the exact database timestamp is stored with the cached result.
 OSM_SNAPSHOT_DATE = "2026-09-14"
 
+# --- Basemap (display only; never a model input) ------------------------------------------
+
+# ASSUMPTION: the locator's extent, [min_lon, min_lat, max_lon, max_lat]. Chosen by hand to cover central
+# Pune and every fixture window with margin. Display only: it frames the "where in the city" inset.
+CITY_LOCATOR_BOUNDS_WGS84 = {"Pune": (73.76, 18.44, 73.96, 18.60)}
+# Road classes drawn in the locator, verbatim OSM highway values. Minor roads at city scale are noise.
+CITY_LOCATOR_HIGHWAY_CLASSES = ("motorway", "trunk", "primary", "secondary")
+# ASSUMPTION: Douglas-Peucker tolerances for display geometry. 1 m in the 2 km window is under a screen
+# pixel at any zoom the app uses; 15 m at city scale is under a pixel in a 200 px inset. Display only.
+BASEMAP_WINDOW_SIMPLIFY_M = 1.0
+BASEMAP_CITY_SIMPLIFY_M = 15.0
+
 # --- Building footprints beyond OSM (docs/sources.md, Building footprints) ----------------
 
 # Overture Maps buildings theme, pinned release. Overture conflates OpenStreetMap, Microsoft ML Buildings
