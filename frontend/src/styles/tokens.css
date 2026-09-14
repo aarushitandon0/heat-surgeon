@@ -1,17 +1,48 @@
-/* Design tokens (SPEC.md §9.4). Components read these; no hex values elsewhere. */
+/* Design tokens (SPEC.md §9.4–9.5). Components read these; no hex value appears anywhere else. */
 :root {
+  /* Surfaces and text */
   --base: #131a22; /* deep blue-slate console */
   --panel: #1b242e; /* raised surfaces */
   --rule: #2c3945; /* hairlines, graticule */
   --paper: #e9e4d9; /* body text, warm off-white */
   --paper-dim: #8c96a1; /* secondary text */
 
-  /* thermal ramp — measured or modelled data only */
+  /* Thermal ramp: measured or modelled data only. Anywhere else is a bug. */
   --t-00: #1b4b57;
   --t-25: #3e7c8c;
   --t-50: #c9b58a;
   --t-75: #c56a35;
   --t-100: #a3341f;
 
-  --signal: #7fd1de; /* final delta readout only */
+  /* The one bright colour: the final temperature delta readout, nowhere else. */
+  --signal: #7fd1de;
+
+  /* Type families (§9.5). Mono is for numeric values only. */
+  --font-display: 'Geist Variable', 'IBM Plex Sans', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Type scale, 1.25 ratio (§9.5) */
+  --fs-12: 0.75rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-20: 1.25rem;
+  --fs-25: 1.5625rem;
+  --fs-31: 1.9375rem;
+  --fs-39: 2.4375rem;
+  --fs-49: 3.0625rem;
+  --fs-61: 3.8125rem;
+
+  /* Spacing */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-12: 3rem;
+
+  --hairline: 1px solid var(--rule);
+  --panel-width: 22.5rem;
+  --measure: 70ch; /* body line length cap */
 }

@@ -349,6 +349,29 @@ Figures: `figures/<street-id>-layouts.png`.
   - The 10 per second cap was never reached, because generations were slower than 0.1 s. Three command-line GA runs were sharing the CPU at the same time.
   - Previews are sent only when the best layout improved since the last message: 60–103 per run.
 
+## Day 5: frontend display
+
+These are display choices, not model constants. They live in `frontend/src/lib/format.ts` and `frontend/src/lib/motion.ts`.
+
+- **Deltas shown to 2 decimals, absolute temperatures to 1.**
+  - Reasoning: the arms differ by 0.08–0.12 °C, so one decimal would show the search tying the design guideline on North Main Road.
+  - What it changes: two decimals suggest more precision than a 1.2–1.7 °C hold-out RMSE supports. The model error and its mean-only baseline are always on screen next to the delta, so the precision is read against the error.
+- **Cost ends rounded outward to 2 significant figures.** The low end is rounded down and the high end up, so rounding never narrows the range. 20 trees at ₹3,720–5,902 each show as ₹74,000–1,20,000. No midpoint is ever computed.
+  - What it changes: at most one step of the second significant figure on each end.
+- **No cost when any end is null.** A layout using coating shows "Not priced" and names the unpriced intervention. There is no partial sum.
+- **Overpass time labelled IST.** `provenance.overpass_local_time` carries no zone. Every street is in Pune, so the zone is Asia/Kolkata.
+  - What it changes: nothing today. A street outside India needs the zone from the backend.
+- **One colour scale across before and both after bands.** The domain is the minimum and maximum over all three modelled grids, so a colour is the same temperature in every view. The measured window uses its own `stats` range.
+- **The convergence curve plots both ends of the best layout's modelled change per generation, not `best_fitness_score`.** The score is a dimensionless objective and is never displayed.
+- **The after view defaults to the conservative end** (`after_lst_c_high`), the end the search ranks on. A toggle shows the more-cooling end when the two differ.
+- **Both labels are on screen whenever their surface is.** Measured surfaces say "measured, 30 m"; the before and after grid says "modelled at 2 m design resolution". The resolution comes from the payload (`provenance.delivered_resolution_m`, `resolution.design_resolution_m`), never a literal.
+- **Stage 03's 2D grid is drawn along the street, not north-up.**
+  - Reasoning: FC Road's design grid is a 200 m by 40 m strip. Drawn north-up in a 1440 px window, 2 m cells render about 3 px wide; drawn along the street, about 9 px.
+  - What it changes: the view is not a map. The subtitle says it is drawn along the street and gives the bearing. Stage 01's measured window stays north-up on its UTM grid, and the 3D scene (Day 6) returns to true geography.
+- **Scrambled characters contain no digits.** A readout still being acquired never shows something that reads as a real number.
+- **Decode timing.** The scramble runs exactly as long as the window thermal request. When data lands, rows resolve 90 ms apart at 16 ms per character. That is about 0.6 s for the longest row, and it starts only after the data exists. Returning to stage 01 later shows the final text with no replay.
+- **Reveal timing.** 1.5 s, ease-in-out cubic. The grid interpolation and the delta count read one progress value, so they land on the same frame. It plays the first time the after view is shown; later toggles are instant. Cost and the comparison table appear when it lands. `prefers-reduced-motion` skips both motions.
+
 ### Building heights (display only)
 
 - **Assumption.** Height comes from OSM `height`, else `building:levels` × 3 m, else 6 m (two storeys), labelled by `height_source`.

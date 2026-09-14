@@ -116,3 +116,11 @@ Day 4 (2026-09-14):
 - **Footprints.** OSM unioned with Overture non-OSM footprints (duckdb). The Sentinel-2 B11 escalation rule is retired.
 - **Costs.** Only trees are priced; coating is unpriced, so costs are nullable and the headline has no cost.
 - **Cross-sections.** From PMC USDG templates on right of way measured from footprints, labelled `published_design`.
+
+Day 5 (2026-09-14):
+- **Frontend.** Stages 00–03 run against the real backend through the Vite proxy.
+  - The provenance stack decodes for as long as the thermal fetch runs.
+  - Stage 02 streams the convergence curve over the WebSocket.
+  - Stage 03 is a 2D heat grid with the before/after reveal, cost range or "Not priced", model error with its baseline, and all four comparison arms.
+- **Checks.** Run `npm test` for hand-checked numeric tests and `npm run check:design` for hex, ramp, `--signal`, motion, emoji, arrow and middle-dot rules.
+- **Next.** Tier 1 still needs its §1 checklist confirmed end to end offline.
