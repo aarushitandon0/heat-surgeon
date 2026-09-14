@@ -110,3 +110,9 @@ Update this section as tiers complete.
 - [ ] Tier 3 — NSGA-II Pareto front, thermal sharpening, ward-scale batch
 
 Active satellite adapter: `planetary_computer`, decided Day 1 (2026-09-14). No Earth Engine project or credentials exist on the build machine. `EarthEngineSource` is written but has not been run against a live account.
+
+Day 4 (2026-09-14):
+- **Backend.** Serves the full §7 API from fixtures. Four streets are cached: Bajirao Road (dense commercial), North Main Road (leafy residential), Karve Road (wide arterial), FC Road (mixed). Tier 1 still needs the 2D result view.
+- **Footprints.** OSM unioned with Overture non-OSM footprints (duckdb). The Sentinel-2 B11 escalation rule is retired.
+- **Costs.** Only trees are priced; coating is unpriced, so costs are nullable and the headline has no cost.
+- **Cross-sections.** From PMC USDG templates on right of way measured from footprints, labelled `published_design`.

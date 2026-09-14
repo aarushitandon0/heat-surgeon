@@ -55,7 +55,9 @@ class GARun:
     best_score_by_generation: list[float]
 
 
-def run_ga(grid: StreetGrid, budget: Budget, params: GAParams, seed_layouts: list[np.ndarray] | None = None) -> GARun:
+def run_ga(grid: StreetGrid, budget: Budget, params: GAParams, seed_layouts: list[np.ndarray] | None = None,
+           on_generation=None) -> GARun:
+    """on_generation(generation, genome, objectives, score, improved) is called after every generation."""
     from app.optimizer.baselines import random_layout
 
     rng = np.random.default_rng(params.seed)
@@ -87,7 +89,7 @@ def run_ga(grid: StreetGrid, budget: Budget, params: GAParams, seed_layouts: lis
         evaluate(individual)
 
     history = []
-    for _ in range(params.generations):
+    for generation in range(params.generations):
         elite = [toolbox.clone(i) for i in tools.selBest(population, params.elite)]
         offspring = [toolbox.clone(i) for i in tools.selTournament(population, params.population - params.elite,
                                                                    tournsize=params.tournament_size)]
@@ -106,7 +108,12 @@ def run_ga(grid: StreetGrid, budget: Budget, params: GAParams, seed_layouts: lis
             if not individual.fitness.valid:
                 evaluate(individual)
         population = elite + offspring
-        history.append(tools.selBest(population, 1)[0].fitness.values[0])
+        leader = tools.selBest(population, 1)[0]
+        score = leader.fitness.values[0]
+        improved = not history or score > history[-1]
+        history.append(score)
+        if on_generation is not None:
+            on_generation(generation + 1, np.asarray(leader, dtype=np.int8), leader.objectives, score, improved)
 
     best = tools.selBest(population, 1)[0]
     return GARun(genome=np.asarray(best, dtype=np.int8), objectives=best.objectives, best_score_by_generation=history)
@@ -118,7 +125,7 @@ def main(argv: list[str] | None = None) -> None:
     from app import config
     from app.data.fixtures import load_window
     from app.model.validate import calibrate
-    from app.optimizer.baselines import greedy_layout, random_layout
+    from app.optimizer.baselines import design_guideline_layout, greedy_layout, random_layout
     from app.optimizer.encoding import street_grid_for
     from app.optimizer.render import save_layout_figure
 
@@ -136,12 +143,19 @@ def main(argv: list[str] | None = None) -> None:
     window = load_window(args.street)
     run = calibrate(args.street)
     grid = street_grid_for(window, run.model)
-    budget = Budget(trees=args.trees, reflective_cells=args.reflective_cells)
+    budget = grid.matched(Budget(trees=args.trees, reflective_cells=args.reflective_cells))
+    print(f"Tree capacity {grid.tree_capacity()} at {config.TREE_MIN_SPACING_M:.0f} m spacing; "
+          f"requested {args.trees}, matched budget {budget.trees}")
     dg = grid.design_grid
 
     print(f"Design grid  {args.street}: {dg.shape[0]} x {dg.shape[1]} cells at {dg.cell_size_m:.0f} m, "
           f"bearing {dg.bearing_deg:.1f}°, origin ({dg.origin_e_m:.1f}, {dg.origin_n_m:.1f}) {dg.crs}")
-    print(f"Cross-section {grid.cross_section}")
+    print(f"Segment      {grid.segment}")
+    cs = grid.cross_section
+    print(f"Cross-section source {cs.source}: {cs.reference}")
+    print("             " + ", ".join(f"{b.kind} {b.offset_from_m:+.1f}..{b.offset_to_m:+.1f}"
+                                      for b in cs.bands if b.kind != "private_property"))
+    print(f"Plantable    {int(grid.plantable.sum())} cells; allowed tree cells {int(grid.allowed[..., 1].sum())}")
     labels = {0: "bare", 1: "canopy", 2: "built", 3: "carriageway", 4: "footway", 5: "water"}
     print("Surfaces     " + ", ".join(f"{labels[k]} {int((grid.classes == k).sum())}" for k in labels))
     print("Allowed      " + ", ".join(f"{STATE_NAMES[s]} {int(grid.allowed[..., s].sum())}" for s in range(1, 5)))
@@ -151,8 +165,10 @@ def main(argv: list[str] | None = None) -> None:
     print()
 
     def describe(o: Objectives) -> str:
+        cost = ("cost unpriced (" + ", ".join(o.unpriced_interventions) + ")" if o.cost_inr_low is None
+                else f"cost Rs {o.cost_inr_low:,.0f} to {o.cost_inr_high:,.0f} (estimate, first-year tree care only)")
         return (f"{o.temp_delta_c_low:+.3f} to {o.temp_delta_c_high:+.3f} °C  "
-                f"(trees {o.trees}, reflective {o.reflective_cells}, permeable {o.permeable_cells})")
+                f"(trees {o.trees}, reflective {o.reflective_cells}, permeable {o.permeable_cells}; {cost})")
 
     random_runs = [grid.evaluate(random_layout(grid, budget, np.random.default_rng(seed)))
                    for seed in range(args.random_seeds)]
@@ -160,6 +176,8 @@ def main(argv: list[str] | None = None) -> None:
     random_example = random_layout(grid, budget, np.random.default_rng(0))
     greedy = greedy_layout(grid, budget)
     greedy_objectives = grid.evaluate(greedy)
+    guideline = design_guideline_layout(grid, budget)
+    guideline_objectives = grid.evaluate(guideline)
 
     params = GAParams(generations=args.generations, population=args.population)
     ga_runs = []
@@ -175,20 +193,24 @@ def main(argv: list[str] | None = None) -> None:
     print(f"Random       mean of {args.random_seeds} seeds: high end {random_high.mean():+.3f} °C "
           f"(best {random_high.min():+.3f}, worst {random_high.max():+.3f}); seed 0: {describe(random_runs[0])}")
     print(f"Greedy       {describe(greedy_objectives)}")
+    print(f"Guideline    {describe(guideline_objectives)}")
     for seed, r in enumerate(ga_runs):
         print(f"GA seed {seed}    {describe(r.objectives)}")
 
     ga_high = best_ga.objectives.temp_delta_c_high
     beats_greedy = all(r.objectives.temp_delta_c_high < greedy_objectives.temp_delta_c_high for r in ga_runs)
     beats_random = all(r.objectives.temp_delta_c_high < random_high.min() for r in ga_runs)
+    beats_guideline = all(r.objectives.temp_delta_c_high < guideline_objectives.temp_delta_c_high for r in ga_runs)
     print()
-    print(f"GA beats greedy on every seed: {beats_greedy}; GA beats the best of {args.random_seeds} random layouts on every seed: {beats_random}")
+    print(f"GA beats greedy on every seed: {beats_greedy}; GA beats the best of {args.random_seeds} random layouts "
+          f"on every seed: {beats_random}; GA beats the design guideline on every seed: {beats_guideline}")
     print(f"Conservative cooling: random {-random_high.mean():.3f} °C, greedy {greedy_objectives.temp_drop_c:.3f} °C, "
-          f"GA {-ga_high:.3f} °C")
+          f"design guideline {guideline_objectives.temp_drop_c:.3f} °C, GA {-ga_high:.3f} °C")
 
     figure = config.BACKEND_DIR.parent / "docs" / "figures" / f"{args.street}-layouts.png"
     save_layout_figure(grid, [("Random (seed 0)", random_example, grid.evaluate(random_example)),
                               ("Greedy, hottest cell first", greedy, greedy_objectives),
+                              ("Design guideline, no optimisation", guideline, guideline_objectives),
                               (f"Genetic algorithm (best of {args.ga_seeds} seeds)", best_ga.genome, best_ga.objectives)],
                        window.manifest["name"], Path(figure))
     print(f"Figure       {Path(figure).relative_to(config.BACKEND_DIR.parent).as_posix()}")

@@ -102,6 +102,75 @@ LOCAL_UTC_OFFSET_MINUTES = 330
 # names the day it was pulled; the exact database timestamp is stored with the cached result.
 OSM_SNAPSHOT_DATE = "2026-09-14"
 
+# --- Building footprints beyond OSM (docs/sources.md, Building footprints) ----------------
+
+# Overture Maps buildings theme, pinned release. Overture conflates OpenStreetMap, Microsoft ML Buildings
+# and Google Open Buildings; we take its non-OSM footprints and union them with our own Overpass pull.
+OVERTURE_RELEASE = "2026-08-19.0"
+OVERTURE_BUILDINGS_PARQUET = (
+    f"s3://overturemaps-us-west-2/release/{OVERTURE_RELEASE}/theme=buildings/type=building/*"
+)
+OVERTURE_S3_REGION = "us-west-2"
+
+# ASSUMPTION: keep Google Open Buildings footprints with confidence at or above 0.65. That is the lowest
+# confidence present in the Overture release over Pune (observed 2026-09-14), so Overture has already
+# applied it; we record it rather than tighten it. See docs/methodology.md.
+GOOGLE_OPEN_BUILDINGS_MIN_CONFIDENCE = 0.65
+
+# ASSUMPTION: a non-OSM footprint whose centroid lies inside an OSM footprint, or within this distance of
+# an OSM footprint's centroid, is the same building and is dropped. See docs/methodology.md.
+FOOTPRINT_DEDUPE_DISTANCE_M = 5.0
+
+# --- Building heights for the 3D scene (docs/methodology.md) --------------------------------
+
+# ASSUMPTION: storey height where OSM gives building:levels but no height.
+STOREY_HEIGHT_M = 3.0
+# ASSUMPTION: a building with no height or levels tag is drawn two storeys tall. Height is used only for
+# display; the heat model does not use it.
+DEFAULT_BUILDING_HEIGHT_M = 6.0
+# Buildings returned with a street's geometry: those within this distance of the design segment.
+GEOMETRY_BUILDING_RADIUS_M = 150.0
+
+# --- API ----------------------------------------------------------------------------------------
+
+# SPEC.md §6.5: progress messages throttled to about 10 per second.
+PROGRESS_MIN_INTERVAL_S = 0.1
+# Random baseline in the result: mean over this many seeded random layouts.
+RANDOM_BASELINE_SEEDS = 30
+
+# --- Street cross-sections (docs/sources.md, Street design) --------------------------------
+
+# PMC Urban Street Design Guidelines, Pune, Version I:2016, chapter 8 reference templates, "A" variant of
+# each right of way (sections through the bus stop). Bands left to right as drawn: (kind, width_m).
+# tree_pit bands are the drawn tree pit / parking-with-tree-pit zones and are the only plantable bands.
+USDG_TEMPLATES: dict[str, list[tuple[str, float]]] = {
+    "9A": [("buffer", 0.5), ("carriageway", 4.5), ("tree_pit", 2.0), ("footway", 2.0)],
+    "12A": [("footway", 2.0), ("tree_pit", 1.0), ("carriageway", 6.0), ("tree_pit", 1.0), ("footway", 2.0)],
+    # 15A and 24A sections are drawn through a bus stop; their plan views show tree pits in that zone along
+    # the rest of the street, so it is recorded as tree_pit.
+    "15A": [("footway", 2.0), ("tree_pit", 1.0), ("cycle_track", 2.0), ("buffer", 0.5), ("carriageway", 6.5),
+            ("tree_pit", 1.5), ("footway", 1.5)],
+    "18A": [("footway", 2.5), ("tree_pit", 1.0), ("cycle_track", 2.5), ("buffer", 0.5), ("carriageway", 6.5),
+            ("tree_pit", 2.0), ("footway", 3.0)],
+    # ASSUMPTION: 21A's section labels sum to 21.5 m (clear walkway 4 m); its plan view gives 8 m for that
+    # side of the carriageway, so the clear walkway is taken as 3.5 m to match the 21 m right of way.
+    "21A": [("footway", 3.5), ("tree_pit", 1.5), ("cycle_track", 2.5), ("buffer", 0.5), ("carriageway", 6.5),
+            ("tree_pit", 2.0), ("footway", 4.5)],
+    "24A": [("footway", 2.5), ("tree_pit", 1.0), ("cycle_track", 2.0), ("buffer", 0.5), ("carriageway", 5.5),
+            ("median", 1.0), ("carriageway", 5.5), ("tree_pit", 1.5), ("cycle_track", 2.0), ("footway", 2.5)],
+    "30A": [("footway", 4.0), ("cycle_track", 2.0), ("buffer", 0.5), ("tree_pit", 2.0), ("carriageway", 6.0),
+            ("median", 1.0), ("carriageway", 6.0), ("tree_pit", 2.5), ("cycle_track", 2.0), ("footway", 4.0)],
+}
+
+# USDG chapter 8: a street whose right of way has no template uses the next smaller template, and the
+# remaining width goes to non-motorised space. We split the remainder equally onto the two outer footways.
+
+# ASSUMPTION: right of way is measured from merged building footprints: at 2 m stations along the segment,
+# the distance to the first building edge on each side within this reach, median over stations.
+ROW_SEARCH_REACH_M = 30.0
+# ASSUMPTION: a side needs a building hit at this share of stations, else its building line is unknown.
+ROW_MIN_STATION_SHARE = 0.3
+
 # --- Surface cover and calibration cells (docs/methodology.md) ---------------------------
 
 # Rasterisation resolution for exact area shares. Not a physical constant: it only needs to nest
@@ -173,6 +242,29 @@ NDVI_WATER_MAX = 0.0
 
 # ASSUMPTION: cells more than a quarter water by area are left out of calibration. See docs/methodology.md.
 WATER_FRACTION_MAX_FOR_FIT = 0.25
+
+# --- Intervention costs (docs/sources.md, Costs; docs/methodology.md, Costs) ----------------
+
+# RUIDP Integrated Schedule of Rates 2023 (Government of Rajasthan, w.e.f. 01/10/2023), item 39.30:
+# roadside avenue tree in a 0.6 m dia x 1 m hole, manure, sapling, watering, fixing the tree guard
+# and maintaining the plant for one year, Rs 1,682 each.
+TREE_PLANTING_FIRST_YEAR_INR = 1682.0
+# Same schedule, tree guards supplied and fixed: 39.31 half-brick circular guard Rs 2,038 (the cheapest
+# complete guard; 39.33 excludes the drum) to 39.39 M.S. guard 50 cm square Rs 4,220 (the dearest).
+TREE_GUARD_INR_LOW = 2038.0
+TREE_GUARD_INR_HIGH = 4220.0
+
+# ASSUMPTION: Jaipur 2023 schedule rates stand in for Pune; no Pune or Maharashtra schedule could be
+# opened. Scope is planting, guard and FIRST-YEAR care only: care in years 2 and 3 has no sourced rate,
+# so SPEC.md §8's three-year figure is not available. See docs/methodology.md.
+COST_INR_BY_INTERVENTION: dict[str, tuple[float, float] | None] = {
+    "tree": (TREE_PLANTING_FIRST_YEAR_INR + TREE_GUARD_INR_LOW, TREE_PLANTING_FIRST_YEAR_INR + TREE_GUARD_INR_HIGH),
+    # No sourced Indian rate for a pavement-grade reflective coating, pervious concrete or shade structure.
+    # None means unpriced: a layout using it has no cost, never an estimated one.
+    "reflective_pavement": None,
+    "permeable_pavement": None,
+    "shade_structure": None,
+}
 
 # --- Surface albedo by material (docs/sources.md, Material albedo) -----------------------
 

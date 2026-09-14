@@ -44,6 +44,11 @@ SourceAdapter = Literal["earth_engine", "planetary_computer"]
 Product = Literal["surface_temperature", "land_cover"]
 StreetProfile = Literal["dense_commercial", "leafy_residential", "wide_arterial", "mixed"]
 DimensionSource = Literal["osm_tag", "estimated_from_area", "default_assumption"]
+CrossSectionSource = Literal["osm_tag", "published_design", "measured_from_imagery", "default_assumption"]
+CrossSectionBandKind = Literal[
+    "carriageway", "median", "bus_stop", "buffer", "cycle_track", "tree_pit", "footway", "private_property",
+]
+SurfaceClassName = Literal["canopy", "built", "paved", "bare"]
 InterventionType = Literal["tree", "reflective_pavement", "permeable_pavement", "shade_structure"]
 
 
@@ -53,8 +58,10 @@ def _check_grid(grid: list[list[float | None]], shape: tuple[int, int], name: st
         raise ValueError(f"{name} does not match shape {list(shape)}")
 
 
-def _check_cost_range(low: float, high: float) -> None:
-    if low > high:
+def _check_cost_range(low: float | None, high: float | None) -> None:
+    if (low is None) != (high is None):
+        raise ValueError("cost_inr_low and cost_inr_high must both be null or both be set")
+    if low is not None and low > high:
         raise ValueError(f"cost_inr_low {low} exceeds cost_inr_high {high}")
 
 
@@ -113,6 +120,10 @@ class Building(Contract):
     footprint: list[PointUTM]
     height_m: float = Field(gt=0)
     height_source: DimensionSource
+    footprint_source: str = Field(
+        description="Dataset the footprint came from, verbatim as Overture names it: 'OpenStreetMap', "
+                    "'Microsoft ML Buildings', 'Google Open Buildings', ..."
+    )
 
 
 class Road(Contract):
@@ -127,6 +138,31 @@ class Sidewalk(Contract):
     width_source: DimensionSource
 
 
+class CrossSectionBand(Contract):
+    """One strip of the street, as offsets across it from the centreline (negative is left of the bearing)."""
+
+    kind: CrossSectionBandKind
+    offset_from_m: float
+    offset_to_m: float
+    plantable: bool
+
+    @model_validator(mode="after")
+    def _ordered(self):
+        if self.offset_from_m >= self.offset_to_m:
+            raise ValueError("offset_from_m must be less than offset_to_m")
+        return self
+
+
+class CrossSection(Contract):
+    """How the street's width is divided. Anything whose source is not osm_tag is an assumption, labelled in the UI."""
+
+    source: CrossSectionSource
+    reference: str = Field(description="What the source is, e.g. 'PMC Urban Street Design Guidelines 2016, template 18A'.")
+    right_of_way_m: float = Field(gt=0)
+    right_of_way_source: DimensionSource | Literal["building_footprints"]
+    bands: list[CrossSectionBand] = Field(min_length=1)
+
+
 class StreetGeometry(Contract):
     street_id: str
     crs: CrsCode
@@ -134,6 +170,7 @@ class StreetGeometry(Contract):
     buildings: list[Building]
     road: Road
     sidewalks: list[Sidewalk]
+    cross_section: CrossSection
 
 
 # --- Thermal grid --------------------------------------------------------------
@@ -178,9 +215,25 @@ class CalibrationRequest(Contract):
     seed: int = 42
 
 
+class SurfaceContrast(Contract):
+    """Modelled surface temperature of a cell fully of class_a minus one fully of class_b, with its standard error.
+
+    Invariant to which class the fit uses as reference. The standard error assumes independent residuals,
+    so it is a diagnostic, not a confidence interval.
+    """
+
+    class_a: SurfaceClassName
+    class_b: SurfaceClassName
+    difference_c: float
+    standard_error_c: float = Field(ge=0)
+
+
 class CalibrationResult(Contract):
     """Baseline surface temperature model fitted on calibration cells (90 m blocks), plus the
-    published albedo coefficient range used for albedo interventions, which is not fitted."""
+    published albedo coefficient range used for albedo interventions, which is not fitted.
+
+    The k fields are differences from paved surface whatever reference class the fit used; the
+    parameterisation does not change predictions. contrasts lists every pair with standard errors."""
 
     street_id: str
     bbox_window: BBoxWGS84
@@ -196,6 +249,9 @@ class CalibrationResult(Contract):
     r2_holdout: float
     n_cells_fit: int = Field(gt=0)
     n_cells_holdout: int = Field(gt=0)
+    fit_reference_class: SurfaceClassName
+    contrasts: list[SurfaceContrast] = Field(min_length=1)
+    building_footprint_sources: list[str] = Field(min_length=1)
     provenance: list[Provenance] = Field(min_length=1)
 
     @model_validator(mode="after")
@@ -207,7 +263,12 @@ class CalibrationResult(Contract):
 # --- Optimization --------------------------------------------------------------
 
 class OptimizeRequest(Contract):
-    budget_inr_max: float = Field(gt=0)
+    """Budget by count, and optionally by rupees. A rupee budget needs every allowed intervention priced:
+    with no sourced coating rate, budget_inr_max requires reflective_cells_max = 0."""
+
+    trees_max: int = Field(ge=0)
+    reflective_cells_max: int = Field(ge=0)
+    budget_inr_max: float | None = Field(default=None, gt=0)
     generations: int = Field(gt=0)
     population: int = Field(gt=0)
     cost_weight_c_per_inr: float = Field(ge=0)
@@ -238,8 +299,8 @@ class OptimizeProgress(Contract):
     )
     best_temp_delta_c_low: float
     best_temp_delta_c_high: float
-    best_cost_inr_low: float = Field(ge=0)
-    best_cost_inr_high: float = Field(ge=0)
+    best_cost_inr_low: float | None = Field(ge=0, description="Null when the layout uses an unpriced intervention.")
+    best_cost_inr_high: float | None = Field(ge=0, description="Null when the layout uses an unpriced intervention.")
     layout_preview: list[Intervention] | None = Field(
         description="Sent only when the best individual improves; null otherwise."
     )
@@ -273,21 +334,32 @@ class ModelError(Contract):
 
 
 class ComparisonArm(Contract):
+    """One arm of the matched-budget comparison. Counts are carried so the match is checkable
+    even when costs are null."""
+
     temp_delta_c_low: float
     temp_delta_c_high: float
-    cost_inr_low: float = Field(ge=0)
-    cost_inr_high: float = Field(ge=0)
+    cost_inr_low: float | None = Field(ge=0, description="Null when the layout uses an unpriced intervention.")
+    cost_inr_high: float | None = Field(ge=0, description="Null when the layout uses an unpriced intervention.")
+    unpriced_interventions: list[InterventionType]
+    trees: int = Field(ge=0)
+    reflective_cells: int = Field(ge=0)
 
     @model_validator(mode="after")
     def _ranges(self):
         _check_cost_range(self.cost_inr_low, self.cost_inr_high)
         _check_band(self.temp_delta_c_low, self.temp_delta_c_high, "temp_delta_c")
+        if (self.cost_inr_low is None) != bool(self.unpriced_interventions):
+            raise ValueError("cost is null exactly when some intervention is unpriced")
         return self
 
 
 class Comparison(Contract):
+    """random is the mean-seed random layout; design_guideline is good practice with no optimisation."""
+
     random: ComparisonArm
     greedy: ComparisonArm
+    design_guideline: ComparisonArm
     ga: ComparisonArm
 
 
@@ -329,12 +401,15 @@ class OptimizationResult(Contract):
     optimized_temp_c_high: float
     temp_delta_c_low: float = Field(description="More-cooling end of the band from the published albedo coefficient range.")
     temp_delta_c_high: float = Field(description="Less-cooling end. Equal to temp_delta_c_low when no albedo intervention is used.")
-    cost_inr_low: float = Field(ge=0)
-    cost_inr_high: float = Field(ge=0)
+    cost_inr_low: float | None = Field(ge=0, description="Null when the layout uses an unpriced intervention.")
+    cost_inr_high: float | None = Field(ge=0, description="Null when the layout uses an unpriced intervention.")
+    unpriced_interventions: list[InterventionType]
     model: ModelError
     comparison: Comparison
     interventions: list[Intervention]
     design_grid: DesignGrid
+    cross_section: CrossSection
+    plantable_mask: list[list[bool]] = Field(description="Design cells where a tree may be planted, from the cross-section.")
     before_lst_c: list[list[float | None]]
     after_lst_c_low: list[list[float | None]]
     after_lst_c_high: list[list[float | None]]
@@ -344,6 +419,11 @@ class OptimizationResult(Contract):
     @model_validator(mode="after")
     def _consistent(self):
         _check_cost_range(self.cost_inr_low, self.cost_inr_high)
+        if (self.cost_inr_low is None) != bool(self.unpriced_interventions):
+            raise ValueError("cost is null exactly when some intervention is unpriced")
+        rows, cols = self.design_grid.shape
+        if len(self.plantable_mask) != rows or any(len(row) != cols for row in self.plantable_mask):
+            raise ValueError(f"plantable_mask does not match shape {list(self.design_grid.shape)}")
         _check_band(self.temp_delta_c_low, self.temp_delta_c_high, "temp_delta_c")
         _check_band(self.optimized_temp_c_low, self.optimized_temp_c_high, "optimized_temp_c")
         _check_grid(self.before_lst_c, self.design_grid.shape, "before_lst_c")

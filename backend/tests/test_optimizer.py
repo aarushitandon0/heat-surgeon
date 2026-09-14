@@ -10,7 +10,7 @@ from app.contracts import DesignGrid
 from app.data.landcover import BARE, BUILT, CANOPY, CARRIAGEWAY, FOOTWAY
 from app.model.delta import cell_effects
 from app.model.heat import HeatModel
-from app.optimizer.baselines import greedy_layout, random_layout
+from app.optimizer.baselines import design_guideline_layout, greedy_layout, random_layout
 from app.optimizer.encoding import REFLECTIVE, TREE, UNCHANGED, Budget, StreetGrid
 from app.optimizer.ga import GAParams, run_ga
 
@@ -77,6 +77,44 @@ def test_greedy_takes_hottest_valid_cell_and_random_respects_budget():
     layout = random_layout(grid, Budget(trees=0, reflective_cells=3), np.random.default_rng(1))
     assert (layout == REFLECTIVE).sum() == 3
     assert all(classes.ravel()[i] == CARRIAGEWAY for i in np.flatnonzero(layout == REFLECTIVE))
+
+
+def test_design_guideline_spaces_trees_evenly_on_both_strips_and_coats_a_contiguous_run():
+    # 50 x 10 grid: carriageway columns 3-6, plantable tree-pit strips in columns 1 and 8.
+    classes = np.full((50, 10), FOOTWAY)
+    classes[:, 3:7] = CARRIAGEWAY
+    plantable = np.zeros((50, 10), dtype=bool)
+    plantable[:, 1] = plantable[:, 8] = True
+    design = DesignGrid(crs="EPSG:32643", origin_e_m=0.0, origin_n_m=0.0, bearing_deg=0.0,
+                        cell_size_m=config.DESIGN_CELL_SIZE_M, shape=classes.shape)
+    grid = StreetGrid(design_grid=design, classes=classes, effects=cell_effects(MODEL, classes),
+                      before_lst_c=np.zeros(classes.shape), plantable=plantable,
+                      coatable=np.isin(classes, (CARRIAGEWAY,)))
+    layout = design_guideline_layout(grid, Budget(trees=4, reflective_cells=8)).reshape(classes.shape)
+    trees = np.argwhere(layout == TREE)
+    assert len(trees) == 4
+    assert sorted(set(trees[:, 1].tolist())) == [1, 8]           # two on each strip
+    for col in (1, 8):
+        rows = trees[trees[:, 1] == col, 0]
+        # span of 49 rows split over 2 trees -> step 24.5 rows (49 m), well above the 8 m minimum
+        assert abs(rows[1] - rows[0]) * config.DESIGN_CELL_SIZE_M >= config.TREE_MIN_SPACING_M
+    coated = np.argwhere(layout == REFLECTIVE)
+    assert len(coated) == 8
+    assert set(coated[:, 1].tolist()) <= {3, 4, 5, 6}
+    assert np.ptp(coated[:, 0]) == 1                               # two whole rows next to each other
+
+
+def test_evaluate_reports_cost_only_when_every_intervention_is_priced():
+    grid = make_grid(np.full((7, 7), BARE))
+    genome = np.zeros(49, dtype=np.int8)
+    genome[24] = TREE
+    result = grid.evaluate(genome)
+    assert (result.cost_inr_low, result.cost_inr_high) == config.COST_INR_BY_INTERVENTION["tree"]
+    classes = np.full((7, 7), CARRIAGEWAY)
+    coated = np.zeros(49, dtype=np.int8)
+    coated[0] = REFLECTIVE
+    result = make_grid(classes).evaluate(coated)
+    assert result.cost_inr_low is None and result.unpriced_interventions == ("reflective_pavement",)
 
 
 def test_ga_finds_the_best_single_tree_position():

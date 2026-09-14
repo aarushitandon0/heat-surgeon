@@ -104,6 +104,40 @@ Both pervious concrete studies find it 0.05–0.20 *less* reflective than conven
 - **[D1]** Indian Roads Congress. *IRC:SP:21-2009, Guidelines on Landscaping and Tree Plantation*. https://archive.org/details/govlawircy2009sp21 — read via the Internet Archive full text.
 - **[D2]** Indian Roads Congress. *IRC:103-2012, Guidelines for Pedestrian Facilities*. https://law.resource.org/pub/in/bis/irc/irc.gov.in.103.2012.pdf — full text read.
 
+| `USDG_TEMPLATES` | 9A, 12A, 15A, 18A, 21A, 24A, 30A band widths | [D3] chapter 8 reference templates, section drawings read from the PDF (pp. 74, 76, 81, 85, 90, 94, 99). 21A and the 15A/24A bus-stop zones are adjusted as logged in methodology.md |
+| Template choice rule | widest template no wider than the right of way; spare width to non-motorised space | [D3] chapter 8 introduction ("For eg: For streets with ROW 20 meters, street template for ROW 18 meters should be used and remaining 2 meters should be designed as a part of NMT space") |
+| Tree placement | trees in the verge / MUZ / parking belt between footpath and carriageway, never in the clear walkway | [D3] §5.2 Plantation |
+
+- **[D3]** Pune Municipal Corporation. *Urban Street Design Guidelines, Pune*, Version I:2016. Published with ITDP India. https://www.itdp.in/wp-content/uploads/2016/07/Urban-street-design-guidelines.pdf — full text and template drawings read 2026-09-14.
+
+## Costs
+
+| Constant | Value | Source |
+|---|---|---|
+| `TREE_PLANTING_FIRST_YEAR_INR` | ₹1,682 per tree | [C1] item 39.30: "Planting of trees by the road side (Avenue trees) in 0.60 m dia holes, 1 m deep dug in the ground, mixing the soil with decayed farm yard/sludge manure, planting the saplings, backfilling the trench, watering, fixing the tree guard and maintaining the plants for one year" |
+| `TREE_GUARD_INR_LOW` | ₹2,038 | [C1] item 39.31: half brick circular tree guard, 1.25 m internal diameter, 1.2 m high |
+| `TREE_GUARD_INR_HIGH` | ₹4,220 | [C1] item 39.39: M.S. tree guard 50 cm square, 1.4 m above ground |
+| `COST_INR_BY_INTERVENTION["tree"]` | ₹3,720 to ₹5,902 | Sum of the above. Scope: planting, guard and **first-year** care only |
+| Reflective coating, pervious concrete, shade structure | no value | Not sourced; see below |
+
+- **[C1]** Government of Rajasthan, Rajasthan Urban Infrastructure Development Project. *Integrated Schedule of Rates 2023* (w.e.f. 01/10/2023). https://lsg.urban.rajasthan.gov.in/content/dam/raj/udh/organizations/ruidp/Downloads/SOR-2023/SOR%20RUIDP%20-%202023.pdf — full text read 2026-09-14. Item 39.33 (bitumen-drum guard, ₹1,026) is not used as the low guard because the drum is supplied by the department and not included in the rate.
+
+Searched within the 90-minute cost timebox and **not** usable:
+- CPWD *Delhi Schedule of Rates (Horticulture & Landscaping) 2020*: the copy at cpwd.gov.in refused the download; the copy hosted by Indian Railways (ICF) opened, but its chapter 2 rate pages are scanned images with no text layer. Chapter 7 gives sapling prices only (₹45 to ₹750 each), not pits or care.
+- Pune Municipal Corporation *Garden DSR 2016-17* (pmc.gov.in): the server refused connections from the build machine.
+- Maharashtra PWD district schedules: mahapwd.com has an invalid TLS certificate; copies found were on Scribd only. The maharashtra.gov.in "Horticulture 2023-24" PDF is an agriculture department programme budget, not a rate schedule.
+- MoRTH *Standard Data Book*: available only on Scribd and mirrors; it is an analysis-of-rates method, not a rate list.
+- Reflective pavement coating: no Indian government schedule item found. RUIDP item 10.8 (hot-applied thermoplastic road marking) is a different product. Cool **roof** coating prices (Telangana Cool Roof Policy 2023-28, Ahmedabad Heat Action Plan) are not traffic-rated pavement coatings and are not used.
+
+## Building footprints
+
+| Constant | Value | Source |
+|---|---|---|
+| `OVERTURE_RELEASE` | 2026-08-19.0 | [B1] |
+| `GOOGLE_OPEN_BUILDINGS_MIN_CONFIDENCE` | 0.65 | Observed minimum in the release over Pune; logged as an assumption |
+
+- **[B1]** Overture Maps Foundation. *Buildings theme*, release 2026-08-19.0, GeoParquet at `s3://overturemaps-us-west-2/release/2026-08-19.0/theme=buildings/type=building/`, read anonymously with DuckDB. Conflates OpenStreetMap (ODbL), Microsoft Global ML Building Footprints (ODbL) and Google Open Buildings (CC BY 4.0 / ODbL). Each footprint's `sources[1].dataset` is kept verbatim as `footprint_source`.
+
 ## OpenStreetMap
 
 Building footprints and highway geometry: © OpenStreetMap contributors, available under the Open Database License (ODbL 1.0), https://www.openstreetmap.org/copyright. Pulled via the Overpass API (https://overpass-api.de); database timestamp 2026-09-13T19:08:06Z, stored with the cached result.

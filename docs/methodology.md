@@ -39,13 +39,13 @@ Each 1 m sub-cell of the window gets one class, in this priority order:
 | Class | Rule | Share of FC Road window (mean over 90 m cells) |
 |---|---|---|
 | Canopy | Sentinel-2 NDVI at or above 0.5 (what the thermal sensor sees from above, so it wins) | 26.4% |
-| Built | OSM building footprint | 19.4% |
-| Paved | OSM highway way, buffered to its tagged or estimated width | 7.8% |
+| Built | Building footprint: OSM, plus Microsoft and Google footprints via Overture (Day 4) | 22.7% (19.4% with OSM alone) |
+| Paved | OSM highway way, buffered to its tagged or estimated width | 7.7% |
 | Water | NDVI below 0 | under 0.1% |
-| Bare | everything else | 46.4% |
+| Bare | everything else | 42.9% |
 
 Limitations, stated plainly:
-- **OSM building footprints are incomplete here.** FC Road is dense commercial, yet only 6 of 484 calibration cells are at least half built. Unmapped roofs fall into "bare".
+- **Building footprints are still incomplete.** With OSM alone, only 6 of 484 calibration cells in dense commercial FC Road were at least half built. Adding 2,686 Microsoft and Google footprints (Day 4) raised that to 9, and the built share from 19.4% to 22.7%: the added footprints are mostly small roofs. Unmapped roofs still fall into "bare".
 - **Paved surface is underestimated.** Only 1 of 1,124 ways has a width tag; the rest use lane counts or class defaults (see assumptions), which are narrow for a busy commercial street.
 - **"Bare" is a catch-all.** It holds dry soil, sparse and dry vegetation (NDVI 0.2–0.5), unmapped roofs and unmapped paving.
 - **"Canopy" is any vigorous green vegetation.** In March–May that is mostly trees and irrigated lawns; a watered lawn counts the same as a tree.
@@ -63,7 +63,45 @@ What the hold-out error does and does not show:
 - **It does not show transfer to other neighbourhoods.** Neighbouring 90 m cells still share some thermal signal.
 - **Coefficient standard errors are a diagnostic, not confidence intervals.**
 
-## Calibration result, FC Road (revision 4 model)
+## Calibration result, FC Road, with merged footprints (Day 4, current)
+
+**Building footprints.** OSM footprints from our own Overpass pull, unioned with the non-OSM footprints in Overture Maps release 2026-08-19.0 (sources.md, [B1]). Overture's own OSM rows are skipped, since OSM comes from Overpass. A non-OSM footprint whose centroid falls inside an OSM footprint, or within 5 m of an OSM footprint's centroid, is a duplicate and dropped. Every building carries `footprint_source`.
+
+| FC Road window | Count |
+|---|---|
+| OSM (Overpass) | 3,222 |
+| Google Open Buildings added | 2,283 |
+| Microsoft ML Buildings added | 403 |
+| Dropped as duplicates | 6 |
+| Dropped below confidence 0.65 | 0 |
+
+**Refit.** Same cells, split and seed as before. Bare is the best-supported class (mean share 42.9%), so it is the reference in the report. All pairwise contrasts, as a full cell of the first class minus a full cell of the second:
+
+| Contrast | °C | Standard error | \|z\| |
+|---|---|---|---|
+| canopy − bare | −7.98 | 0.40 | 19.9 |
+| built − bare | −4.45 | 0.58 | 7.7 |
+| paved − bare | −2.29 | 1.17 | 2.0 |
+| canopy − built | −3.53 | 0.62 | 5.7 |
+| canopy − paved | −5.68 | 1.11 | 5.1 |
+| built − paved | −2.16 | 1.35 | 1.6 |
+
+| Quantity | Value |
+|---|---|
+| Fully bare cell | 44.27 °C (se 0.23) |
+| `t_base_c` (fully paved cell, contract field) | 41.98 °C (se 1.08) |
+| `k_canopy_c_per_fraction`, `k_built_c_per_fraction`, `k_bare_c_per_fraction` | +5.68, −2.16, +2.29 |
+| `rmse_holdout_c` / `rmse_mean_baseline_c` | 1.40 °C / 2.03 °C |
+| `r2_holdout` | 0.53 |
+
+What changed and what did not:
+- **Built cooler than paved is no longer a tight result.** It is −2.16 ± 1.35 °C (|z| 1.6); with OSM alone it was −2.97 ± 1.28.
+- **Built cooler than bare is robust.** Roofs are about 4.4 °C cooler than bare ground at the 10:57 overpass, |z| 7.7. Plausible reasons: shading between buildings, and roofs heating more slowly in the morning than dry exposed soil. This is a finding about this neighbourhood at mid-morning, not about roof materials in general.
+- **Hold-out error is unchanged within noise** (1.36 → 1.40 °C). Better footprints moved area between classes but did not add explanatory power.
+- **Changing the reference class cannot fix the paved coefficient.** Shares sum to one, so choosing the reference is a reparameterisation: predictions, error, every pairwise contrast and its standard error are identical under any choice. Paved − anything is uncertain because paved surface is only 7.7% of the window and majority nowhere. More paved area in the data (better carriageway widths), not a different reference, is what would tighten it. The contract keeps the k fields relative to paved and adds `contrasts` with standard errors and `fit_reference_class`.
+- **Sentinel-2 B11 escalation rule: retired.** Within majority-built cells, albedo still correlates with surface temperature (r = +0.58, n = 9); the rule would fire again. The rule was meant to detect sparse footprints, and footprints are now addressed directly. NDBI from B11 confuses dry bare soil with roofs, the confound this model avoids. The correlation stays as a diagnostic in the calibration output.
+
+## Superseded: calibration result with OSM footprints only (revision 4 model, Day 3)
 
 | Quantity | Value |
 |---|---|
@@ -217,6 +255,65 @@ Figure: [figures/pune-fc-road-layouts.png](figures/pune-fc-road-layouts.png).
 **The magnitudes depend on uncertain coefficients.**
 - A crown over bare ground gains k_canopy + k_bare = 7.8 °C per cell. Both coefficients carry standard errors of about 1 °C.
 - The coating band spans a factor of seven (1.5 to 10.8 °C per asphalt cell).
+
+## Day 4: costs, cross-sections and the design-guideline baseline
+
+### Costs
+
+- **What is priced.** Street trees only: planting in a 0.6 m × 1 m hole with manure, the sapling, fixing a guard and one year of maintenance, plus the guard itself. ₹3,720 to ₹5,902 per tree, from the Government of Rajasthan's RUIDP *Integrated Schedule of Rates 2023* (sources.md, [C1]).
+- **What is not priced.** Reflective pavement coating, pervious concrete and shade structures. No Indian government rate schedule with these items could be opened within the 90-minute timebox; sources.md lists every source tried and why it failed.
+- **What that means for the product.**
+  - A layout that uses any unpriced intervention has **no cost**: `cost_inr_low` and `cost_inr_high` are null, and `unpriced_interventions` names what is missing. The UI drops cost from the headline rather than showing a partial sum or an estimate.
+  - The comparison is matched by count (trees, coated cells), and counts are in every comparison arm so the match is checkable.
+  - A rupee budget (`budget_inr_max`) is accepted only when no unpriced intervention is allowed (`reflective_cells_max = 0`). It then caps the tree count at the budget divided by the high end of the per-tree range, so total cost stays within budget at the conservative end.
+
+Cost assumptions:
+- **Jaipur 2023 rates stand in for Pune.** Reasoning: no Pune or Maharashtra schedule could be opened. What it changes: labour and material rates differ between states; the range is an order-of-magnitude estimate, labelled as such.
+- **First-year care only.** SPEC.md §8 asks for three years of establishment care; years two and three have no sourced rate, so the range understates a three-year cost. What it changes: a three-year figure would be higher by the cost of two more years of watering and maintenance.
+
+### Cross-section
+
+The Day 3 layouts put trees 5–9 m from FC Road's centreline, very likely in carriageway or parking, because the corridor between a 7 m carriageway and the building line was treated as plantable bare ground. The cross-section now decides where interventions may go, and is labelled by source (`CrossSection.source`):
+
+1. **`osm_tag`**: used when the OSM way tags carriageway width and both sidewalk widths. No Pune street surveyed has these tags.
+2. **`published_design`**:
+   - The right of way is measured from building footprints: at 2 m stations along the segment, the distance to the first building edge on each side within 30 m, median over stations.
+   - It is divided by the PMC *Urban Street Design Guidelines* (2016) template for that width: the widest template no wider than the right of way, with spare width added to the outer footways (sources.md, [D3]).
+   - This is Pune's own street design standard applied to the measured width, **not a survey of the street as built**. The reference string says so, and the UI must label the cross-section as assumed.
+3. **`default_assumption`**: carriageway from lanes or road class, IRC:103 minimum sidewalks, and **no plantable band**, so no trees.
+
+Rules that follow from the cross-section:
+- Trees go only in `tree_pit` bands, never on a building or existing canopy.
+- Coatings go only on carriageway, footway and cycle track inside the right of way.
+- Nothing goes on private property outside the right of way, which removes the Day 3 plantings in private setbacks.
+- **Today's surface inside the right of way** follows the bands where the land cover shows neither canopy nor building: carriageway as asphalt, footway, cycle track and tree pits as paved footway, buffers and medians as bare.
+
+Cross-section assumptions:
+- **Right of way measured to building edges.** Reasoning: no surveyed widths exist in OSM for these streets. What it changes: buildings set back behind compound walls or front yards make the measured right of way wider than the public street. FC Road's segment measures 28.2 m and takes template 24A; the public street is likely narrower. A narrower measure picks a smaller template with fewer and narrower tree pits.
+- **30 m search reach, 30% of stations must hit a building on each side.** Reasoning: long enough for arterial setbacks, short enough to stay on the street. What it changes: a longer reach finds buildings across open ground and inflates the right of way; fewer stations makes the median noisier.
+- **Template 21A's clear walkway is taken as 3.5 m.** Reasoning: the section's labelled widths sum to 21.5 m, while the plan view gives 8 m for that side of the carriageway. What it changes: 0.5 m of walkway on one side of 21 m streets.
+- **15A and 24A bus-stop zones are recorded as tree pits.** Reasoning: the sections are drawn through a bus stop; the plan views show tree pits in that zone along the rest of the street. What it changes: without it those templates have trees on one side only, halving tree capacity.
+
+### Baselines
+
+- **Greedy is kept, and labelled weak.** In a linear model, an intervention's gain at a cell does not depend on how hot the cell is, so "hottest cell first" is not a sensible heuristic; beating it is not a claim.
+- **`design_guideline_layout()` is the counterfactual that matters.** It is what a competent street designer would do with the same budget, with no optimisation:
+  - Trees split evenly between the plantable strips on the two sides, each evenly spaced along the segment at no less than the IRC:SP:21 minimum of 8 m.
+  - Coating on whole rows of paving not under a new crown, a contiguous run of the widest rows.
+- **Matched budget.** Every arm gets the same tree count, capped at the most trees the plantable strips physically hold at 8 m spacing (`StreetGrid.tree_capacity()`), and the same number of coated cells. Without the cap, arms placed different numbers of trees when the request exceeded capacity.
+- **The GA is not seeded with the guideline layout**, so matching or beating it is not guaranteed by construction.
+
+### Permeable paving and shade structures stay out of the action set
+
+- **Permeable paving warms in this model.** A paved footway made pervious is modelled as bare-like ground, and bare is 2.3 °C hotter than paved in the pre-monsoon fit.
+- **That agrees with the albedo literature.** Pervious concrete is 0.05–0.20 less reflective than conventional concrete (Lu et al. 2023; Zhang et al. 2015; sources.md, [M2], [M3]).
+- **Any cooling would come from evaporation**, which needs moisture that pre-monsoon Pune surfaces lack and which this model does not represent. It is left out, not tuned to look useful.
+- **Shade structures** have no cited surface temperature effect and no fitted coefficient.
+
+### Building heights (display only)
+
+- **Assumption.** Height comes from OSM `height`, else `building:levels` × 3 m, else 6 m (two storeys), labelled by `height_source`.
+- **What it changes.** Only the 3D scene; the heat model does not use height.
 
 ## Earlier data-layer assumptions
 

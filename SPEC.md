@@ -4,6 +4,15 @@
 > NextStep Hacks 2026 · HackAlphaX · Theme: Earth Forward
 > Build window: 10 days.
 
+**Revision 5 (Day 4)** — contracts reopened again, backend and frontend together.
+- **Costs are nullable.** Only street trees have a sourced rate (RUIDP ISOR 2023, first-year care). A layout using an unpriced intervention returns `cost_inr_low/high = null` with `unpriced_interventions`, never an estimate.
+- **`OptimizeRequest` budgets by count.** It takes `trees_max` and `reflective_cells_max`. `budget_inr_max` is optional and allowed only for fully priced action sets.
+- **`ComparisonArm` carries `trees`, `reflective_cells` and `unpriced_interventions`**, and `Comparison` gains `design_guideline`, the good-practice layout with no optimisation.
+- **Geometry gains cross-sections.** `Building` gains `footprint_source`, since footprints are OSM unioned with Microsoft and Google via Overture. `StreetGeometry` and `OptimizationResult` gain a `CrossSection` (source `osm_tag | published_design | measured_from_imagery | default_assumption`), and `OptimizationResult` gains `plantable_mask`.
+- **Calibration reports contrasts.** `CalibrationResult` gains `fit_reference_class`, all pairwise `contrasts` with standard errors, and `building_footprint_sources`.
+- **Profiles swapped.** Bajirao Road is now the dense commercial street and FC Road is reclassified as mixed.
+- **Numbers.** The §7 numeric examples below predate this revision; `docs/methodology.md` has the real Day 4 output.
+
 **Revision 4** — the heat model is split into a fitted baseline and an intervention delta. The baseline (canopy, built, bare; paved is the reference) is fitted on 90 m calibration cells, not 30 m pixels. The albedo coefficient is a published field measurement carried as a low/high band, never fitted. Built and paved surfaces come from OSM, canopy from NDVI. Contracts reopened on Day 3 for these fields: `CalibrationResult` gains `k_built`, `k_bare`, `k_albedo_low/high`, `calibration_resolution_m`, `n_cells_*` and loses the fitted albedo and impervious terms; temperature deltas and after-grids become low/high bands; `Resolution` gains `calibration_resolution_m`. Overpass time corrected to the measured 10:57 IST. Invented calibration numbers replaced with real output.
 
 **Revision 3** — measured grids stay on their native UTM grid (no resampling of measured values). `OptimizationResult` gains a street-aligned design grid with before/after surfaces and a single comparison-arm shape. Invalid cells are `null` with no separate mask. Coordinates use typed `BBoxWGS84` / `PointUTM` / `AffineUTM`. Model coefficients are named by unit. `layout_preview` is sent only on improvement. Sentinel-2 masking and offset handling specified. Uncitable thresholds are logged as assumptions. CLAUDE.md rules 6 and 7 amended. §7 examples are illustrative, not normative.
@@ -287,7 +296,8 @@ Return `temp_drop` and `cost` as **separate fields** even in the single-objectiv
 
 ### 6.4 Baselines — same day as the GA
 1. `random_layout()` — same number of interventions, placed randomly.
-2. `greedy_layout()` — place one at a time at the currently hottest valid cell.
+2. `greedy_layout()` — place one at a time at the currently hottest valid cell. Revision 5: a weak baseline. In a linear model an intervention's gain does not depend on how hot the cell is, so beating greedy is not a claim.
+3. `design_guideline_layout()` (revision 5) — what a competent street designer would do with the same budget: trees evenly spaced along both plantable strips at IRC spacing, coating on the widest continuous run of paving. This is the counterfactual the GA has to beat.
 
 Both at matched budget. Report all three:
 
@@ -542,6 +552,8 @@ Per unit, as **low/high ranges**:
 - Shade structure: per unit.
 
 The UI shows the range and labels it an order-of-magnitude estimate. It never shows a midpoint. Precision you don't have is a liability.
+
+**Revision 5 status:** only street trees are priced, at ₹3,720–5,902 each (RUIDP ISOR 2023 items 39.30 plus a guard from 39.31–39.39). That covers planting, the guard and first-year care, not three years. Coating, permeable concrete and shade structures are unpriced. A layout that uses them has a null cost, and the UI drops cost from the headline.
 
 ---
 

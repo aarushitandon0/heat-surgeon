@@ -17,10 +17,10 @@ from pathlib import Path
 import numpy as np
 
 from app import config
-from app.contracts import CalibrationRequest, CalibrationResult
+from app.contracts import CalibrationRequest, CalibrationResult, SurfaceContrast
 from app.data.fixtures import CachedWindow, load_window
 from app.data.landcover import SurfaceCover, block_fractions, block_mean, classify_surfaces
-from app.model.heat import HeatModel, fit
+from app.model.heat import SURFACE_CLASSES, HeatModel, contrasts, fit, reference_view
 
 REPO_DIR = config.BACKEND_DIR.parent
 
@@ -49,7 +49,7 @@ def window_surfaces(window: CachedWindow) -> tuple[np.ndarray, object]:
     """Surface class codes on the 1 m sub-grid of the whole window."""
     s2 = window.sentinel2
     return classify_surfaces(s2.arrays["red"], s2.arrays["nir"], tuple(s2.metadata["transform"]),
-                             s2.metadata["boa_add_offset_applied"], window.osm, window.bbox.bounds)
+                             s2.metadata["boa_add_offset_applied"], window.surface_geometry, window.bbox.bounds)
 
 
 def calibration_cells(window: CachedWindow, classes: np.ndarray | None = None) -> tuple[SurfaceCover, np.ndarray, np.ndarray]:
@@ -70,6 +70,9 @@ class CalibrationRun:
     result: CalibrationResult
     model: HeatModel
     standard_errors: np.ndarray
+    covariance: np.ndarray
+    mean_share: dict[str, float]
+    footprint_counts: dict
     rmse_fit_c: float
     observed_fit_c: np.ndarray
     predicted_fit_c: np.ndarray
@@ -109,9 +112,13 @@ def calibrate(street_id: str, request: CalibrationRequest | None = None) -> Cali
     def subset(i):
         return cells["canopy_fraction"][i], cells["built_fraction"][i], cells["bare_fraction"][i]
 
-    model, standard_errors = fit(observed[fit_i], *subset(fit_i))
+    model, standard_errors, covariance = fit(observed[fit_i], *subset(fit_i))
     predicted_fit, predicted_holdout = model.predict_c(*subset(fit_i)), model.predict_c(*subset(holdout_i))
     baseline = np.full(len(holdout_i), observed[fit_i].mean())
+    # Report against the best-supported class: the one with the largest mean share of the fitting cells.
+    mean_share = {name: float(cells[f"{name}_fraction"][fit_i].mean()) for name in SURFACE_CLASSES}
+    reference = max(mean_share, key=mean_share.get)
+    pairs = contrasts(model, covariance)
 
     albedo_correlation = {}
     for name in ("built_fraction", "paved_fraction", "bare_fraction", "canopy_fraction"):
@@ -135,10 +142,14 @@ def calibrate(street_id: str, request: CalibrationRequest | None = None) -> Cali
         r2_holdout=r2_score(observed[holdout_i], predicted_holdout),
         n_cells_fit=len(fit_i),
         n_cells_holdout=len(holdout_i),
+        fit_reference_class=reference,
+        contrasts=[SurfaceContrast(class_a=a, class_b=b, difference_c=d, standard_error_c=se) for a, b, d, se in pairs],
+        building_footprint_sources=sorted({b["footprint_source"] for b in window.buildings}),
         provenance=[window.landsat_provenance, window.sentinel2_provenance],
     )
     return CalibrationRun(
-        result=result, model=model, standard_errors=standard_errors,
+        result=result, model=model, standard_errors=standard_errors, covariance=covariance,
+        mean_share=mean_share, footprint_counts=window.footprint_counts,
         rmse_fit_c=rmse_c(observed[fit_i], predicted_fit),
         observed_fit_c=observed[fit_i], predicted_fit_c=predicted_fit,
         observed_holdout_c=observed[holdout_i], predicted_holdout_c=predicted_holdout,
@@ -199,12 +210,29 @@ def main(argv: list[str] | None = None) -> None:
     print(f"             fit {r.n_cells_fit}, held out {r.n_cells_holdout} "
           f"(holdout_fraction {args.holdout_fraction}, seed {args.seed})")
     print()
-    print("Model        lst_pred_c = t_base_c - k_canopy * canopy + k_built * built + k_bare * bare   (paved is the reference)")
+    fc = run.footprint_counts
+    print("Footprints   " + ", ".join(f"{k} {v}" for k, v in fc.items()))
+    print("Mean share   " + ", ".join(f"{k} {v:.3f}" for k, v in run.mean_share.items())
+          + f"  -> reference class: {r.fit_reference_class}")
+    print()
+    view = reference_view(m, run.covariance, r.fit_reference_class)
+    t_ref, t_ref_se = view.pop("t_reference_c")
+    print(f"Model, {r.fit_reference_class} as reference (a reparameterisation; predictions identical)")
+    print(f"  fully {r.fit_reference_class} cell          {t_ref:8.3f} °C   (se {t_ref_se:.3f})")
+    for name, (value, value_se) in view.items():
+        print(f"  {name:8s} minus {r.fit_reference_class:8s}     {value:+8.3f} °C   (se {value_se:.3f})")
+    print()
+    print("Contract fields (paved as reference)")
     print(f"  t_base_c                     {m.t_base_c:8.3f} °C (fully paved cell)   (se {se[0]:.3f})")
     print(f"  k_canopy_c_per_fraction      {m.k_canopy_c_per_fraction:8.3f}                           (se {se[1]:.3f})")
     print(f"  k_built_c_per_fraction       {m.k_built_c_per_fraction:8.3f}                           (se {se[2]:.3f})")
     print(f"  k_bare_c_per_fraction        {m.k_bare_c_per_fraction:8.3f}                           (se {se[3]:.3f})")
     print(f"  k_albedo (published, fixed)  {r.k_albedo_low_c_per_unit_albedo:.1f} to {r.k_albedo_high_c_per_unit_albedo:.1f} °C per unit albedo")
+    print()
+    print("All pairwise contrasts, full cell of a minus full cell of b")
+    for c in r.contrasts:
+        z = abs(c.difference_c) / c.standard_error_c if c.standard_error_c else float("inf")
+        print(f"  {c.class_a:7s} - {c.class_b:7s} {c.difference_c:+8.3f} °C  (se {c.standard_error_c:.3f}, |z| {z:.1f})")
     print()
     print("Error, held-out cells")
     print(f"  rmse_holdout_c               {r.rmse_holdout_c:8.3f} °C")
@@ -223,10 +251,7 @@ def main(argv: list[str] | None = None) -> None:
     print(f"Albedo against surface temperature within cells at least {config.BUILT_DOMINANT_FRACTION:.0%} of one class")
     for n, (count, corr) in run.albedo_correlation.items():
         print(f"  {n:16s} n={count:4d}  r={corr:+.3f}")
-    built_n, built_r = run.albedo_correlation["built_fraction"]
-    escalate = built_n >= 3 and built_r > config.ALBEDO_BUILT_CORRELATION_ESCALATION
-    print(f"  escalation to Sentinel-2 B11: {'YES' if escalate else 'no'} "
-          f"(rule: built-class r above {config.ALBEDO_BUILT_CORRELATION_ESCALATION:+.2f})")
+    print("  (diagnostic only; the Sentinel-2 B11 escalation rule was retired for building footprints, Day 4)")
     print()
     print(f"Scatter      {figure.relative_to(REPO_DIR).as_posix()}")
 

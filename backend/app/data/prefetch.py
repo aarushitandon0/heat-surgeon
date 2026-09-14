@@ -26,6 +26,7 @@ from rasterio.warp import transform_bounds
 from app import config
 from app.data.cache import BBox, CachedResult, CacheKey, DateRange, cache_path, get_or_fetch, load
 from app.data.fixtures import LANDSAT_PRODUCT, S2_PRODUCT
+from app.data.footprints import load_overture_buildings, merge_footprints, overture_key
 from app.data.osm import load_osm, osm_key
 
 
@@ -129,6 +130,8 @@ def main(argv: list[str] | None = None) -> None:
     landsat = get_or_fetch(landsat_key, fetch_landsat(source, window, date_range), allow_network=True)
     s2 = get_or_fetch(s2_key, fetch_sentinel2(source, window, date_range), allow_network=True)
     osm = load_osm(window, allow_network=True)
+    overture = load_overture_buildings(window, allow_network=True)
+    merged, footprint_counts = merge_footprints(osm["buildings"], overture["buildings"])
 
     manifest.update({
         "bbox_window": [round(v, 5) for v in transform_bounds(window.crs, "EPSG:4326", *window.bounds)],
@@ -139,6 +142,7 @@ def main(argv: list[str] | None = None) -> None:
             "surface_temperature": str(cache_path(landsat_key).relative_to(config.BACKEND_DIR).as_posix()),
             "land_cover": str(cache_path(s2_key).relative_to(config.BACKEND_DIR).as_posix()),
             "osm": str(cache_path(osm_key(window)).relative_to(config.BACKEND_DIR).as_posix()),
+            "overture_buildings": str(cache_path(overture_key(window)).relative_to(config.BACKEND_DIR).as_posix()),
         },
     })
     config.STREETS_DIR.mkdir(parents=True, exist_ok=True)
@@ -180,6 +184,10 @@ def main(argv: list[str] | None = None) -> None:
     print(f"  database timestamp   {osm['osm_base']}")
     print(f"  buildings            {len(osm['buildings'])}")
     print(f"  highway ways         {len(osm['highways'])}")
+    print()
+    print(f"Building footprints, OSM unioned with Overture {overture['release']} non-OSM footprints")
+    print(f"  Overture rows        {len(overture['buildings'])}")
+    print(f"  merged buildings     {len(merged)}  {footprint_counts}")
 
 
 if __name__ == "__main__":

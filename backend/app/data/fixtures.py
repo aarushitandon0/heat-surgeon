@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from app import config
 from app.contracts import Provenance
 from app.data.cache import BBox, CachedResult, CacheKey, DateRange, get_or_fetch
+from app.data.footprints import load_overture_buildings, merge_footprints
 from app.data.osm import load_osm
 
 LANDSAT_PRODUCT = "landsat_c2_l2_composite"
@@ -18,10 +19,28 @@ class CachedWindow:
     landsat: CachedResult
     sentinel2: CachedResult
     osm: dict
+    overture: dict
 
     @property
     def bbox(self) -> BBox:
         return BBox(crs=self.manifest["window"]["crs"], bounds=tuple(self.manifest["window"]["bounds_m"]))
+
+    @property
+    def buildings(self) -> list[dict]:
+        """OSM footprints unioned with non-duplicate Overture footprints, each tagged with footprint_source."""
+        if not hasattr(self, "_buildings"):
+            self._buildings, self._footprint_counts = merge_footprints(self.osm["buildings"], self.overture["buildings"])
+        return self._buildings
+
+    @property
+    def footprint_counts(self) -> dict:
+        self.buildings
+        return self._footprint_counts
+
+    @property
+    def surface_geometry(self) -> dict:
+        """Buildings and highways in the shape classify_surfaces expects."""
+        return {"buildings": self.buildings, "highways": self.osm["highways"]}
 
     @property
     def landsat_provenance(self) -> Provenance:
@@ -61,4 +80,5 @@ def load_window(street_id: str) -> CachedWindow:
         landsat=get_or_fetch(landsat_key, _never_fetch, allow_network=False),
         sentinel2=get_or_fetch(s2_key, _never_fetch, allow_network=False),
         osm=load_osm(landsat_key.bbox, allow_network=False),
+        overture=load_overture_buildings(landsat_key.bbox, allow_network=False),
     )

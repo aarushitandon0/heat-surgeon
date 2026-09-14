@@ -28,7 +28,8 @@ UNIT_SUFFIX = re.compile(
 DIMENSIONLESS = {
     "scene_count", "valid_pixels", "n_cells_fit", "n_cells_holdout", "generation", "generations",
     "generations_total", "population", "cells", "states_per_cell", "seed",
-    "holdout_fraction", "r2_holdout", "best_fitness_score",
+    "holdout_fraction", "r2_holdout", "best_fitness_score", "trees", "reflective_cells",
+    "trees_max", "reflective_cells_max",
 }
 
 
@@ -69,7 +70,16 @@ def thermal_grid(**overrides):
 
 
 def arm(delta_c, low, high):
-    return {"temp_delta_c_low": delta_c, "temp_delta_c_high": delta_c, "cost_inr_low": low, "cost_inr_high": high}
+    return {"temp_delta_c_low": delta_c, "temp_delta_c_high": delta_c, "cost_inr_low": low, "cost_inr_high": high,
+            "unpriced_interventions": [], "trees": 2, "reflective_cells": 0}
+
+
+CROSS_SECTION = {
+    "source": "published_design", "reference": "test template", "right_of_way_m": 12.0,
+    "right_of_way_source": "building_footprints",
+    "bands": [{"kind": "carriageway", "offset_from_m": -3.0, "offset_to_m": 3.0, "plantable": False},
+              {"kind": "tree_pit", "offset_from_m": 3.0, "offset_to_m": 4.0, "plantable": True}],
+}
 
 
 def optimization_result(**overrides):
@@ -83,13 +93,17 @@ def optimization_result(**overrides):
         "temp_delta_c_high": -1.0,
         "cost_inr_low": 100.0,
         "cost_inr_high": 200.0,
+        "unpriced_interventions": [],
         "model": {"rmse_holdout_c": 0.5, "rmse_mean_baseline_c": 2.0},
-        "comparison": {"random": arm(-0.2, 90, 190), "greedy": arm(-0.5, 95, 195), "ga": arm(-1.0, 100, 200)},
+        "comparison": {"random": arm(-0.2, 90, 190), "greedy": arm(-0.5, 95, 195),
+                       "design_guideline": arm(-0.8, 100, 200), "ga": arm(-1.0, 100, 200)},
         "interventions": [{"type": "tree", "cells": [[0, 0], [1, 1]]}],
         "design_grid": {
             "crs": "EPSG:32643", "origin_e_m": 374210.0, "origin_n_m": 2050880.0,
             "bearing_deg": 37.4, "cell_size_m": 2.0, "shape": [2, 2],
         },
+        "cross_section": CROSS_SECTION,
+        "plantable_mask": [[True, False], [True, False]],
         "before_lst_c": [[36.0, 36.1], [None, 36.2]],
         "after_lst_c_low": [[34.8, 36.1], [None, 35.0]],
         "after_lst_c_high": [[35.0, 36.1], [None, 35.2]],
@@ -154,12 +168,22 @@ def test_intervention_outside_design_grid_is_rejected():
 
 def test_cost_range_must_be_ordered():
     with pytest.raises(ValidationError):
-        ComparisonArm(temp_delta_c_low=-1.0, temp_delta_c_high=-1.0, cost_inr_low=300, cost_inr_high=200)
+        ComparisonArm(**{**arm(-1.0, 300, 200)})
 
 
 def test_temperature_band_must_be_ordered():
     with pytest.raises(ValidationError, match="temp_delta_c_low"):
-        ComparisonArm(temp_delta_c_low=-0.5, temp_delta_c_high=-1.0, cost_inr_low=100, cost_inr_high=200)
+        ComparisonArm(**{**arm(-1.0, 100, 200), "temp_delta_c_low": -0.5})
+
+
+def test_cost_is_null_exactly_when_an_intervention_is_unpriced():
+    ComparisonArm(**{**arm(-1.0, None, None), "unpriced_interventions": ["reflective_pavement"]})
+    with pytest.raises(ValidationError, match="unpriced"):
+        ComparisonArm(**{**arm(-1.0, 100, 200), "unpriced_interventions": ["reflective_pavement"]})
+    with pytest.raises(ValidationError, match="unpriced"):
+        ComparisonArm(**arm(-1.0, None, None))
+    with pytest.raises(ValidationError, match="both be null"):
+        ComparisonArm(**{**arm(-1.0, 100, None), "unpriced_interventions": ["reflective_pavement"]})
 
 
 def test_websocket_message_discriminates_on_type():

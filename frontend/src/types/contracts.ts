@@ -26,6 +26,10 @@ export type SourceAdapter = 'earth_engine' | 'planetary_computer'
 export type Product = 'surface_temperature' | 'land_cover'
 export type StreetProfile = 'dense_commercial' | 'leafy_residential' | 'wide_arterial' | 'mixed'
 export type DimensionSource = 'osm_tag' | 'estimated_from_area' | 'default_assumption'
+export type CrossSectionSource = 'osm_tag' | 'published_design' | 'measured_from_imagery' | 'default_assumption'
+export type CrossSectionBandKind =
+  | 'carriageway' | 'median' | 'bus_stop' | 'buffer' | 'cycle_track' | 'tree_pit' | 'footway' | 'private_property'
+export type SurfaceClassName = 'canopy' | 'built' | 'paved' | 'bare'
 export type InterventionType = 'tree' | 'reflective_pavement' | 'permeable_pavement' | 'shade_structure'
 
 // --- Provenance ---------------------------------------------------------------
@@ -71,6 +75,8 @@ export interface Building {
   footprint: PointUTM[]
   height_m: number
   height_source: DimensionSource
+  /** Dataset verbatim as Overture names it: 'OpenStreetMap', 'Microsoft ML Buildings', 'Google Open Buildings'. */
+  footprint_source: string
 }
 
 export interface Road {
@@ -85,6 +91,23 @@ export interface Sidewalk {
   width_source: DimensionSource
 }
 
+/** One strip of the street, as offsets across it from the centreline (negative is left of the bearing). */
+export interface CrossSectionBand {
+  kind: CrossSectionBandKind
+  offset_from_m: number
+  offset_to_m: number
+  plantable: boolean
+}
+
+/** How the street's width is divided. Anything whose source is not osm_tag is an assumption, labelled in the UI. */
+export interface CrossSection {
+  source: CrossSectionSource
+  reference: string
+  right_of_way_m: number
+  right_of_way_source: DimensionSource | 'building_footprints'
+  bands: CrossSectionBand[]
+}
+
 export interface StreetGeometry {
   street_id: string
   crs: CrsCode
@@ -92,6 +115,7 @@ export interface StreetGeometry {
   buildings: Building[]
   road: Road
   sidewalks: Sidewalk[]
+  cross_section: CrossSection
 }
 
 // --- Thermal grid -------------------------------------------------------------
@@ -124,9 +148,18 @@ export interface CalibrationRequest {
   seed: number
 }
 
+/** A full cell of class_a minus one of class_b. Standard error is a diagnostic, not a confidence interval. */
+export interface SurfaceContrast {
+  class_a: SurfaceClassName
+  class_b: SurfaceClassName
+  difference_c: number
+  standard_error_c: number
+}
+
 /**
  * Baseline surface temperature model fitted on calibration cells (90 m blocks), plus the
  * published albedo coefficient range used for albedo interventions, which is not fitted.
+ * The k fields are differences from paved surface whatever reference class the fit used.
  */
 export interface CalibrationResult {
   street_id: string
@@ -146,13 +179,19 @@ export interface CalibrationResult {
   r2_holdout: number
   n_cells_fit: number
   n_cells_holdout: number
+  fit_reference_class: SurfaceClassName
+  contrasts: SurfaceContrast[]
+  building_footprint_sources: string[]
   provenance: Provenance[]
 }
 
 // --- Optimization -------------------------------------------------------------
 
+/** Budget by count, and optionally by rupees (requires reflective_cells_max = 0 while coatings are unpriced). */
 export interface OptimizeRequest {
-  budget_inr_max: number
+  trees_max: number
+  reflective_cells_max: number
+  budget_inr_max?: number | null
   generations: number
   population: number
   cost_weight_c_per_inr: number
@@ -182,8 +221,9 @@ export interface OptimizeProgress {
   best_fitness_score: number
   best_temp_delta_c_low: number
   best_temp_delta_c_high: number
-  best_cost_inr_low: number
-  best_cost_inr_high: number
+  /** Null when the layout uses an unpriced intervention. */
+  best_cost_inr_low: number | null
+  best_cost_inr_high: number | null
   /** Sent only when the best individual improves; null otherwise. */
   layout_preview: Intervention[] | null
 }
@@ -208,16 +248,22 @@ export interface ModelError {
   rmse_mean_baseline_c: number
 }
 
+/** Counts are carried so the matched budget is checkable even when costs are null. */
 export interface ComparisonArm {
   temp_delta_c_low: number
   temp_delta_c_high: number
-  cost_inr_low: number
-  cost_inr_high: number
+  /** Null when the layout uses an unpriced intervention. */
+  cost_inr_low: number | null
+  cost_inr_high: number | null
+  unpriced_interventions: InterventionType[]
+  trees: number
+  reflective_cells: number
 }
 
 export interface Comparison {
   random: ComparisonArm
   greedy: ComparisonArm
+  design_guideline: ComparisonArm
   ga: ComparisonArm
 }
 
@@ -252,12 +298,17 @@ export interface OptimizationResult {
   temp_delta_c_low: number
   /** Less-cooling end. Equal to temp_delta_c_low when no albedo intervention is used. */
   temp_delta_c_high: number
-  cost_inr_low: number
-  cost_inr_high: number
+  /** Null when the layout uses an unpriced intervention; never shown as a guess. */
+  cost_inr_low: number | null
+  cost_inr_high: number | null
+  unpriced_interventions: InterventionType[]
   model: ModelError
   comparison: Comparison
   interventions: Intervention[]
   design_grid: DesignGrid
+  cross_section: CrossSection
+  /** Design cells where a tree may be planted, from the cross-section. */
+  plantable_mask: boolean[][]
   /** Model output at design resolution, not a measurement. */
   before_lst_c: (number | null)[][]
   /** Model output at design resolution, not a measurement. */
