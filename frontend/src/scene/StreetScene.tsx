@@ -1,7 +1,7 @@
 import { Grid as Graticule, OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { useMemo } from 'react'
-import type { Domain } from '../lib/thermal.ts'
+import type { Domain, Grid } from '../lib/thermal.ts'
 import type { OptimizationResult, StreetGeometry } from '../types/contracts.ts'
 import { readSurfaceColor } from '../ui/tokens.ts'
 import { Buildings } from './Buildings.tsx'
@@ -31,10 +31,14 @@ interface StreetSceneProps {
   result: OptimizationResult
   geometry: StreetGeometry
   domain: Domain
+  /** The after grid for the chosen end of the band. */
+  after: Grid
+  /** Reveal progress: 0 is before, 1 is after. */
+  progress: number
 }
 
-/** Before state only: modelled ground, real building footprints, the searched layout as markers. */
-export function StreetScene({ result, geometry, domain }: StreetSceneProps) {
+/** Modelled ground from before to after, real building footprints, the searched layout's trees and coating. */
+export function StreetScene({ result, geometry, domain, after, progress }: StreetSceneProps) {
   const design = result.design_grid
   const origin = useMemo(() => designGridCentre(design), [design])
   const pose = useMemo(() => {
@@ -74,7 +78,7 @@ export function StreetScene({ result, geometry, domain }: StreetSceneProps) {
           fadeDistance={GRATICULE_FADE_M}
           followCamera={false}
         />
-        <HeatGround grid={result.before_lst_c} design={design} origin={origin} domain={domain} />
+        <HeatGround before={result.before_lst_c} after={after} progress={progress} design={design} origin={origin} domain={domain} />
         <Buildings buildings={geometry.buildings} origin={origin} />
         <InterventionMarkers design={design} interventions={result.interventions} origin={origin} />
         <OrbitControls

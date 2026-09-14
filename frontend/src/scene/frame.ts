@@ -49,19 +49,23 @@ export function ringArea_m2(points: [number, number][]): number {
 }
 
 /**
- * Heat grid as a two-channel float texture, row-major: texel (x = col, y = row) holds
- * [surface temperature °C, 1] where there is a value and [0, 0] where the cell is null.
+ * Before and after grids as one four-channel float texture for the reveal, row-major: texel (x = col, y = row)
+ * holds [before °C, after °C, 1, 0] where both grids have a value and [0, 0, 0, 0] otherwise, so the shader
+ * can interpolate between the two on the GPU without re-uploading anything while the reveal plays.
  */
-export function packHeatTexture(grid: Grid): Float32Array {
-  const rows = grid.length
-  const cols = rows === 0 ? 0 : grid[0].length
-  const data = new Float32Array(rows * cols * 2)
+export function packRevealTexture(before: Grid, after: Grid): Float32Array {
+  const rows = before.length
+  const cols = rows === 0 ? 0 : before[0].length
+  const data = new Float32Array(rows * cols * 4)
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      const value = grid[r][c]
-      if (value === null) continue
-      data[(r * cols + c) * 2] = value
-      data[(r * cols + c) * 2 + 1] = 1
+      const from = before[r][c]
+      const to = after[r]?.[c] ?? null
+      if (from === null || to === null) continue
+      const i = (r * cols + c) * 4
+      data[i] = from
+      data[i + 1] = to
+      data[i + 2] = 1
     }
   }
   return data

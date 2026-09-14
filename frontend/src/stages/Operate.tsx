@@ -91,6 +91,7 @@ export function OperateStage() {
           mode={mode}
           onMode={setMode}
           view={view}
+          revealed={revealed}
           onBefore={() => setView('before')}
           onAfter={showAfter}
           bandEnd={bandEnd}
@@ -200,6 +201,8 @@ interface OperateViewportProps {
   mode: Mode
   onMode: (mode: Mode) => void
   view: View
+  /** True once the reveal has been started; the before/after toggle is for inspection after that. */
+  revealed: boolean
   onBefore: () => void
   onAfter: () => void
   bandEnd: BandEnd
@@ -207,7 +210,7 @@ interface OperateViewportProps {
   progress: number
 }
 
-function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEnd, onBandEnd, progress }: OperateViewportProps) {
+function OperateViewport({ result, mode, onMode, view, revealed, onBefore, onAfter, bandEnd, onBandEnd, progress }: OperateViewportProps) {
   const geometry = useStore((s) => s.geometry)
   // Along the street, not north-up: a 200 m by 40 m strip drawn north-up leaves 2 m cells a few pixels wide.
   const affine = useMemo(() => streetFrameAffine(result.design_grid), [result.design_grid])
@@ -293,18 +296,22 @@ function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEn
     <>
       <div className="viewport-head">
         <h2 className="viewport-title">Surface temperature, modelled at {design_m} m design resolution</h2>
-        {mode === 'scene' ? (
-          <p className="viewport-sub">
-            Model output, not a measurement. Before state: markers show the searched layout, not yet applied to the ground.
-          </p>
-        ) : (
-          <p className="viewport-sub">
-            Model output, not a measurement. {view === 'before' ? "Today's street, from the calibrated model." : 'With the searched layout applied.'}{' '}
-            Drawn along the street, start at the left: {formatCount(result.design_grid.shape[0])} by{' '}
-            {formatCount(result.design_grid.shape[1])} cells, the street bearing {formatNumber(result.design_grid.bearing_deg, 1)}° from
-            grid north.
-          </p>
-        )}
+        <p className="viewport-sub">
+          Model output, not a measurement.{' '}
+          {!revealed
+            ? "Today's street, from the calibrated model; the searched layout is placed but not yet applied."
+            : view === 'before'
+              ? "Today's street, from the calibrated model, for comparison."
+              : 'With the searched layout applied.'}
+          {mode === 'grid' && (
+            <>
+              {' '}
+              Drawn along the street, start at the left: {formatCount(result.design_grid.shape[0])} by{' '}
+              {formatCount(result.design_grid.shape[1])} cells, the street bearing {formatNumber(result.design_grid.bearing_deg, 1)}° from
+              grid north.
+            </>
+          )}
+        </p>
         <div className="controls">
           <div className="segmented" role="group" aria-label="View">
             <button type="button" aria-pressed={mode === 'scene'} onClick={() => onMode('scene')}>
@@ -314,7 +321,12 @@ function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEn
               2D grid
             </button>
           </div>
-          {mode === 'grid' && (
+          {!revealed && (
+            <button className="button button-primary" type="button" onClick={onAfter}>
+              Apply the searched layout
+            </button>
+          )}
+          {revealed && (
             <div className="segmented" role="group" aria-label="Street state">
               <button type="button" aria-pressed={view === 'before'} onClick={onBefore}>
                 Before
@@ -324,7 +336,7 @@ function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEn
               </button>
             </div>
           )}
-          {mode === 'grid' && bandsDiffer && (
+          {revealed && bandsDiffer && (
             <div className="segmented" role="group" aria-label="End of the coating coefficient range">
               <button type="button" aria-pressed={bandEnd === 'high'} onClick={() => onBandEnd('high')}>
                 Conservative end
@@ -338,7 +350,7 @@ function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEn
       </div>
 
       {mode === 'scene' && domain && geometry.status === 'ready' && (
-        <StreetScene result={result} geometry={geometry.data} domain={domain} />
+        <StreetScene result={result} geometry={geometry.data} domain={domain} after={after} progress={progress} />
       )}
       {mode === 'scene' && geometry.status === 'loading' && <p className="viewport-message">Loading street geometry.</p>}
       {mode === 'scene' && geometry.status === 'error' && (
@@ -368,7 +380,7 @@ function OperateViewport({ result, mode, onMode, view, onBefore, onAfter, bandEn
               result.interventions.map((iv) => (
                 <span className="legend-item" key={iv.type}>
                   <span className={iv.type === 'tree' ? 'legend-tree' : 'legend-coated'} aria-hidden="true" />
-                  {mode === 'scene' ? `Planned ${INTERVENTION_LABELS[iv.type]}` : INTERVENTION_LABELS[iv.type]}
+                  {revealed && view === 'after' ? INTERVENTION_LABELS[iv.type] : `Planned ${INTERVENTION_LABELS[iv.type]}`}
                 </span>
               ))}
             {mode === 'grid' && context && (
@@ -427,7 +439,7 @@ function ResultBar({ result, revealed, progress }: { result: OptimizationResult;
   if (!revealed) {
     return (
       <footer className="resultbar" aria-label="Result">
-        <p className="result-label">Open the 2D grid and choose after to apply the searched layout.</p>
+        <p className="result-label">Apply the searched layout to see its modelled change in surface temperature.</p>
       </footer>
     )
   }

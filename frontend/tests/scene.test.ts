@@ -7,7 +7,7 @@ import {
   graticuleOffset,
   groundQuad,
   interventionPositions,
-  packHeatTexture,
+  packRevealTexture,
   ringArea_m2,
   streetRotationY_rad,
   threeQuarterPose,
@@ -51,8 +51,13 @@ test('a building extrudes up to its height and its north edge lands at -z', () =
   assert.equal(mergedBuildings([building, building], origin)!.getAttribute('position').count, 2 * geometry.getAttribute('position').count)
 })
 
-test('packHeatTexture writes value and validity per cell, row-major', () => {
-  close(packHeatTexture([[36.5, null], [40, 41]]), [36.5, 1, 0, 0, 40, 1, 41, 1])
+test('packRevealTexture holds before and after per cell, valid only where both have a value', () => {
+  close(packRevealTexture([[36.5, null], [40, 41]], [[35, 20], [39, null]]), [
+    36.5, 35, 1, 0, // both present
+    0, 0, 0, 0, // before null
+    40, 39, 1, 0, // both present
+    0, 0, 0, 0, // after null
+  ])
 })
 
 test('the ground quad spans the design grid corners with u across and v along', () => {
