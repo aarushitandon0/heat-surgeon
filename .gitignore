@@ -1,3 +1,13 @@
+# Personal working notes (kept locally, not published)
+CLAUDE.md
+SPEC.md
+.claude/
+notes/
+*.notes.md
+TODO.md
+NOTES.md
+scratch/
+
 # Python
 __pycache__/
 *.pyc
@@ -11,6 +21,10 @@ dist/
 # Local environment
 .env
 .env.local
+
+# Editors
+.vscode/
+.idea/
 
 # OS
 .DS_Store
