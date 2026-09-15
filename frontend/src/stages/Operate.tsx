@@ -22,6 +22,16 @@ import {
   streetShortName,
 } from '../lib/format.ts'
 import { formatRecordedDate } from '../lib/replay.ts'
+import {
+  CROWN_CHECK_TEXT,
+  DECCAN_SPECIES,
+  EXCLUDED_SPECIES,
+  SPECIES_SOURCE,
+  USDG_FORM_GUIDANCE,
+  crownCheck,
+  largestTrunkForPit,
+  narrowestTreePit_m,
+} from '../lib/species.ts'
 import { designGridContext } from '../lib/basemap.ts'
 import { designGridLabels } from '../lib/labels.ts'
 import { measurer } from '../ui/textMeasure.ts'
@@ -31,7 +41,7 @@ import { ARM_ORDER, coolingMarginPercent, countRange, strongestBaseline, type Ba
 import { gridDomain } from '../lib/thermal.ts'
 import { StreetScene } from '../scene/StreetScene.tsx'
 import { useStore } from '../store/store.ts'
-import type { Building, Comparison, ComparisonArm, OptimizationResult } from '../types/contracts.ts'
+import type { Building, Comparison, ComparisonArm, CrossSection, OptimizationResult } from '../types/contracts.ts'
 import { LABEL_FONT_PX, LABEL_PAD_PX, drawLabels, strokeGridContext, type ContextStyle } from '../ui/basemapDraw.ts'
 import { HeatCanvas, type OverlayContext } from '../ui/HeatCanvas.tsx'
 import { Numeral } from '../ui/Numeral.tsx'
@@ -180,6 +190,8 @@ function OperatePanel({ result }: { result: OptimizationResult }) {
         <p className="panel-note">{result.cross_section.reference}</p>
       </section>
 
+      <TreeReferenceSection crossSection={result.cross_section} />
+
       <button className="button" type="button" onClick={() => goTo('diagnose')}>
         Change search settings
       </button>
@@ -187,6 +199,55 @@ function OperatePanel({ result }: { result: OptimizationResult }) {
         Print a one-page brief
       </button>
     </>
+  )
+}
+
+/** "This street's narrowest tree pit is 1.0 m: by the USDG grate table, trunks up to 0.3 m." Null without tree pits. */
+function pitLimitSentence(crossSection: CrossSection): string | null {
+  const pit_m = narrowestTreePit_m(crossSection.bands)
+  if (pit_m === null) return null
+  const limit = largestTrunkForPit(pit_m)
+  return limit
+    ? `The narrowest tree pit band on this street is ${formatNumber(pit_m, 1)} m wide. By the USDG 2016 tree grate table it takes a grate up to ${formatNumber(limit.grate_side_m, 2)} m, for a trunk up to ${formatNumber(limit.trunk_diameter_max_m, 2)} m across.`
+    : `The narrowest tree pit band on this street is ${formatNumber(pit_m, 1)} m wide, narrower than the smallest grate in the USDG 2016 table.`
+}
+
+/**
+ * Street tree species: a cited reference lookup, set apart from the modelled results. It changes no temperature, cost
+ * or rank; the model is species-agnostic and treats every tree as an 8 m crown.
+ */
+function TreeReferenceSection({ crossSection }: { crossSection: CrossSection }) {
+  const pitSentence = pitLimitSentence(crossSection)
+  return (
+    <section className="panel-section tree-reference" aria-labelledby="trees-heading">
+      <h3 id="trees-heading">Trees to consider, reference only</h3>
+      <p className="panel-note">
+        A cited reference list, not a model output. It changes no temperature, cost or rank: the model treats every tree as
+        an 8 m crown whatever its species.
+      </p>
+      <p className="panel-note">
+        {pitSentence ?? 'This cross-section has no tree pit bands, so the method places no trees on this street.'} New pits
+        are placed only in tree pit bands, never on a building or on existing canopy, and a new crown over an existing tree
+        counts as no cooling.
+      </p>
+      <p className="panel-note">USDG 2016 on form: {USDG_FORM_GUIDANCE.join(' ')}</p>
+      <ul className="credits">
+        {DECCAN_SPECIES.map((species) => (
+          <li key={species.botanical_name} className="panel-note">
+            <span className="tree-name">{species.botanical_name}</span>
+            {species.common_name && ` (${species.common_name})`}.{' '}
+            {species.size_quote && `Source: "${species.size_quote}". `}
+            {CROWN_CHECK_TEXT[crownCheck(species.size)]}
+          </li>
+        ))}
+      </ul>
+      {EXCLUDED_SPECIES.map((species) => (
+        <p key={species.botanical_name} className="panel-note">
+          Not listed: {species.botanical_name}. {species.reason}
+        </p>
+      ))}
+      <p className="panel-note">{SPECIES_SOURCE} Local forest and horticulture experts should be consulted before choosing, as the source itself recommends.</p>
+    </section>
   )
 }
 
@@ -571,6 +632,15 @@ function WardBrief({ result }: { result: OptimizationResult }) {
         </tbody>
       </table>
 
+      <h2>Trees to consider, reference only (not modelled)</h2>
+      <p>
+        {pitLimitSentence(result.cross_section) ?? 'This cross-section has no tree pit bands.'} Large sized, per IRC:SP:21-2009:{' '}
+        {DECCAN_SPECIES.filter((s) => s.size === 'large').map((s) => s.botanical_name).join(', ')}. Small sized, likely to cool less
+        than the modelled 8 m crown: {DECCAN_SPECIES.filter((s) => s.size === 'small').map((s) => s.botanical_name).join(', ')}. Also on
+        its Deccan list, size not stated: {DECCAN_SPECIES.filter((s) => s.size === null).map((s) => s.botanical_name).join(', ')}.
+        Avoid Mast tree (False Ashoka), per USDG 2016.
+      </p>
+
       <h2>Where the numbers come from</h2>
       {surface && (
         <p>
@@ -590,13 +660,12 @@ function WardBrief({ result }: { result: OptimizationResult }) {
       </p>
 
       <h2>Read this with</h2>
-      <ul>
-        <li>Surface temperature, not the air temperature a person feels.</li>
-        <li>Mid-morning, at the Landsat overpass, not the afternoon peak.</li>
-        <li>The after state is a model output at {design_m} m design resolution, not a measurement.</li>
-        <li>Tree cooling assumes a mature crown; saplings are far smaller for years.</li>
-        <li>The model error above is larger than the differences between the layouts compared.</li>
-      </ul>
+      <p>
+        Surface temperature, not the air temperature a person feels. Mid-morning, at the Landsat overpass, not the afternoon
+        peak. The after state is a model output at {design_m} m design resolution, not a measurement. Tree cooling assumes a
+        mature crown; saplings are far smaller for years. The model error above is larger than the differences between the
+        layouts compared.
+      </p>
     </article>
   )
 }

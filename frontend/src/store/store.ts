@@ -69,6 +69,8 @@ interface State {
   stage: StageId
   /** The data panel is hidden so the viewport can go wide. Kept across stage changes for the session. */
   panelCollapsed: boolean
+  /** Data panel width set by dragging its edge; null keeps the default --panel-width. Kept for the session. */
+  panelWidth_px: number | null
   dataMode: DataMode
   streets: Load<StreetSummary[]>
   /** Streets inside the calibrated windows, ranked offline by `python -m app.ranking`. */
@@ -96,6 +98,7 @@ interface Actions {
   startOptimize: () => Promise<void>
   goTo: (stage: StageId) => void
   togglePanel: () => void
+  setPanelWidth: (width_px: number) => void
 }
 
 export type Store = State & Actions
@@ -144,6 +147,7 @@ export function stageAvailable(state: State, stage: StageId): boolean {
 export const useStore = create<Store>()((set, get) => ({
   stage: 'locate',
   panelCollapsed: false,
+  panelWidth_px: null,
   dataMode: { kind: 'live' },
   streets: { status: 'idle' },
   ranking: { status: 'idle' },
@@ -287,6 +291,8 @@ export const useStore = create<Store>()((set, get) => ({
   },
 
   togglePanel: () => set((state) => ({ panelCollapsed: !state.panelCollapsed })),
+
+  setPanelWidth: (width_px) => set({ panelWidth_px: width_px }),
 }))
 
 async function loadResult(resultUrl: string, token: number) {

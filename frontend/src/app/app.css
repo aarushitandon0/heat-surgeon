@@ -163,6 +163,42 @@ input {
   margin-left: auto;
 }
 
+/* The draggable line on the panel's edge. A wide invisible hit area over the hairline border; the line shows while
+   dragging and when focused from the keyboard. */
+.workspace {
+  position: relative;
+}
+
+.panel-resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--panel-width);
+  z-index: 2;
+  width: 10px;
+  margin-left: -5px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.panel-resizer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 2px;
+}
+
+.panel-resizer:focus-visible {
+  outline: none;
+}
+
+.panel-resizer[data-dragging='true']::before,
+.panel-resizer:focus-visible::before {
+  background: var(--paper-dim);
+}
+
 /* The panel runs the full height, beside the viewport and the stage 03 result bar, and scrolls its own content. */
 .panel {
   grid-row: 1 / -1;
@@ -203,7 +239,9 @@ input {
   border-top: var(--hairline);
 }
 
-@media (max-width: 64rem) {
+/* Stacked layout only on narrow screens. At 64rem, laptops with Windows display scaling (1366 px at 150% is 911 CSS px)
+   fell into it, where the page scrolls instead of the panel. */
+@media (max-width: 48rem) {
   .app {
     height: auto;
     min-height: 100vh;
@@ -225,6 +263,9 @@ input {
   .resultbar {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--sp-6);
+  }
+  .panel-resizer {
+    display: none;
   }
 }
 
@@ -756,6 +797,17 @@ input {
   gap: var(--sp-1);
 }
 
+/* The species list is reference material, set apart from the modelled readouts above it by a rule. */
+.tree-reference {
+  padding-top: var(--sp-4);
+  border-top: var(--hairline);
+}
+
+.tree-name {
+  font-style: italic;
+  color: var(--paper);
+}
+
 /* Ward office brief: one printed page per street. On screen it is not shown; printing shows only the brief. */
 
 .brief {
@@ -824,7 +876,7 @@ input {
   /* The diagram keeps its proportions inside this height, so the brief stays on one A4 page. */
   .brief-layout {
     width: 100%;
-    height: 30mm;
+    height: 20mm;
   }
 
   .brief-layout-plantable {

@@ -110,6 +110,14 @@ Both pervious concrete studies find it 0.05–0.20 *less* reflective than conven
 
 - **[D3]** Pune Municipal Corporation. *Urban Street Design Guidelines, Pune*, Version I:2016. Published with ITDP India. https://www.itdp.in/wp-content/uploads/2016/07/Urban-street-design-guidelines.pdf — full text and template drawings read 2026-09-14.
 
+| Reference lookup (not a model input) | Value | Source |
+|---|---|---|
+| Street tree species list | Annex E, trees suitable for the Deccan Plateau | [D1] Annex E (Clause 11.11.1) |
+| Species size words | "Large sized" / "Small sized", quoted per species | [D1] Appendix I, where the scan is legible |
+| Species to avoid | Eucalyptus, Australian Acacia, Lantana, Leucaena, Mast Tree (False Ashoka) | [D3] §5.2 |
+| Tree grate by trunk diameter | up to 0.15 m: 0.6 × 0.6 m; 0.3 m: 0.75 × 0.75 m; 0.9 m: 1.5 × 1.5 m; 1.2 m: 2 × 2 m | [D3] §5.2 table, read from PDF page 48 on 2026-09-15 |
+| Tree form by street type | columnar for narrower spaces; overarching canopies for wider streets; medium-sized for residential and commercial streets | [D3] §5.2, quoted |
+
 ## Costs
 
 | Constant | Value | Source |
