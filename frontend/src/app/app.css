@@ -748,7 +748,7 @@ input {
 @media print {
   @page {
     size: A4;
-    margin: 14mm;
+    margin: 10mm 12mm;
   }
 
   body {
@@ -804,9 +804,10 @@ input {
     border-bottom: var(--hairline);
   }
 
+  /* The diagram keeps its proportions inside this height, so the brief stays on one A4 page. */
   .brief-layout {
     width: 100%;
-    height: auto;
+    height: 30mm;
   }
 
   .brief-layout-plantable {
