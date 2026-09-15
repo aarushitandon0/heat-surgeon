@@ -1,0 +1,1 @@
+{"job_id":"e1b0acee3467","ws_url":"/ws/optimize/e1b0acee3467","grid_shape":[100,20],"cells":2000,"states_per_cell":5,"design_grid":{"crs":"EPSG:32643","origin_e_m":377672.5582386467,"origin_n_m":2048042.6985135425,"bearing_deg":352.30410075063276,"cell_size_m":2.0,"shape":[100,20]}}
