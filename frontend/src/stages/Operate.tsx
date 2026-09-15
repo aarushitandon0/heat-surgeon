@@ -472,6 +472,12 @@ function WardBrief({ result }: { result: OptimizationResult }) {
             Mean surface temperature over the {formatCount(rows * cell_m)} m by {formatCount(cols * cell_m)} m design area, at{' '}
             {design_m} m design resolution
           </p>
+          <p>
+            Model error <span className="mono">±{formatNumber(result.model.rmse_holdout_c, ERROR_DECIMALS)} °C</span> per{' '}
+            {formatCount(result.resolution.calibration_resolution_m)} m calibration cell, against{' '}
+            <span className="mono">{formatNumber(result.model.rmse_mean_baseline_c, ERROR_DECIMALS)} °C</span> for predicting
+            the neighbourhood mean.
+          </p>
         </div>
         <div>
           <p>Cost, estimate</p>
@@ -483,13 +489,6 @@ function WardBrief({ result }: { result: OptimizationResult }) {
           </p>
         </div>
       </div>
-
-      <p>
-        Model error <span className="mono">±{formatNumber(result.model.rmse_holdout_c, ERROR_DECIMALS)} °C</span> per{' '}
-        {formatCount(result.resolution.calibration_resolution_m)} m calibration cell, against{' '}
-        <span className="mono">{formatNumber(result.model.rmse_mean_baseline_c, ERROR_DECIMALS)} °C</span> for predicting the
-        neighbourhood mean.
-      </p>
 
       <h2>Layout</h2>
       <p>
@@ -543,13 +542,14 @@ function WardBrief({ result }: { result: OptimizationResult }) {
         ))}
       </svg>
 
-      <h2>Against other layouts at the same budget</h2>
+      <h2>Against other layouts at the same budget, modelled</h2>
       <ComparisonCaption comparison={result.comparison} />
+      <p>Every change in this table is modelled surface temperature, not a measurement.</p>
       <table>
         <thead>
           <tr>
             <th scope="col">Layout</th>
-            <th scope="col">Change, °C</th>
+            <th scope="col">Modelled change, °C</th>
             <th scope="col">Trees</th>
             <th scope="col">Cost, estimate</th>
           </tr>
@@ -580,6 +580,14 @@ function WardBrief({ result }: { result: OptimizationResult }) {
         </p>
       )}
       <p>Cross-section: {CROSS_SECTION_SOURCE_LABELS[result.cross_section.source]} {result.cross_section.reference}.</p>
+      <p>
+        Data and licences: Landsat 8 and 9, U.S. Geological Survey, public domain; Sentinel-2, contains modified Copernicus
+        Sentinel data (European Space Agency); both accessed through Microsoft Planetary Computer. Roads and footprints:
+        copyright OpenStreetMap contributors, ODbL 1.0. Building footprints: Overture Maps Foundation, conflating
+        OpenStreetMap (ODbL), Microsoft Global ML Building Footprints (ODbL) and Google Open Buildings (CC BY 4.0 and
+        ODbL). Tree costs: Government of Rajasthan, RUIDP Integrated Schedule of Rates 2023. Street templates: Pune
+        Municipal Corporation, Urban Street Design Guidelines (2016); tree spacing IRC:SP:21-2009.
+      </p>
 
       <h2>Read this with</h2>
       <ul>
