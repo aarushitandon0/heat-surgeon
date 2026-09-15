@@ -4,12 +4,19 @@ import { STAGES, stageAvailable, useStore, type DataMode } from '../store/store.
 /** Says, on every stage, that the data on screen is a recording and when it was made. */
 function ReplayNotice({ mode }: { mode: Extract<DataMode, { kind: 'replay' }> }) {
   const date = <span className="mono">{formatRecordedDate(mode.manifest.recorded_at)}</span>
+  if (mode.reason === 'forced') {
+    return (
+      <p className="replay-notice" role="status">
+        This site serves stored results. Every screen is a recording of real runs made on {date} from the satellite and map
+        data committed with the code; nothing is computed while you watch. Searches replay at the recorded pace with the
+        recorded settings.
+      </p>
+    )
+  }
   return (
     <p className="replay-notice" role="status">
-      {mode.reason === 'backend_unreachable' ? 'The backend is not reachable, so this is a recording' : 'This is a recording'} of
-      real runs made on {date} from the cached satellite and map data. Searches replay at the recorded pace with the
-      recorded settings.
-      {mode.reason === 'backend_unreachable' && ' Start the backend and reload to search live.'}
+      The backend is not reachable, so this is a recording of real runs made on {date} from the cached satellite and map
+      data. Searches replay at the recorded pace with the recorded settings. Start the backend and reload to search live.
     </p>
   )
 }

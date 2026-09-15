@@ -96,6 +96,8 @@ def record_street(client: TestClient, street_id: str, request: OptimizeRequest) 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--street", action="append", help="street id; repeat for several (default: every fixture street)")
+    parser.add_argument("--ranking-only", action="store_true",
+                        help="record only /api/ranking into ranking.json; street recordings and manifest stay as they are")
     args = parser.parse_args(argv)
 
     config.USE_LIVE_DATA = False   # a snapshot is a recording of the offline path, never of a network call
@@ -103,6 +105,11 @@ def main(argv: list[str] | None = None) -> None:
     from app.pipeline import street_ids
 
     client = TestClient(app)
+    if args.ranking_only:
+        # ranking.json carries its own generated_at and git_commit, so the street manifest is not rewritten.
+        size_bytes = _write(SNAPSHOT_DIR / "ranking.json", _ok(client.get("/api/ranking")))
+        print(f"recorded ranking.json, {size_bytes / 1e6:.2f} MB", flush=True)
+        return
     summaries = _ok(client.get("/api/streets"))
     wanted = args.street or street_ids()
     recorded = [record_street(client, street_id, RECORDED_REQUEST) for street_id in wanted]

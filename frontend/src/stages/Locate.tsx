@@ -32,9 +32,9 @@ import type { BBoxWGS84, RankedStreet, SkippedStreet, StreetRanking, StreetSumma
 /** What each backend skip reason means, in plain terms. Keyed by the exact reason strings in app/ranking.py. */
 const SKIP_EXPLANATIONS: Record<string, string> = {
   "The design grid extends past the window's calibration cells.":
-    'Its 200 m by 40 m design grid runs past the part of the window covered by calibration cells. Ranking it would take surface temperature from outside the calibrated area, so it is not ranked.',
+    'the 200 m by 40 m design grid runs past the part of the window covered by calibration cells. Ranking these would take surface temperature from outside the calibrated area.',
   'The cross-section has no plantable tree pits.':
-    "Its cross-section has no tree pit band: its OpenStreetMap tags give only footway and carriageway widths, no right of way could be measured from buildings, or the right of way is narrower than the narrowest Pune street design template (7 m). Trees might still fit on these streets; this method has no rule for placing them.",
+    'the cross-section has no tree pit band. The OpenStreetMap tags give only footway and carriageway widths, no right of way could be measured from buildings, or the right of way is narrower than the narrowest Pune street design template (7 m). Trees might still fit on these streets; this method has no rule for placing them.',
 }
 import { useElementSize } from '../ui/hooks.ts'
 import { Readout } from '../ui/Readout.tsx'
@@ -122,6 +122,7 @@ export function LocatePanel() {
         </section>
       )}
       {ranking.status === 'ready' && <RankingSection ranking={ranking.data} fixtures={streets.status === 'ready' ? streets.data : []} />}
+      <CreditsSection />
     </>
   )
 }
@@ -211,6 +212,48 @@ function RankingSection({ ranking, fixtures }: { ranking: StreetRanking; fixture
   )
 }
 
+/** Data sources, licences and cited constants, as in docs/sources.md. Shown on the first screen in every mode. */
+function CreditsSection() {
+  return (
+    <section className="panel-section" aria-labelledby="credits-heading">
+      <h3 id="credits-heading">Data and credits</h3>
+      <ul className="credits">
+        <li className="panel-note">
+          Landsat 8 and 9 Collection 2 Level 2 surface temperature: U.S. Geological Survey, public domain. Accessed through
+          Microsoft Planetary Computer.
+        </li>
+        <li className="panel-note">
+          Sentinel-2 L2A: contains modified Copernicus Sentinel data, European Space Agency. Accessed through Microsoft
+          Planetary Computer.
+        </li>
+        <li className="panel-note">
+          Roads, building footprints and place names: copyright OpenStreetMap contributors, Open Database License (ODbL 1.0).
+        </li>
+        <li className="panel-note">
+          Building footprints: Overture Maps Foundation, buildings theme, release 2026-08-19.0, which conflates
+          OpenStreetMap (ODbL), Microsoft Global ML Building Footprints (ODbL) and Google Open Buildings (CC BY 4.0 and
+          ODbL).
+        </li>
+        <li className="panel-note">
+          Cool pavement effect: Ko, Schlaerth, Bruce, Sanders and Ban-Weiss (2022), Environmental Research Letters 17,
+          044027.
+        </li>
+        <li className="panel-note">
+          Broadband albedo coefficients: Liang (2001), Remote Sensing of Environment 76, 213–238. Used as a diagnostic only.
+        </li>
+        <li className="panel-note">
+          Street cross-sections: Pune Municipal Corporation, Urban Street Design Guidelines (2016). Tree spacing and
+          footway minimums: Indian Roads Congress IRC:SP:21-2009 and IRC:103-2012.
+        </li>
+        <li className="panel-note">
+          Tree costs: Government of Rajasthan, RUIDP Integrated Schedule of Rates 2023.
+        </li>
+      </ul>
+      <p className="panel-note">Every constant, with its full citation or its logged assumption: docs/sources.md and docs/methodology.md in the repository.</p>
+    </section>
+  )
+}
+
 /** The streets the method could not rank, counted and explained. Stating the limit beats dropping them quietly. */
 function SkippedSection({ skipped, ranked }: { skipped: SkippedStreet[]; ranked: number }) {
   const [open, setOpen] = useState(false)
@@ -226,7 +269,7 @@ function SkippedSection({ skipped, ranked }: { skipped: SkippedStreet[]; ranked:
       </p>
       {groups.map((group) => (
         <p key={group.reason} className="panel-note">
-          <span className="mono">{formatCount(group.streets.length)}</span>. {SKIP_EXPLANATIONS[group.reason] ?? group.reason}
+          <span className="mono">{formatCount(group.streets.length)}</span> streets: {SKIP_EXPLANATIONS[group.reason] ?? group.reason}
         </p>
       ))}
       <button className="button" type="button" aria-expanded={open} onClick={() => setOpen(!open)}>
