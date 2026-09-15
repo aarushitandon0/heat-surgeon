@@ -484,7 +484,7 @@ function WardBrief({ result }: { result: OptimizationResult }) {
           <p className="brief-figure-label mono">{cost ?? 'Not priced'}</p>
           <p>
             {cost
-              ? 'Planting, guard and first-year care, rounded outward.'
+              ? 'Planting, guard and first-year care, rounded outward. Rates are the Government of Rajasthan RUIDP 2023 schedule, used as a proxy: no Maharashtra or PMC schedule of rates could be sourced within the build window.'
               : `No sourced rate for ${result.unpriced_interventions.map((t) => INTERVENTION_LABELS[t]).join(', ')}.`}
           </p>
         </div>
@@ -537,7 +537,7 @@ function WardBrief({ result }: { result: OptimizationResult }) {
             className="brief-layout-pit"
             cx={(r + 0.5) * BRIEF_CELL_PX}
             cy={(c + 0.5) * BRIEF_CELL_PX}
-            r={BRIEF_CELL_PX * 0.6}
+            r={BRIEF_CELL_PX * 0.9}
           />
         ))}
       </svg>

@@ -149,8 +149,23 @@ input {
   min-height: 0;
 }
 
+/* Data panel hidden: the viewport and result bar take the full width. */
+.workspace-collapsed {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace-collapsed .panel {
+  display: none;
+}
+
+.panel-toggle {
+  align-self: center;
+  margin-left: auto;
+}
+
+/* The panel runs the full height, beside the viewport and the stage 03 result bar, and scrolls its own content. */
 .panel {
-  grid-row: 1;
+  grid-row: 1 / -1;
   display: flex;
   flex-direction: column;
   gap: var(--sp-8);
@@ -179,7 +194,7 @@ input {
 }
 
 .resultbar {
-  grid-column: 1 / -1;
+  grid-column: -2 / -1;
   display: grid;
   grid-template-columns: minmax(18rem, auto) minmax(12rem, auto) minmax(0, 1fr);
   gap: var(--sp-12);
@@ -525,9 +540,11 @@ input {
   text-shadow: 0 0 2px var(--base), 0 0 2px var(--base), 0 0 3px var(--base);
 }
 
+/* The design street's own name is the most prominent label on screen: larger, heavier and in full --paper. */
 .scene-label-street {
-  font-size: var(--fs-14);
-  font-weight: 500;
+  font-size: var(--fs-16);
+  font-weight: 600;
+  color: var(--paper);
 }
 
 .heat-canvas-hover {
@@ -812,8 +829,8 @@ input {
 
   .brief-layout-plantable {
     fill: none;
-    stroke: var(--rule);
-    stroke-width: 0.5;
+    stroke: var(--paper-dim);
+    stroke-width: 0.7;
   }
 
   .brief-layout-coated {

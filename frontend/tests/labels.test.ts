@@ -75,6 +75,17 @@ test('roadCandidates puts the design street first under its display name, then m
   assert.deepEqual(candidates.map((c) => c.text), ['FC Road', 'Karve Road', 'Lane'])
 })
 
+test('crossStreetCrossings keeps a road that carries its OSM class only down to tertiary', () => {
+  // All three cross the far line (column 21) at row 50; only the classes differ.
+  const road = (name: string, kind?: string) => ({ name, kind, points: [[-5, 50], [25, 50]] as [number, number][] })
+  const crossings = crossStreetCrossings(
+    [road('Tertiary Road', 'tertiary'), road('Lane 3', 'residential'), road('Service lane', 'service'), road('Unclassified')],
+    [100, 20],
+    'Street',
+  )
+  assert.deepEqual(crossings.map((c) => c.name).sort(), ['Tertiary Road', 'Unclassified'])
+})
+
 test('crossStreetCrossings finds where a road meets the lines one column outside each long edge, nearest the middle', () => {
   // Grid 100 rows by 20 columns; lines at column -1 and 21. Road from (col -5, row 30) to (col 25, row 34):
   //   column -1 at t = 4/30, row 30 + 4 * 4/30 = 30.533; column 21 at t = 26/30, row 33.467 (nearer row 50).

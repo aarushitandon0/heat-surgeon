@@ -10,6 +10,9 @@ const EDGE_THRESHOLD_DEG = 20
 /** Outlines stay faint: the ground carries the data, the buildings are context. */
 const EDGE_OPACITY = 0.22
 
+/** The merged building faces carry this name, so scene labels can test whether a building hides them. */
+export const BUILDING_FACES_NAME = 'building-faces'
+
 /** Context, not data: surface colours only. Two draw calls for every building: faces and outlines. */
 export function Buildings({ buildings, origin }: { buildings: Building[]; origin: SceneOrigin }) {
   const faces = useMemo(() => mergedBuildings(buildings, origin), [buildings, origin])
@@ -22,7 +25,7 @@ export function Buildings({ buildings, origin }: { buildings: Building[]; origin
   if (!faces || !edges) return null
   return (
     <group>
-      <mesh geometry={faces}>
+      <mesh geometry={faces} name={BUILDING_FACES_NAME}>
         <meshLambertMaterial color={colors.face} />
       </mesh>
       <lineSegments geometry={edges}>

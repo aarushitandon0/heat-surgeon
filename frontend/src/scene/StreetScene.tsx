@@ -49,11 +49,12 @@ const SCENE_CONTEXT_RADIUS_M = 350
 const SCENE_LABEL_OPTIONS: SceneLabelOptions = {
   radius_m: SCENE_CONTEXT_RADIUS_M,
   maxCrossStreets: 3,
-  // Close up, local streets are what locate a place, so they are named too, after the larger roads.
   maxRoads: 14,
   // Named buildings and places (shops, banks, schools, temples), nearest the street first; collisions thin them out.
   maxPlaces: 12,
-  maxRoadRank: 4,
+  // Roads down to tertiary only. Residential, unclassified and living streets ("Lane 3", "Off FC Road") are left
+  // unnamed: filtered by OSM highway class, not by name.
+  maxRoadRank: 3,
 }
 
 /** Modelled ground from before to after, real building footprints, the searched layout's trees and coating. */

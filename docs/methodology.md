@@ -760,6 +760,17 @@ The standard errors assume independent residuals, so every z above is an upper b
 - **Skipped streets** are listed in the payload with a reason: the segment runs past the calibrated window, the cross-section has no plantable tree pits, or the searched layout gives no modelled cooling.
 - **Why a street can have no tree pits.** Only a published-design cross-section has tree pit bands; every PMC template from 9A to 30A includes them. A street gets none when (i) its OSM way tags carriageway and both sidewalk widths, so the tagged cross-section is used and it has footway and carriageway only; (ii) no right of way could be measured from building footprints within 30 m, so the default cross-section is used, which has no tree pits by design; or (iii) the measured right of way is narrower than the narrowest template, 9A at 7.0 m. Each is the existing cross-section rule applied to that street, not a ranking-specific filter. It does mean the ranking leaves out narrow lanes where trees might in practice be planted on private frontage.
 
+## Recommended species: not shipped (freeze)
+
+A list of recommended street tree species was considered for stage 03 and the printed brief, as a cited reference lookup that would never touch the model, and with each species' mature crown diameter checked against the model's 8 m crown. It was timeboxed to 90 minutes, on the rule that it ships cited or not at all. It did not ship.
+
+- **Pune Municipal Corporation.** No openly available Tree Authority or Garden department street tree list was found. The Urban Street Design Guidelines (2016) §5.2 direct planting of "Local Indigenous trees, Deciduous & Evergreen trees that are recommended by PMC Garden department and mentioned in PMC ESR 2013"; the 2013 Environment Status Report could not be found online.
+- **Maharashtra forest department.** No urban street species list was found.
+- **USDG 2016 §5.2** names no species to plant. It gives tree forms by location (columnar or conical in shoulders and narrow spaces; broad upright, oval or spreading forms in multi-utility zones and parking belts), tree guard sizes, and species to avoid (Eucalyptus, Australian Acacia, Lantana, Leucaena, Mast Tree or False Ashoka).
+- **IRC:SP:21-2009** (already cited as [D1]). Annex E lists trees "suitable for Deccan Plateau", which covers Pune, by botanical and common name only. Appendix I describes each native species' size in words ("Large, Shady", "Small, Thorny"). Neither gives a mature crown diameter.
+
+**Why it was dropped.** The check that would have made the list useful, each species' crown against the 8 m crown the model assumes, needs a sourced crown diameter per species. None of these sources gives one, and supplying diameters from memory would be an uncited number on screen. The model stays species-agnostic: a tree is an 8 m crown (`TREE_CROWN_DIAMETER_M`), placed only in the cross-section's tree pit bands, never on a building or existing canopy, at least 8 m from the next tree.
+
 ## Demo safety kit (Day 7, close)
 
 ### Short search: 150 generations instead of 400

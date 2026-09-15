@@ -24,11 +24,12 @@ export default function App() {
   const stage = useStore((s) => s.stage)
   const street = useStore((s) => s.street)
   const result = useStore((s) => s.result)
+  const panelCollapsed = useStore((s) => s.panelCollapsed)
 
   return (
     <div className="app">
       <Header />
-      <main className="workspace">
+      <main className={panelCollapsed ? 'workspace workspace-collapsed' : 'workspace'}>
         {/* Keyed by stage so each panel gets a fresh element and opens scrolled to the top, never mid-content. */}
         {stage === 'locate' && <Workspace key="locate" panel={<LocatePanel />} viewport={<LocateViewport />} />}
         {stage === 'diagnose' && street && <Workspace key={`diagnose-${street.id}`} panel={<DiagnosePanel />} viewport={<DiagnoseViewport />} />}

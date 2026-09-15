@@ -69,7 +69,8 @@ export function svgPathData(path: PointUTM[], project: (e_m: number, n_m: number
 export type CellPoint = [number, number]
 
 export interface DesignGridContext {
-  roads: { weight: Exclude<RoadWeight, 'path'>; name: string | null; points: CellPoint[] }[]
+  /** kind is the OSM highway class, so labels can be limited by class. */
+  roads: { weight: Exclude<RoadWeight, 'path'>; kind: string; name: string | null; points: CellPoint[] }[]
   buildings: CellPoint[][]
 }
 
@@ -81,7 +82,7 @@ export function designGridContext(roads: BasemapWay[], buildings: PointUTM[][], 
   return {
     roads: roads.flatMap((way) => {
       const weight = roadWeight(way.kind)
-      return weight !== 'path' && pathTouches(way.path, bounds) ? [{ weight, name: way.name, points: toCells(way.path) }] : []
+      return weight !== 'path' && pathTouches(way.path, bounds) ? [{ weight, kind: way.kind, name: way.name, points: toCells(way.path) }] : []
     }),
     buildings: buildings.filter((ring) => pathTouches(ring, bounds)).map(toCells),
   }

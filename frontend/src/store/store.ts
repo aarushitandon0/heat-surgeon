@@ -67,6 +67,8 @@ const IDLE_JOB: JobState = { status: 'idle', handle: null, progress: [], preview
 
 interface State {
   stage: StageId
+  /** The data panel is hidden so the viewport can go wide. Kept across stage changes for the session. */
+  panelCollapsed: boolean
   dataMode: DataMode
   streets: Load<StreetSummary[]>
   /** Streets inside the calibrated windows, ranked offline by `python -m app.ranking`. */
@@ -93,6 +95,7 @@ interface Actions {
   setRequest: (patch: Partial<OptimizeRequest>) => void
   startOptimize: () => Promise<void>
   goTo: (stage: StageId) => void
+  togglePanel: () => void
 }
 
 export type Store = State & Actions
@@ -140,6 +143,7 @@ export function stageAvailable(state: State, stage: StageId): boolean {
 
 export const useStore = create<Store>()((set, get) => ({
   stage: 'locate',
+  panelCollapsed: false,
   dataMode: { kind: 'live' },
   streets: { status: 'idle' },
   ranking: { status: 'idle' },
@@ -281,6 +285,8 @@ export const useStore = create<Store>()((set, get) => ({
   goTo: (stage) => {
     if (stageAvailable(get(), stage)) set({ stage })
   },
+
+  togglePanel: () => set((state) => ({ panelCollapsed: !state.panelCollapsed })),
 }))
 
 async function loadResult(resultUrl: string, token: number) {

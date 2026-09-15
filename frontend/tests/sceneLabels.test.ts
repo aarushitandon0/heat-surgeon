@@ -30,12 +30,11 @@ test('sceneLabels orders the street, its cross streets, other roads, then places
     { osmName: 'Gopal Krushna Gokhale Path', label: 'FC Road' },
     OPTIONS,
   )
-  // Cross streets are named whatever their class, like the 2D grid's: Lane (residential) crosses at row 25, further
-  // from the middle (row 50) than Cross, so it comes second. Residential roads that do not cross are never named.
+  // Cross streets are named only down to tertiary, like every other road label: Lane (residential) crosses the grid at
+  // row 25 but is left unnamed, filtered by its OSM class, not its name.
   assert.deepEqual(labels.map((l) => [l.kind, l.text]), [
     ['street', 'FC Road'],
     ['cross', 'Cross'],
-    ['cross', 'Lane'],
     ['road', 'Main'],
     ['place', 'Near hall'],
   ])
@@ -45,12 +44,12 @@ test('sceneLabels orders the street, its cross streets, other roads, then places
   // The second is 3 cells beyond the far edge: column 23, e = 46 m.
   assert.deepEqual(labels[1].candidates.map((c) => c.anchor), [[-6, 100], [46, 100]])
   // Main's candidates all lie on the road, nearest the grid centre (20, 100) first.
-  const main = labels[3].candidates
+  const main = labels[2].candidates
   assert.ok(main.length > 1 && main.every((c) => c.anchor[1] === 300 && c.toward !== null))
   const distance = (c: (typeof main)[number]) => Math.hypot(c.anchor[0] - 20, c.anchor[1] - 100)
   assert.ok(main.every((c, i) => i === 0 || distance(main[i - 1]) <= distance(c)))
   // No drawn building given, so the place sits at street level.
-  assert.deepEqual(labels[4].candidates, [{ anchor: [60, 120], toward: null, height_m: null }])
+  assert.deepEqual(labels[3].candidates, [{ anchor: [60, 120], toward: null, height_m: null }])
 })
 
 test('place names go nearest the street first, once each, on the roof of the building they fall inside', () => {

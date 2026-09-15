@@ -1,8 +1,9 @@
 import { useFrame, type RootState } from '@react-three/fiber'
 import { useMemo, useRef, type MutableRefObject } from 'react'
-import { Matrix4, Vector3 } from 'three'
+import { Matrix4, Raycaster, Vector3, type Object3D } from 'three'
 import { boxesOverlap, rotatedBox, uprightAngle, type Box } from '../lib/labels.ts'
 import type { SceneLabel } from '../lib/sceneLabels.ts'
+import { BUILDING_FACES_NAME } from './Buildings.tsx'
 import { utmToScene, type SceneOrigin } from './frame.ts'
 
 /** Road names float just above the ground. Display only. */
@@ -12,6 +13,8 @@ const ROOF_CLEARANCE_M = 2
 const STREET_LEVEL_PLACE_Y_M = 3
 const LABEL_PAD_PX = 4
 const EDGE_PX = 4
+/** A building face closer to the camera than the label by more than this hides the label. */
+const OCCLUSION_TOLERANCE_M = 1
 
 export type LabelElements = MutableRefObject<(HTMLSpanElement | null)[]>
 
@@ -36,8 +39,8 @@ export function SceneLabelLayer({ labels, elements }: { labels: SceneLabel[]; el
 
 /**
  * Inside the canvas: whenever the camera moves, projects each label to the screen, turns road names to follow their
- * road (never upside down), and hides any label that would leave the frame or collide with one placed before it.
- * Labels arrive most important first, so the street's own name always wins.
+ * road (never upside down), and hides any label that would leave the frame, collide with one placed before it, or sit
+ * behind a building. Labels arrive most important first, so the street's own name always wins a collision.
  */
 export function SceneLabelProjector({ labels, origin, elements }: { labels: SceneLabel[]; origin: SceneOrigin; elements: LabelElements }) {
   const world = useMemo(
@@ -57,28 +60,42 @@ export function SceneLabelProjector({ labels, origin, elements }: { labels: Scen
       ),
     [labels, origin],
   )
-  const last = useRef({ matrix: new Matrix4(), width: 0, height: 0, world: null as unknown })
-  const scratch = useRef({ a: new Vector3(), b: new Vector3() })
-  const sizes = useRef<{ w: number; h: number }[]>([])
+  const last = useRef({ matrix: new Matrix4(), width: 0, height: 0, world: null as unknown, blockers: null as Object3D | null })
+  const scratch = useRef({ a: new Vector3(), b: new Vector3(), dir: new Vector3(), ray: new Raycaster() })
 
-  useFrame(({ camera, size }: RootState) => {
+  useFrame(({ camera, size, scene }: RootState) => {
+    const blockers = scene.getObjectByName(BUILDING_FACES_NAME) ?? null
     const seen = last.current
-    if (seen.world === world && seen.width === size.width && seen.height === size.height && seen.matrix.equals(camera.matrixWorld)) return
+    if (
+      seen.world === world &&
+      seen.blockers === blockers &&
+      seen.width === size.width &&
+      seen.height === size.height &&
+      seen.matrix.equals(camera.matrixWorld)
+    )
+      return
     seen.matrix.copy(camera.matrixWorld)
     seen.width = size.width
     seen.height = size.height
     seen.world = world
+    seen.blockers = blockers
 
-    const { a, b } = scratch.current
+    const { a, b, dir, ray } = scratch.current
+    const hidden = (at: Vector3) => {
+      if (!blockers) return false
+      dir.copy(at).sub(camera.position)
+      const distance_m = dir.length()
+      ray.set(camera.position, dir.normalize())
+      ray.far = Math.max(0, distance_m - OCCLUSION_TOLERANCE_M)
+      return ray.intersectObject(blockers, false).length > 0
+    }
+
     const placed: Box[] = []
     world.forEach((candidates, i) => {
       const el = elements.current[i]
       if (!el) return
-      let dims = sizes.current[i]
-      if (!dims || dims.w === 0) {
-        dims = { w: el.offsetWidth, h: el.offsetHeight }
-        sizes.current[i] = dims
-      }
+      // Measured on every pass: a web font can finish loading after the first, and a stale width lets labels overlap.
+      const dims = { w: el.offsetWidth, h: el.offsetHeight }
       for (const point of candidates) {
         a.copy(point.at).project(camera)
         if (a.z > 1) continue
@@ -91,7 +108,7 @@ export function SceneLabelProjector({ labels, origin, elements }: { labels: Scen
         }
         const box = rotatedBox(x, y, dims.w, dims.h, angle_rad, LABEL_PAD_PX)
         const outside = box.x < EDGE_PX || box.y < EDGE_PX || box.x + box.w > size.width - EDGE_PX || box.y + box.h > size.height - EDGE_PX
-        if (outside || placed.some((other) => boxesOverlap(box, other))) continue
+        if (outside || placed.some((other) => boxesOverlap(box, other)) || hidden(point.at)) continue
         placed.push(box)
         el.style.visibility = 'visible'
         el.style.transform = `translate(${x}px, ${y}px) rotate(${angle_rad}rad) translate(-50%, -50%)`

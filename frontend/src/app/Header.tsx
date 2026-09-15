@@ -45,6 +45,9 @@ export function Header() {
           ))}
         </ol>
       </nav>
+      <button className="button panel-toggle" type="button" aria-expanded={!state.panelCollapsed} onClick={state.togglePanel}>
+        {state.panelCollapsed ? 'Show data panel' : 'Hide data panel'}
+      </button>
       <p className="link-status" aria-live="polite">
         {state.job.socketOpen && !replaying ? (
           <>

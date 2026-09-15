@@ -297,6 +297,9 @@ export function cityLabelCandidates(ways: BasemapWay[], bounds_m: [number, numbe
     }))
 }
 
+/** Cross streets are named only down to tertiary (rank 3): residential lanes and service roads stay unnamed. */
+export const CROSS_STREET_MAX_RANK = 3
+
 export interface Crossing {
   name: string
   row: number
@@ -307,13 +310,22 @@ export interface Crossing {
 /**
  * Where named roads cross the lines just outside the design grid's two long edges (one column beyond each), one
  * crossing per name, nearest the middle of the segment first. One column out catches roads that end at the
- * street (T-junctions) as well as those that cross it. The design street itself is excluded.
+ * street (T-junctions) as well as those that cross it. The design street itself is excluded. A road that carries its
+ * OSM class is kept only down to CROSS_STREET_MAX_RANK.
  */
-export function crossStreetCrossings(roads: { name: string | null; points: CellPoint[] }[], shape: [number, number], excludeName: string): Crossing[] {
+export function crossStreetCrossings(
+  roads: { name: string | null; points: CellPoint[]; kind?: string }[],
+  shape: [number, number],
+  excludeName: string,
+): Crossing[] {
   const [rows, cols] = shape
   const best = new Map<string, Crossing>()
   for (const road of roads) {
     if (!road.name || road.name === excludeName) continue
+    if (road.kind !== undefined) {
+      const rank = roadRank(road.kind)
+      if (rank === null || rank > CROSS_STREET_MAX_RANK) continue
+    }
     for (let i = 1; i < road.points.length; i++) {
       const [c0, r0] = road.points[i - 1]
       const [c1, r1] = road.points[i]
