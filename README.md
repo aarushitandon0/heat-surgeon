@@ -1,6 +1,6 @@
 # Heat Surgeon
 
-Heat Surgeon takes one real street and does four things:
+Heat Surgeon takes one real street and does following things:
 
 1. Pulls the street's measured satellite land surface temperature.
 2. Calibrates a surface temperature model on the street's own 2 km neighbourhood.
