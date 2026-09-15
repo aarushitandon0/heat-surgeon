@@ -42,6 +42,21 @@ class GAParams:
     seed: int = 42
 
 
+def clone_layout(individual):
+    """A copy of an individual that shares nothing mutable with it.
+
+    Genes are ints and `objectives` is a frozen dataclass, so a shallow list copy is enough. DEAP's default clone
+    is copy.deepcopy, which walked all 2,000 genes of every individual every generation: profiled at about 75% of
+    search time on FC Road (docs/methodology.md, "Demo safety kit"). The copy consumes no random numbers, so a
+    seeded search returns the same layout either way.
+    """
+    copied = creator.Layout(individual)
+    if individual.fitness.valid:
+        copied.fitness.values = individual.fitness.values
+    copied.objectives = individual.objectives
+    return copied
+
+
 def fitness_score(objectives: Objectives, cost_weight_c_per_inr: float) -> float:
     """Dimensionless scalarized objective. Not a physical quantity; never display it as one."""
     cost_inr = objectives.cost_inr_high or 0.0
@@ -65,6 +80,7 @@ def run_ga(grid: StreetGrid, budget: Budget, params: GAParams, seed_layouts: lis
     flat_allowed = grid.allowed.reshape(-1, len(STATE_NAMES))
     actionable = np.flatnonzero(flat_allowed[:, 1:].any(axis=1))
     toolbox = base.Toolbox()
+    toolbox.register("clone", clone_layout)
 
     def evaluate(individual) -> None:
         individual.objectives = grid.evaluate(np.asarray(individual, dtype=np.int8))

@@ -239,6 +239,26 @@ K_ALBEDO_HIGH_C_PER_UNIT_ALBEDO = 27.0   # 2.7 C per 0.1 albedo, 15:00 peak
 # SPEC.md §6.1: 2 m design cells.
 DESIGN_CELL_SIZE_M = 2.0
 
+# Street ranking (app/ranking.py, docs/methodology.md "Street ranking").
+# The same matched budget the app opens on, at the short search length.
+RANKING_TREES_MAX = 20
+RANKING_GENERATIONS = 150
+RANKING_POPULATION = 120
+RANKING_SEED = 42
+# ASSUMPTION: streets a ward office would plant along. Footways, service roads, tracks and motorways are left out:
+# footways and tracks have no carriageway cross-section to plant beside, service roads are mostly private
+# compounds, and motorways are not street tree corridors. Adding classes adds streets to the ranking; it does not
+# change any street's result.
+RANKING_HIGHWAY_CLASSES = frozenset({
+    "trunk", "primary", "secondary", "tertiary", "residential", "unclassified", "living_street",
+})
+RANKING_PATH = BACKEND_DIR / "fixtures" / "ranking" / "four-windows.json"
+# ASSUMPTION: two ranked streets are tied when their difference in modelled cooling per tree is within 1.96 standard
+# errors of the calibration coefficients (a two-sided 95% interval). The coefficient standard errors assume independent
+# residuals and are optimistic, so this finds fewer ties than the truth. A larger value finds more ties; it never
+# changes any street's modelled cooling or its point rank.
+RANKING_TIE_Z = 1.96
+
 # ASSUMPTION: a 200 m segment centred on the street's longest straight OSM way, 40 m across
 # (20 m either side of the centreline, reaching the building line on FC Road). 100 x 20 = 2,000 cells.
 DESIGN_SEGMENT_LENGTH_M = 200.0

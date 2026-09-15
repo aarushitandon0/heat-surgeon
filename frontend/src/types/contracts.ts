@@ -369,3 +369,72 @@ export interface OptimizationResult {
   resolution: Resolution
   provenance: Provenance[]
 }
+
+/** [lon, lat] in degrees, EPSG:4326. Display only. */
+export type PointWGS84 = [number, number]
+
+/** A 2 km calibration window. Every ranked street inside it uses this window's fitted model. */
+export interface RankingWindow {
+  /** The fixture street whose cached window this is. */
+  street_id: string
+  name: string
+  bbox_window: BBoxWGS84
+  rmse_holdout_c: number
+  rmse_mean_baseline_c: number
+  provenance: Provenance[]
+}
+
+/** One street's matched-budget, trees-only result. Every temperature is modelled, not measured. */
+export interface RankedStreet {
+  /** Order by the point estimate. Read with rank_best and rank_worst. */
+  rank: number
+  /** Best rank this street could hold within the model's coefficient error. */
+  rank_best: number
+  /** Worst rank this street could hold within the model's coefficient error. */
+  rank_worst: number
+  osm_name: string
+  /** The window whose calibration this street uses. */
+  window_street_id: string
+  /** Set when this is a fixture street with the full pipeline. */
+  fixture_street_id: string | null
+  /** Start and end of the design segment. Display only. */
+  segment_wgs84: [PointWGS84, PointWGS84]
+  /** OSM highway class of the way the design segment lies on. */
+  highway: string
+  cross_section_source: CrossSectionSource
+  tree_capacity: number
+  trees: number
+  /** Searched layout: modelled change in mean surface temperature over the design area. */
+  temp_delta_c: number
+  /** Standard error of temp_delta_c from the window's coefficient covariance. */
+  temp_delta_se_c: number
+  /** Mean over random layouts at the same budget. */
+  random_temp_delta_c: number
+  design_guideline_temp_delta_c: number
+  cost_inr_low: number
+  cost_inr_high: number
+  /** Modelled cooling per ₹1,00,000 at the high end of the cost range. */
+  cooling_c_per_lakh_inr_low: number
+  /** Modelled cooling per ₹1,00,000 at the low end of the cost range. */
+  cooling_c_per_lakh_inr_high: number
+}
+
+export interface SkippedStreet {
+  osm_name: string
+  window_street_id: string
+  reason: string
+}
+
+/**
+ * Streets inside the calibrated windows, ranked by modelled cooling per ₹1 lakh. Coverage is the calibrated
+ * windows, not an administrative ward. Ranks follow cooling_c_per_lakh_inr_high.
+ */
+export interface StreetRanking {
+  generated_at: string
+  git_commit: string | null
+  request: OptimizeRequest
+  windows: RankingWindow[]
+  streets: RankedStreet[]
+  skipped: SkippedStreet[]
+  resolution: Resolution
+}

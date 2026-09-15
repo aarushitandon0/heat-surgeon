@@ -49,6 +49,10 @@ export function manifestUrl(base: string): string {
   return `${base}snapshot/manifest.json`
 }
 
+export function rankingUrl(base: string): string {
+  return `${base}snapshot/ranking.json`
+}
+
 export function streetsUrl(base: string): string {
   return `${base}snapshot/streets.json`
 }

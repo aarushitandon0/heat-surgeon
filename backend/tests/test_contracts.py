@@ -29,7 +29,7 @@ DIMENSIONLESS = {
     "scene_count", "valid_pixels", "n_cells_fit", "n_cells_holdout", "generation", "generations",
     "generations_total", "population", "cells", "states_per_cell", "seed",
     "holdout_fraction", "r2_holdout", "best_fitness_score", "trees", "reflective_cells",
-    "trees_max", "reflective_cells_max",
+    "trees_max", "reflective_cells_max", "rank", "rank_best", "rank_worst", "tree_capacity",
 }
 
 

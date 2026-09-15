@@ -85,6 +85,14 @@ export function formatSeasons(months: number[], date_range: [string, string]): s
  * provenance.overpass_local_time is local time at the street. Every street is in Pune, so the zone
  * is IST. A street outside India needs the zone from the backend, not this label.
  */
+/** Modelled cooling per ₹1 lakh. Two decimals, so neighbouring ranks stay distinguishable. */
+export const COOLING_PER_LAKH_DECIMALS = 2
+
+/** "0.59–0.94": both ends, never a midpoint, because the cost it divides by is a range. */
+export function formatCoolingPerLakhRange(low_c: number, high_c: number): string {
+  return formatBand(low_c, high_c, COOLING_PER_LAKH_DECIMALS)
+}
+
 export const LOCAL_TIME_ZONE_LABEL = 'IST'
 
 export function formatOverpass(local_time: string): string {

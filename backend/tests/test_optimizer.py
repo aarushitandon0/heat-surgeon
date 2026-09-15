@@ -12,7 +12,7 @@ from app.model.delta import cell_effects
 from app.model.heat import HeatModel
 from app.optimizer.baselines import design_guideline_layout, greedy_layout, random_layout
 from app.optimizer.encoding import REFLECTIVE, TREE, UNCHANGED, Budget, StreetGrid
-from app.optimizer.ga import GAParams, run_ga
+from app.optimizer.ga import GAParams, clone_layout, run_ga
 
 MODEL = HeatModel(t_base_c=40.0, k_canopy_c_per_fraction=5.0, k_built_c_per_fraction=-3.0, k_bare_c_per_fraction=2.0)
 
@@ -142,6 +142,21 @@ def test_evaluate_reports_cost_only_when_every_intervention_is_priced():
     coated[0] = REFLECTIVE
     result = make_grid(classes).evaluate(coated)
     assert result.cost_inr_low is None and result.unpriced_interventions == ("reflective_pavement",)
+
+
+def test_clone_layout_copies_genes_fitness_and_objectives_without_sharing_the_genes():
+    from deap import creator
+
+    original = creator.Layout([0, 1, 2, 0])
+    original.fitness.values = (0.5,)
+    original.objectives = "frozen objectives stand-in"
+    copied = clone_layout(original)
+    assert list(copied) == [0, 1, 2, 0] and copied.fitness.values == (0.5,) and copied.objectives is original.objectives
+    copied[1] = 0
+    del copied.fitness.values
+    assert list(original) == [0, 1, 2, 0] and original.fitness.valid and original.fitness.values == (0.5,)
+    # An individual whose fitness was invalidated clones as invalid.
+    assert not clone_layout(copied).fitness.valid
 
 
 def test_ga_finds_the_best_single_tree_position():

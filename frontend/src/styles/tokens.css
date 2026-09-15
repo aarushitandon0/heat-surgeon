@@ -46,3 +46,14 @@
   --panel-width: 22.5rem;
   --measure: 70ch; /* body line length cap */
 }
+
+/* The printed ward office brief: ink on paper. Only the surface and text tokens change. */
+@media print {
+  :root {
+    --base: #ffffff;
+    --panel: #ffffff;
+    --rule: #9a9a9a;
+    --paper: #111111;
+    --paper-dim: #4a4a4a;
+  }
+}

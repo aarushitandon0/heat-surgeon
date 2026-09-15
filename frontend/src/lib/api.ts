@@ -12,11 +12,13 @@ import type {
   OptimizeRequest,
   StreetBasemap,
   StreetGeometry,
+  StreetRanking,
   StreetSummary,
   ThermalGrid,
 } from '../types/contracts.ts'
 import {
   manifestUrl,
+  rankingUrl,
   replayDelaysMs,
   requestMatches,
   snapshotUrl,
@@ -85,6 +87,7 @@ export interface StreamHandlers {
 export interface DataSource {
   kind: 'live' | 'replay'
   streets: () => Promise<StreetSummary[]>
+  ranking: () => Promise<StreetRanking>
   geometry: (streetId: string) => Promise<StreetGeometry>
   basemap: (streetId: string) => Promise<StreetBasemap>
   thermal: (streetId: string, scope: 'street' | 'window') => Promise<ThermalGrid>
@@ -103,6 +106,7 @@ export function websocketUrl(path: string): string {
 export const liveSource: DataSource = {
   kind: 'live',
   streets: () => request<StreetSummary[]>('/api/streets'),
+  ranking: () => request<StreetRanking>('/api/ranking'),
   geometry: (streetId) => request<StreetGeometry>(`/api/street/${encodeURIComponent(streetId)}/geometry`),
   basemap: (streetId) => request<StreetBasemap>(`/api/street/${encodeURIComponent(streetId)}/basemap`),
   thermal: (streetId, scope) => request<ThermalGrid>(`/api/street/${encodeURIComponent(streetId)}/thermal?scope=${scope}`),
@@ -151,6 +155,7 @@ export function replaySource(base: string, manifest: SnapshotManifest): DataSour
   return {
     kind: 'replay',
     streets: () => recorded<StreetSummary[]>(streetsUrl(base)),
+    ranking: () => recorded<StreetRanking>(rankingUrl(base)),
     geometry: (streetId) => file(streetId, 'geometry'),
     basemap: (streetId) => file(streetId, 'basemap'),
     thermal: (streetId, scope) => file(streetId, scope === 'window' ? 'thermal-window' : 'thermal-street'),

@@ -43,3 +43,8 @@ def test_default_request_mirrors_the_frontend_default():
         "trees_max": 20, "reflective_cells_max": 0, "budget_inr_max": None, "generations": 400, "population": 120,
         "cost_weight_c_per_inr": 0.0, "run_baselines": True, "seed": 42,
     }
+
+
+def test_recorded_request_is_the_default_at_the_short_search_length():
+    # frontend/src/lib/search.ts SEARCH_LENGTHS.short = { generations: 150, population: 120 }
+    assert snapshot.RECORDED_REQUEST.model_dump() == {**snapshot.DEFAULT_REQUEST.model_dump(), "generations": 150}

@@ -10,7 +10,7 @@ Conventions (SPEC.md §7, CLAUDE.md rule 6):
 - Invalid grid cells are None (null in JSON). There is no separate mask.
 """
 
-from datetime import date
+from datetime import date, datetime
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -485,4 +485,91 @@ class OptimizationResult(Contract):
             for row, col in intervention.cells:
                 if not (0 <= row < rows and 0 <= col < cols):
                     raise ValueError(f"intervention cell {[row, col]} outside design grid {[rows, cols]}")
+        return self
+
+
+# --- Street ranking ----------------------------------------------------------------
+
+PointWGS84 = Annotated[tuple[float, float], Field(description="[lon, lat] in degrees, EPSG:4326. Display only.")]
+
+
+class RankingWindow(Contract):
+    """A 2 km calibration window. Every ranked street inside it uses this window's fitted model."""
+
+    street_id: str = Field(description="The fixture street whose cached window this is.")
+    name: str
+    bbox_window: BBoxWGS84
+    rmse_holdout_c: float = Field(ge=0)
+    rmse_mean_baseline_c: float = Field(ge=0)
+    provenance: list[Provenance] = Field(min_length=1)
+
+
+class RankedStreet(Contract):
+    """One street's matched-budget, trees-only result. Every temperature is modelled, not measured."""
+
+    rank: int = Field(ge=1, description="Order by the point estimate. Read with rank_best and rank_worst.")
+    rank_best: int = Field(ge=1, description="Best rank this street could hold within the model's coefficient error.")
+    rank_worst: int = Field(ge=1, description="Worst rank this street could hold within the model's coefficient error.")
+    osm_name: str
+    window_street_id: str = Field(description="The window whose calibration this street uses.")
+    fixture_street_id: str | None = Field(description="Set when this is a fixture street with the full pipeline.")
+    segment_wgs84: tuple[PointWGS84, PointWGS84] = Field(description="Start and end of the design segment. Display only.")
+    highway: str = Field(description="OSM highway class of the way the design segment lies on.")
+    cross_section_source: CrossSectionSource
+    tree_capacity: int = Field(ge=1)
+    trees: int = Field(ge=1)
+    temp_delta_c: float = Field(lt=0, description="Searched layout: modelled change in mean surface temperature over the design area.")
+    temp_delta_se_c: float = Field(ge=0, description="Standard error of temp_delta_c from the window's coefficient covariance.")
+    random_temp_delta_c: float = Field(description="Mean over random layouts at the same budget.")
+    design_guideline_temp_delta_c: float
+    cost_inr_low: float = Field(gt=0)
+    cost_inr_high: float = Field(gt=0)
+    cooling_c_per_lakh_inr_low: float = Field(gt=0, description="Modelled cooling per ₹1,00,000 at the high end of the cost range.")
+    cooling_c_per_lakh_inr_high: float = Field(gt=0, description="Modelled cooling per ₹1,00,000 at the low end of the cost range.")
+
+    @model_validator(mode="after")
+    def _ranges(self):
+        _check_cost_range(self.cost_inr_low, self.cost_inr_high)
+        _check_band(self.cooling_c_per_lakh_inr_low, self.cooling_c_per_lakh_inr_high, "cooling_c_per_lakh_inr")
+        if self.trees > self.tree_capacity:
+            raise ValueError(f"trees {self.trees} exceeds tree_capacity {self.tree_capacity}")
+        if not self.rank_best <= self.rank <= self.rank_worst:
+            raise ValueError(f"rank {self.rank} must lie within rank_best {self.rank_best} and rank_worst {self.rank_worst}")
+        return self
+
+
+class SkippedStreet(Contract):
+    osm_name: str
+    window_street_id: str
+    reason: str
+
+
+class StreetRanking(Contract):
+    """Streets inside the calibrated windows, ranked by modelled cooling per ₹1 lakh.
+
+    Coverage is the calibrated windows, not an administrative ward. Ranks follow cooling_c_per_lakh_inr_high;
+    with one rate range per tree, both ends of the range give the same order.
+    """
+
+    generated_at: datetime
+    git_commit: str | None
+    request: OptimizeRequest
+    windows: list[RankingWindow] = Field(min_length=1)
+    streets: list[RankedStreet]
+    skipped: list[SkippedStreet]
+    resolution: Resolution
+
+    @model_validator(mode="after")
+    def _ordered(self):
+        if [s.rank for s in self.streets] != list(range(1, len(self.streets) + 1)):
+            raise ValueError("ranks must run 1, 2, 3, ... in list order")
+        if any(s.rank_worst > len(self.streets) for s in self.streets):
+            raise ValueError("rank_worst cannot exceed the number of ranked streets")
+        values = [s.cooling_c_per_lakh_inr_high for s in self.streets]
+        if any(a < b for a, b in zip(values, values[1:])):
+            raise ValueError("streets must be sorted by cooling_c_per_lakh_inr_high, highest first")
+        window_ids = {w.street_id for w in self.windows}
+        for s in [*self.streets, *self.skipped]:
+            if s.window_street_id not in window_ids:
+                raise ValueError(f"{s.osm_name} refers to unknown window {s.window_street_id}")
         return self

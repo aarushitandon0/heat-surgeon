@@ -711,6 +711,119 @@ input {
   pointer-events: none;
 }
 
+.map-ranked {
+  stroke: var(--paper-dim);
+  stroke-width: 2;
+  stroke-linecap: round;
+  cursor: pointer;
+}
+
+.map-ranked-top {
+  stroke: var(--paper);
+  stroke-width: 3;
+}
+
+.map-ranked-selected {
+  stroke: var(--paper);
+  stroke-width: 5;
+}
+
+.ranked-rank {
+  display: inline-block;
+  min-width: 2.5ch;
+}
+
+/* Ward office brief: one printed page per street. On screen it is not shown; printing shows only the brief. */
+
+.brief {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body {
+    background: var(--base);
+    color: var(--paper);
+  }
+
+  .app {
+    display: none;
+  }
+
+  .brief {
+    display: block;
+    font-size: var(--fs-12);
+    color: var(--paper);
+  }
+
+  .brief h1 {
+    font-size: var(--fs-20);
+    margin-bottom: var(--sp-1);
+  }
+
+  .brief h2 {
+    font-size: var(--fs-14);
+    margin: var(--sp-3) 0 var(--sp-1);
+  }
+
+  .brief p,
+  .brief li {
+    margin-bottom: var(--sp-1);
+    max-width: none;
+  }
+
+  .brief-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-2) var(--sp-4);
+  }
+
+  .brief-figure-label {
+    font-size: var(--fs-16);
+  }
+
+  .brief table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .brief th,
+  .brief td {
+    text-align: left;
+    padding: 2px var(--sp-2) 2px 0;
+    border-bottom: var(--hairline);
+  }
+
+  .brief-layout {
+    width: 100%;
+    height: auto;
+  }
+
+  .brief-layout-plantable {
+    fill: none;
+    stroke: var(--rule);
+    stroke-width: 0.5;
+  }
+
+  .brief-layout-coated {
+    fill: var(--paper-dim);
+  }
+
+  .brief-layout-crown {
+    fill: none;
+    stroke: var(--paper);
+    stroke-width: 0.6;
+  }
+
+  .brief-layout-pit {
+    fill: var(--paper);
+  }
+}
+
 /* Stage 02 */
 
 .convergence {

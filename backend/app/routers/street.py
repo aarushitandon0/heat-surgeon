@@ -1,11 +1,11 @@
-"""Street endpoints: list, geometry, thermal grid (SPEC.md §7)."""
+"""Street endpoints: list, geometry, thermal grid, and the street ranking (SPEC.md §7)."""
 
 from typing import Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app import pipeline
-from app.contracts import StreetBasemap, StreetGeometry, StreetSummary, ThermalGrid
+from app.contracts import StreetBasemap, StreetGeometry, StreetRanking, StreetSummary, ThermalGrid
 from app.routers.errors import known_street
 
 router = APIRouter()
@@ -14,6 +14,14 @@ router = APIRouter()
 @router.get("/api/streets", response_model=list[StreetSummary])
 def list_streets() -> list[StreetSummary]:
     return [pipeline.street_summary(street_id) for street_id in pipeline.street_ids()]
+
+
+@router.get("/api/ranking", response_model=StreetRanking)
+def ranking() -> StreetRanking:
+    try:
+        return pipeline.street_ranking()
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
 
 
 @router.get("/api/street/{street_id}/geometry", response_model=StreetGeometry)

@@ -2,6 +2,7 @@
 // the reveal moves into the scene.
 
 import { useCallback, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   CROSS_SECTION_SOURCE_LABELS,
   DELTA_DECIMALS,
@@ -15,9 +16,12 @@ import {
   formatDeltaBand,
   formatInrRange,
   formatNumber,
+  formatOverpass,
+  formatSeasons,
   formatSigned,
   streetShortName,
 } from '../lib/format.ts'
+import { formatRecordedDate } from '../lib/replay.ts'
 import { designGridContext } from '../lib/basemap.ts'
 import { designGridLabels } from '../lib/labels.ts'
 import { measurer } from '../ui/textMeasure.ts'
@@ -101,6 +105,8 @@ export function OperateStage() {
         />
       </section>
       <ResultBar result={result} revealed={revealed} progress={progress} />
+      {/* Outside .app, which printing hides. */}
+      {createPortal(<WardBrief result={result} />, document.body)}
     </>
   )
 }
@@ -176,6 +182,9 @@ function OperatePanel({ result }: { result: OptimizationResult }) {
 
       <button className="button" type="button" onClick={() => goTo('diagnose')}>
         Change search settings
+      </button>
+      <button className="button" type="button" onClick={() => window.print()}>
+        Print a one-page brief
       </button>
     </>
   )
@@ -410,6 +419,177 @@ function OperateViewport({ result, mode, onMode, view, revealed, landed, onBefor
         </div>
       </div>
     </>
+  )
+}
+
+/** Design cell size on the printed layout diagram. */
+const BRIEF_CELL_PX = 6
+
+/**
+ * The ward office brief: one printed A4 page for this street. Hidden on screen; printing shows only this (app.css).
+ * Every number is the same payload value the screen shows, with the same labels and the same limits.
+ */
+function WardBrief({ result }: { result: OptimizationResult }) {
+  const thermalStreet = useStore((s) => s.thermalStreet)
+  const dataMode = useStore((s) => s.dataMode)
+  const surface = result.provenance.find((p) => p.product === 'surface_temperature')
+  const cost = formatInrRange(result.cost_inr_low, result.cost_inr_high)
+  const [rows, cols] = result.design_grid.shape
+  const cell_m = result.design_grid.cell_size_m
+  const design_m = formatCount(result.resolution.design_resolution_m)
+  const treeCells = result.interventions.filter((iv) => iv.type === 'tree').flatMap((iv) => iv.cells)
+  const coatedCells = result.interventions.filter((iv) => iv.type !== 'tree').flatMap((iv) => iv.cells)
+
+  return (
+    <article className="brief" aria-hidden="true">
+      <h1>Street tree brief: {result.street.name}</h1>
+      <p>
+        Prepared with Heat Surgeon on <span className="mono">{formatRecordedDate(new Date().toISOString())}</span>
+        {dataMode.kind === 'replay' && (
+          <>
+            {' '}
+            from a recording of runs made on <span className="mono">{formatRecordedDate(dataMode.manifest.recorded_at)}</span>
+          </>
+        )}
+        . A first-pass screening to prioritise streets, not an engineering study.
+      </p>
+
+      <div className="brief-grid">
+        {thermalStreet.status === 'ready' && (
+          <div>
+            <p>Street surface temperature, measured</p>
+            <p className="brief-figure-label mono">{formatNumber(thermalStreet.data.stats.mean_c, TEMP_DECIMALS)} °C</p>
+            <p>
+              Mean of {formatCount(thermalStreet.data.provenance.delivered_resolution_m)} m Landsat pixels
+              {surface && <>, {formatOverpass(surface.overpass_local_time)} overpass</>}
+            </p>
+          </div>
+        )}
+        <div>
+          <p>Change with the searched layout, modelled</p>
+          <p className="brief-figure-label mono">{formatDeltaBand(result.temp_delta_c_low, result.temp_delta_c_high)} °C</p>
+          <p>
+            Mean surface temperature over the {formatCount(rows * cell_m)} m by {formatCount(cols * cell_m)} m design area, at{' '}
+            {design_m} m design resolution
+          </p>
+        </div>
+        <div>
+          <p>Cost, estimate</p>
+          <p className="brief-figure-label mono">{cost ?? 'Not priced'}</p>
+          <p>
+            {cost
+              ? 'Planting, guard and first-year care, rounded outward.'
+              : `No sourced rate for ${result.unpriced_interventions.map((t) => INTERVENTION_LABELS[t]).join(', ')}.`}
+          </p>
+        </div>
+      </div>
+
+      <p>
+        Model error <span className="mono">±{formatNumber(result.model.rmse_holdout_c, ERROR_DECIMALS)} °C</span> per{' '}
+        {formatCount(result.resolution.calibration_resolution_m)} m calibration cell, against{' '}
+        <span className="mono">{formatNumber(result.model.rmse_mean_baseline_c, ERROR_DECIMALS)} °C</span> for predicting the
+        neighbourhood mean.
+      </p>
+
+      <h2>Layout</h2>
+      <p>
+        <span className="mono">{formatCount(treeCells.length)}</span> street trees
+        {coatedCells.length > 0 && (
+          <>
+            {' '}
+            and <span className="mono">{formatCount(coatedCells.length * cell_m ** 2)}</span> m² of reflective coating
+          </>
+        )}
+        . The street runs left to right; outlined cells are where the cross-section allows a tree pit.
+      </p>
+      <svg
+        className="brief-layout"
+        viewBox={`0 0 ${rows * BRIEF_CELL_PX} ${cols * BRIEF_CELL_PX}`}
+        role="img"
+        aria-label="Layout along the street"
+      >
+        {result.plantable_mask.flatMap((row, r) =>
+          row.map((plantable, c) =>
+            plantable ? (
+              <rect
+                key={`p${r}-${c}`}
+                className="brief-layout-plantable"
+                x={r * BRIEF_CELL_PX}
+                y={c * BRIEF_CELL_PX}
+                width={BRIEF_CELL_PX}
+                height={BRIEF_CELL_PX}
+              />
+            ) : null,
+          ),
+        )}
+        {coatedCells.map(([r, c]) => (
+          <rect
+            key={`c${r}-${c}`}
+            className="brief-layout-coated"
+            x={r * BRIEF_CELL_PX}
+            y={c * BRIEF_CELL_PX}
+            width={BRIEF_CELL_PX}
+            height={BRIEF_CELL_PX}
+          />
+        ))}
+        {treeCells.map(([r, c]) => (
+          <circle
+            key={`t${r}-${c}`}
+            className="brief-layout-pit"
+            cx={(r + 0.5) * BRIEF_CELL_PX}
+            cy={(c + 0.5) * BRIEF_CELL_PX}
+            r={BRIEF_CELL_PX * 0.6}
+          />
+        ))}
+      </svg>
+
+      <h2>Against other layouts at the same budget</h2>
+      <ComparisonCaption comparison={result.comparison} />
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Layout</th>
+            <th scope="col">Change, °C</th>
+            <th scope="col">Trees</th>
+            <th scope="col">Cost, estimate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ARM_ORDER.map((key) => {
+            const arm = result.comparison[key]
+            return (
+              <tr key={key}>
+                <th scope="row">{ARM_LABELS[key]}</th>
+                <td className="mono">{formatDeltaBand(arm.temp_delta_c_low, arm.temp_delta_c_high)}</td>
+                <td className="mono">{formatCount(arm.trees)}</td>
+                <td>
+                  <ArmCost arm={arm} />
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+
+      <h2>Where the numbers come from</h2>
+      {surface && (
+        <p>
+          Surface temperature: a per-pixel median of <span className="mono">{formatCount(surface.scene_count)}</span> Landsat
+          scenes, {formatSeasons(surface.months, surface.date_range)}, clouds masked per pixel. Collections:{' '}
+          {surface.collections.join(', ')}.
+        </p>
+      )}
+      <p>Cross-section: {CROSS_SECTION_SOURCE_LABELS[result.cross_section.source]} {result.cross_section.reference}.</p>
+
+      <h2>Read this with</h2>
+      <ul>
+        <li>Surface temperature, not the air temperature a person feels.</li>
+        <li>Mid-morning, at the Landsat overpass, not the afternoon peak.</li>
+        <li>The after state is a model output at {design_m} m design resolution, not a measurement.</li>
+        <li>Tree cooling assumes a mature crown; saplings are far smaller for years.</li>
+        <li>The model error above is larger than the differences between the layouts compared.</li>
+      </ul>
+    </article>
   )
 }
 

@@ -60,7 +60,7 @@ Limitations, stated plainly:
 
 What the hold-out error does and does not show:
 - **It measures misfit within this neighbourhood.** Hold-out and in-sample error are close (1.36 vs 1.38 °C).
-- **It does not show transfer to other neighbourhoods.** Neighbouring 90 m cells still share some thermal signal.
+- **It does not show transfer to other neighbourhoods.** Neighbouring 90 m cells still share some thermal signal. (Tested directly at Day 7 close: see "Transfer test". A borrowed model loses 0.08–0.65 °C of hold-out accuracy; refitting only the base temperature recovers most of it.)
 - **Coefficient standard errors are a diagnostic, not confidence intervals.**
 
 ## Calibration result, FC Road, with merged footprints (Day 4, current)
@@ -657,6 +657,101 @@ Trees only, 20 trees for every arm, computed through the same calls the job runn
 - **Why greedy is worst.** In the linear model a tree's gain depends on the surface its crown replaces, not on how hot the cell is. The hottest cells are often roofs and paving next to buildings, where pits cluster.
 - **What the claim is now.** The search beats the strongest matched-budget baseline by 5–11% (0.03–0.09 °C). The seed spread (at most 0.008 °C) is below that on every street; the absolute error (±1.16–1.68 °C per 90 m cell) is not, and is common-mode across arms.
 
+## Transfer test: do coefficients carry from one neighbourhood to another? (Day 7, close)
+
+`python -m app.model.transfer`. Every target window is scored on its own held-out 90 m cells: the same seeded 20% split (seed 42) its calibration reports. A source window's cells whose centre lies inside the target window are dropped before fitting, because the FC Road window overlaps both the Karve Road and Bajirao Road windows (up to 109 of 387 fitting cells dropped).
+
+- **Own.** The target's own fit, the number the product reports.
+- **Raw.** Another window's model, applied unchanged.
+- **Offset.** That model with only `t_base_c` refitted on the target's own fitting cells; the three k coefficients stay the source's.
+- **Pooled.** One model fitted on the other three windows together.
+
+Hold-out RMSE in °C, per 90 m cell:
+
+| Target | Own | Mean baseline | Raw, range over the three sources | Offset, range | Pooled raw | Pooled offset |
+|---|---|---|---|---|---|---|
+| Bajirao Road | 1.16 | 1.66 | 1.42–1.91 | 1.18–1.24 | 1.62 | 1.17 |
+| FC Road | 1.40 | 2.03 | 1.61–1.92 | 1.46–1.63 | 1.66 | 1.62 |
+| Karve Road | 1.38 | 1.80 | 1.48–1.91 | 1.39–1.48 | 1.60 | 1.48 |
+| North Main Road | 1.68 | 2.19 | 1.76–2.33 | 1.70–1.81 | 1.97 | 1.78 |
+
+Fitted coefficients, ± standard error (independent-residual assumption, so the errors are optimistic):
+
+| Window | `t_base_c` | `k_canopy` | `k_built` | `k_bare` |
+|---|---|---|---|---|
+| Bajirao Road | 42.00 ± 0.78 | 5.29 ± 0.83 | −0.18 ± 0.98 | 2.53 ± 0.92 |
+| FC Road | 41.98 ± 1.08 | 5.68 ± 1.11 | −2.15 ± 1.35 | 2.29 ± 1.17 |
+| Karve Road | 44.52 ± 0.85 | 7.56 ± 0.88 | −5.65 ± 1.15 | −2.04 ± 0.95 |
+| North Main Road | 41.74 ± 1.30 | 5.37 ± 1.32 | −0.30 ± 1.68 | −0.57 ± 1.42 |
+
+**Is each difference distinguishable from noise?** Paired bootstrap over the target's held-out cells (5,000 resamples, seed 0): 95% interval of RMSE(borrowed) − RMSE(own), in °C.
+
+| Target ← source model | Raw | Offset |
+|---|---|---|
+| Bajirao Road ← FC Road | +0.26 [+0.09, +0.41] | +0.04 [−0.03, +0.10] |
+| Bajirao Road ← Karve Road | +0.59 [+0.36, +0.81] | +0.08 [−0.03, +0.19] |
+| Bajirao Road ← North Main Road | +0.75 [+0.50, +0.97] | +0.02 [−0.06, +0.10] |
+| FC Road ← Bajirao Road | +0.21 [+0.09, +0.32] | +0.06 [+0.01, +0.11] |
+| FC Road ← Karve Road | +0.23 [+0.05, +0.42] | +0.08 [−0.03, +0.20] |
+| FC Road ← North Main Road | +0.53 [+0.25, +0.81] | +0.23 [+0.04, +0.42] |
+| Karve Road ← Bajirao Road | +0.53 [+0.31, +0.75] | +0.02 [−0.08, +0.11] |
+| Karve Road ← FC Road | +0.19 [+0.03, +0.35] | +0.00 [−0.10, +0.10] |
+| Karve Road ← North Main Road | +0.10 [−0.01, +0.20] | +0.09 [+0.00, +0.18] |
+| North Main Road ← Bajirao Road | +0.65 [+0.32, +0.96] | +0.09 [−0.05, +0.23] |
+| North Main Road ← FC Road | +0.37 [+0.08, +0.63] | +0.12 [−0.04, +0.27] |
+| North Main Road ← Karve Road | +0.08 [−0.07, +0.22] | +0.01 [−0.08, +0.09] |
+
+The bootstrap treats held-out cells as independent. Neighbouring 90 m cells share some thermal signal, so these intervals are narrower than the truth, and a borderline "distinguishable" should be read as borderline.
+
+**Results.**
+- **Borrowed models are consistently worse, by 0.08–0.75 °C of hold-out RMSE.** The model is never better than the target's own fit in any of the twelve pairings. (An earlier version of this section gave the range as 0.08–0.65 °C; 0.75 °C, Bajirao Road scored with North Main Road's model, is the correct top.)
+- **The size varies, and the low end is not distinguishable from noise.** Ten of twelve raw pairings are distinguishable from zero. The two smallest are not: North Main Road scored with Karve Road's model (+0.08 °C, interval −0.07 to +0.22) and Karve Road scored with North Main Road's (+0.10 °C, −0.01 to +0.20). Against a per-cell model error of ±1.16–1.68 °C, those are small. This is "consistently worse, sometimes by a lot", not "meaningfully worse everywhere."
+- **In two pairings a borrowed model is worse than predicting the neighbourhood mean**: Bajirao Road's model on Karve Road (1.91 against 1.80 °C) and on North Main Road (2.33 against 2.19 °C).
+- **Most of the loss is the base temperature.** Refitting `t_base_c` alone on the target brings every pairing within 0.00–0.23 °C of the own fit, below the mean baseline in all twelve, and indistinguishable from the own fit in nine of twelve.
+
+**Which terms transfer and which do not.** Pairwise differences in each fitted coefficient between windows, as z = difference ÷ √(se₁² + se₂²), using the standard errors in the table above:
+
+| Coefficient | Range across windows | Largest difference | Largest z | Pairs with z > 2 |
+|---|---|---|---|---|
+| `t_base_c` (a fully paved cell) | 41.74 to 44.52 °C | 2.78 °C (North Main Road against Karve Road, z 1.79) | 2.18 (Bajirao Road against Karve Road, difference 2.52 °C) | 1 of 6 |
+| `k_canopy_c_per_fraction` | 5.29 to 7.56 | 2.27 (Bajirao Road against Karve Road) | 1.87 | 0 of 6 |
+| `k_built_c_per_fraction` | −5.65 to −0.18 | 5.46 (Bajirao Road against Karve Road) | 3.62 | 2 of 6 |
+| `k_bare_c_per_fraction` | −2.04 to +2.53 | 4.57 (Bajirao Road against Karve Road) | 3.45 | 2 of 6 |
+
+Note on `t_base_c`: its standard error is large because it is the intercept for a cell that is entirely paving, which almost no 90 m cell is. The offset refit above is the more direct test: shifting only the base temperature recovers most of the transfer loss, so the base temperature differs between windows in practice, including in pairs where its z is below 2.
+
+**The mechanism.**
+- **The canopy effect transfers; the built-environment terms do not.** Across four neighbourhoods, how much cooler a fully vegetated cell is than paving is statistically the same (5.3–7.6 °C, no pair beyond 1.9 standard errors). How roofs and bare ground compare with paving is not: those coefficients change size and sign between neighbourhoods (up to 3.6 standard errors). So does the base temperature.
+- **That is physically plausible.** Vegetation cools through evapotranspiration and shade, which depend on the canopy, not on what surrounds it. "Roof" and "bare" are broad classes whose materials differ by neighbourhood: tin, concrete and tile roofs; dry soil, construction sites, compacted maidans.
+- **For a tree planted over paving this is good news.** Its modelled gain is `k_canopy`, the term that transfers. Its gain over bare ground or a roof uses the terms that do not.
+- **Per-neighbourhood calibration is still necessary.** The base temperature and the built and bare terms move between windows, and a borrowed model is worse than the target's own in every pairing.
+
+The standard errors assume independent residuals, so every z above is an upper bound. The sign changes in `k_built` and `k_bare` do not depend on the error model.
+
+**What this means.**
+- **For ranking many streets:** calibrate once per 2 km window and apply it to every street inside that window. One window serves many streets; one model does not serve many windows.
+- **Limit.** Four windows, three of them overlapping or adjacent in central-west Pune. This is not evidence about neighbourhoods unlike these four.
+
+## Street ranking (Day 7, close)
+
+`python -m app.ranking`, served by `GET /api/ranking` and shown in stage 00. Tier 3's "batch ranking by cost-per-degree", scoped to what is already cached: no network.
+
+- **Which streets.** Every OSM way `name` in the four cached windows whose `highway` class is in `RANKING_HIGHWAY_CLASSES` (trunk, primary, secondary, tertiary, residential, unclassified, living street), and whose longest way with that name holds the 200 m design segment. That class list is an assumption, logged in `config.py`: footways and tracks have no carriageway cross-section, service roads are mostly private compounds. Adding classes adds streets; it changes no street's result.
+- **Which window.** The windows overlap, so a name can sit in several. Each street is ranked once, in the window where all four corners of its 200 m × 40 m design grid sit farthest inside that window's calibration cells. Those cover 1,980 m of the 2,010 m window: 22 whole 90 m blocks from the north-west corner, leaving a 30 m strip on the south and east with no calibration cell. A street whose grid crosses that extent in every window it appears in is skipped, with that reason, rather than given residuals from outside the calibrated area. (The first batch run measured against the full 2,010 m and failed on one street, Chhatrapati Sambhaji Path, whose grid reached the uncovered strip; it was stopped and re-run with this rule.)
+- **Which calibration.** The street's own window, per the transfer test above: one calibration per 2 km window serves the streets inside it.
+- **Same budget for every street.** `RANKING_TREES_MAX` (20) trees, trees only, matched to the street's capacity when it holds fewer; the short search (150 generations, population 120, seed 42); the random (mean of 30) and design-guideline baselines at the same budget.
+- **The metric.** Modelled cooling divided by the cost range, per ₹1,00,000, carried as a range: cooling ÷ high cost to cooling ÷ low cost. It is never collapsed to a midpoint. Every tree is priced at the same per-tree range, so both ends order the streets identically; ranks follow the high end, ties by name.
+- **Ties: ranks are shown as ranges.** Every tree carries the same per-tree cost range, so an overlap test on the per-lakh ranges ties every street with every other (on the first batch, rank 1's range overlapped 76 of the other 92, and neighbouring overlaps chained into one group of all 93). That spread is common to all streets and says nothing about which cools more. The uncertainty that can reorder streets is the model's. So:
+  - A street's modelled change is linear in `k_canopy`, `k_built` and `k_bare`: its crown cells over paving, bare ground and roofs, divided by the design cells. `t_base_c` cancels. The batch computes that gradient exactly and checks, for every street, that it reproduces the layout's change to 1e-9 °C.
+  - The standard error of a street's change, `temp_delta_se_c`, is √(gᵀΣg), with Σ the window's fitted coefficient covariance.
+  - Two streets are tied when their modelled cooling per tree differs by less than `RANKING_TIE_Z` (1.96) standard errors of the difference. In one window both share the same coefficients, so the variance is (g₁ − g₂)ᵀΣ(g₁ − g₂). Across windows the fits are independent, so the variances add.
+  - Each street's range runs from 1 + the number of streets clearly better to n − the number clearly worse. The list, the detail panel and the map show the range, not the point rank.
+  - **Limits.** The coefficient covariance assumes independent residuals, so these ranges are narrower than the truth. The search's own seed-to-seed spread (at most 0.008 °C) is not included; it is small against the coefficient error.
+- **What the rank does and does not mean.** It orders streets by modelled cooling per rupee, under the same model and assumptions as the rest of the product. The per-cell model error (±1.16–1.68 °C) is larger than the gap between most neighbouring ranks. Coefficients are common within a window, so ranks inside one window are sturdier than ranks across windows, where the base temperature and the bare and built coefficients differ.
+- **Not a ward.** Coverage is the four calibrated windows in central-west Pune, and the interface says so.
+- **Skipped streets** are listed in the payload with a reason: the segment runs past the calibrated window, the cross-section has no plantable tree pits, or the searched layout gives no modelled cooling.
+- **Why a street can have no tree pits.** Only a published-design cross-section has tree pit bands; every PMC template from 9A to 30A includes them. A street gets none when (i) its OSM way tags carriageway and both sidewalk widths, so the tagged cross-section is used and it has footway and carriageway only; (ii) no right of way could be measured from building footprints within 30 m, so the default cross-section is used, which has no tree pits by design; or (iii) the measured right of way is narrower than the narrowest template, 9A at 7.0 m. Each is the existing cross-section rule applied to that street, not a ranking-specific filter. It does mean the ranking leaves out narrow lanes where trees might in practice be planted on private frontage.
+
 ## Demo safety kit (Day 7, close)
 
 ### Short search: 150 generations instead of 400
@@ -668,11 +763,26 @@ Trees only, 20 trees, seed 42, population 120, run through `run_ga` on each stre
 | Bajirao Road | −0.674 °C | −0.674 °C | 21.8 s / 62.7 s |
 | FC Road | −0.696 °C | −0.696 °C | 22.9 s / 63.1 s |
 | Karve Road | −0.936 °C | −0.936 °C | 26.6 s / 78.5 s |
-| North Main Road | −0.698 °C | −0.698 °C (seed table above) | 35.5 s, measured while another test ran |
+| North Main Road | −0.698 °C | −0.698 °C | 35.5 s / 111.8 s, both measured while other tests ran on the same machine |
 
 - **Result.** At this budget 150 generations reached the same searched value as 400 on all four streets, in about a third of the time. Smaller populations (60 × 100, 80 × 150) came within 0.008 °C.
 - **Why it is a preset, not the default.** One seed at one budget is not evidence that 150 generations always converges. The full search stays the default; "Short search" is a labelled choice, and the stage 02 counter always shows the generation total ("Generation 142 of 150").
 - **What changing it would change.** A budget nearer a street's capacity, or coating switched on, enlarges the choice and may need more generations. Re-run this table before relying on the short preset in those settings.
+
+### The search spent most of its time copying layouts
+
+- **Found by.** Recording the replay, where a 400-generation search through the API took 266–311 s per street, against 63 s for `run_ga` alone in the table above. cProfile of the job path (FC Road, 60 generations): `copy.deepcopy` accounted for about 75% of the time, repair for about 17%, and model evaluation for about 6%.
+- **Cause.** DEAP's default `toolbox.clone` is `copy.deepcopy`. Each generation clones every individual, and each individual is a Python list of 2,000 genes, so the search deep-copied about 240,000 ints per generation.
+- **Fix.** `clone_layout` in `app/optimizer/ga.py`: a shallow list copy that copies the fitness values and shares `objectives`. Genes are ints and `Objectives` is a frozen dataclass, so nothing shared can be mutated.
+- **Same answers.** The clone consumes no random numbers. FC Road, 30 generations, seed 42, run before and after: identical genome hash, identical conservative and more-cooling ends, and an identical best score at every generation, for both trees only (−0.696101 °C) and trees with 150 coated cells (−1.387705 to −0.773605 °C). Time fell from 9.0 s to 3.0 s for each.
+- **What it does not change.** Every result in this document. The layouts, values and seed-to-seed spreads above were produced by the same operators and random sequence; only the copying was slower.
+- **The short-search timings in the table above are `run_ga` alone, measured before this fix.** They still show 150 and 400 generations reaching the same value; their seconds are superseded.
+- **Wall-clock times on the build laptop are noisy.** It is a 13th Gen Intel Core i5-1334U; during these runs Windows reported 71% processor load from other applications and a clock speed of 1,300 MHz. After the fix, the same 400-generation FC Road search took 116.5 s through the job runner in one run and 173.5 s in another, with a steady per-generation pace within each run. Treat every time here as this machine under that load, not as a property of the code. The layout values do not vary.
+- **Remaining cost.** After the fix, `repair` accounts for most of the search time, mostly `tree_fits` (the tree spacing check). Not optimised: the short search already finishes in under a minute, and repair's correctness is what the matched-budget comparison rests on.
+
+### What the replay records
+
+- **The default request at the short search length** (150 generations, population 120, 20 trees, trees only, seed 42). A replay runs at the recorded pace; a full search recorded through the API took 266–311 s per street before the clone fix, too long to watch. The replay shows these settings and "Generation 142 of 150", so it never presents itself as the full search.
 
 ### Recorded replay when the backend is unreachable
 

@@ -32,6 +32,7 @@ from app.contracts import (
     StreetBasemap,
     StreetGeometry,
     StreetRef,
+    StreetRanking,
     StreetSummary,
     ThermalGrid,
     ThermalStats,
@@ -244,6 +245,15 @@ def thermal_grid(street_id: str, scope: str) -> ThermalGrid:
                            mean_c=round(float(valid.mean()), 2), valid_pixels=int(valid.size)),
         provenance=window.landsat_provenance,
     )
+
+
+# --- Street ranking ----------------------------------------------------------------------------
+
+def street_ranking() -> StreetRanking:
+    """The batch ranking written by `python -m app.ranking`. Never computed on request: it takes an hour."""
+    if not config.RANKING_PATH.exists():
+        raise FileNotFoundError("No street ranking has been computed yet. Run: cd backend && python -m app.ranking")
+    return StreetRanking.model_validate_json(config.RANKING_PATH.read_text(encoding="utf-8"))
 
 
 # --- Optimization ------------------------------------------------------------------------------

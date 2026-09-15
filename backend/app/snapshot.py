@@ -5,7 +5,7 @@ response from this API, recorded in-process from committed fixtures with live da
 edited, summarised or synthesised. Optimizer progress messages keep the time they arrived, so a replay runs at
 the recorded pace.
 
-    python -m app.snapshot                      # all fixture streets, the app's default request
+    python -m app.snapshot                      # all fixture streets, the default request as a short search
     python -m app.snapshot --street pune-fc-road
 """
 
@@ -28,6 +28,11 @@ SNAPSHOT_FORMAT_VERSION = 1
 # Mirrors DEFAULT_REQUEST in frontend/src/lib/search.ts: the request the app opens on.
 DEFAULT_REQUEST = OptimizeRequest(trees_max=20, reflective_cells_max=0, budget_inr_max=None, generations=400,
                                   population=120, cost_weight_c_per_inr=0.0, run_baselines=True, seed=42)
+# What the snapshot records: the default request at the short search length (SEARCH_LENGTHS.short in
+# frontend/src/lib/search.ts). A replay runs at the recorded pace, and a full search recorded at 4-5 minutes per
+# street is too long to watch. At this budget and seed the short search reaches the same layout value
+# (docs/methodology.md, "Demo safety kit"); the replay shows its settings and generation total.
+RECORDED_REQUEST = DEFAULT_REQUEST.model_copy(update={"generations": 150})
 # Mirrors the calibration request the store sends in selectStreet.
 CALIBRATION_REQUEST = {"holdout_fraction": 0.2, "seed": 42}
 
@@ -46,9 +51,12 @@ def _ok(response):
 
 
 def _git_commit() -> str | None:
+    """The commit the recording was made from, with "-dirty" when tracked files had uncommitted changes."""
+    def git(*args: str) -> str:
+        return subprocess.run(["git", *args], cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.strip()
     try:
-        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True,
-                              check=True).stdout.strip()
+        commit = git("rev-parse", "--short", "HEAD")
+        return f"{commit}-dirty" if git("status", "--porcelain", "--untracked-files=no") else commit
     except (OSError, subprocess.CalledProcessError):
         return None
 
@@ -97,19 +105,24 @@ def main(argv: list[str] | None = None) -> None:
     client = TestClient(app)
     summaries = _ok(client.get("/api/streets"))
     wanted = args.street or street_ids()
-    recorded = [record_street(client, street_id, DEFAULT_REQUEST) for street_id in wanted]
+    recorded = [record_street(client, street_id, RECORDED_REQUEST) for street_id in wanted]
 
     manifest_path = SNAPSHOT_DIR / "manifest.json"
     previous = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {"streets": []}
     by_id = {s["id"]: s for s in previous.get("streets", [])} | {s["id"]: s for s in recorded}
     _write(SNAPSHOT_DIR / "streets.json", summaries)
+    ranking_response = client.get("/api/ranking")
+    if ranking_response.status_code == 200:
+        _write(SNAPSHOT_DIR / "ranking.json", ranking_response.json())
+    else:
+        print(f"no street ranking recorded: {ranking_response.json().get('detail')}", flush=True)
     _write(manifest_path, {
         "format_version": SNAPSHOT_FORMAT_VERSION,
         "recorded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "git_commit": _git_commit(),
-        "source_adapter": config.SOURCE_ADAPTER,
+        "source_adapter": config.ACTIVE_SOURCE_ADAPTER,
         "calibration_request": CALIBRATION_REQUEST,
-        "optimize_request": DEFAULT_REQUEST.model_dump(),
+        "optimize_request": RECORDED_REQUEST.model_dump(),
         "streets": [by_id[s["id"]] for s in summaries if s["id"] in by_id],
     })
 

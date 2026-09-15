@@ -14,6 +14,7 @@ import type {
   OptimizeRequest,
   StreetBasemap,
   StreetGeometry,
+  StreetRanking,
   StreetSummary,
   ThermalGrid,
 } from '../types/contracts.ts'
@@ -68,6 +69,10 @@ interface State {
   stage: StageId
   dataMode: DataMode
   streets: Load<StreetSummary[]>
+  /** Streets inside the calibrated windows, ranked offline by `python -m app.ranking`. */
+  ranking: Load<StreetRanking>
+  /** rankedKey() of the ranked street open in stage 00, if any. */
+  rankedKey: string | null
   street: StreetSummary | null
   geometry: Load<StreetGeometry>
   /** OSM roads and footprints for the window, and the city locator. Display context, never data. */
@@ -82,6 +87,8 @@ interface State {
 
 interface Actions {
   loadStreets: () => Promise<void>
+  loadRanking: () => Promise<void>
+  selectRanked: (key: string | null) => void
   selectStreet: (street: StreetSummary) => void
   setRequest: (patch: Partial<OptimizeRequest>) => void
   startOptimize: () => Promise<void>
@@ -135,6 +142,8 @@ export const useStore = create<Store>()((set, get) => ({
   stage: 'locate',
   dataMode: { kind: 'live' },
   streets: { status: 'idle' },
+  ranking: { status: 'idle' },
+  rankedKey: null,
   street: null,
   geometry: { status: 'idle' },
   basemap: { status: 'idle' },
@@ -185,6 +194,18 @@ export const useStore = create<Store>()((set, get) => ({
       })
     }
   },
+
+  // Called once the streets have loaded, so `source` is already the live backend or the recording.
+  loadRanking: async () => {
+    set({ ranking: { status: 'loading' } })
+    try {
+      set({ ranking: { status: 'ready', data: await source.ranking() } })
+    } catch (error) {
+      set({ ranking: { status: 'error', message: messageOf(error) } })
+    }
+  },
+
+  selectRanked: (key) => set({ rankedKey: key }),
 
   selectStreet: (street) => {
     closeStream()

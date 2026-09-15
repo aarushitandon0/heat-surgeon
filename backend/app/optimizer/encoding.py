@@ -209,9 +209,12 @@ class StreetGrid:
         ]
 
 
-def segment_frame(window: CachedWindow) -> dict:
-    """The design segment: DESIGN_SEGMENT_LENGTH_M centred on the street's longest OSM way in the window."""
-    street_name = window.manifest["osm_name"]
+def segment_frame(window: CachedWindow, street_name: str | None = None) -> dict:
+    """The design segment: DESIGN_SEGMENT_LENGTH_M centred on the street's longest OSM way in the window.
+
+    `street_name` is an OSM `name` tag; it defaults to the window's own street (the manifest's osm_name).
+    """
+    street_name = street_name or window.manifest["osm_name"]
     ways = [w for w in window.osm["highways"] if w["tags"].get("name") == street_name]
     if not ways:
         raise ValueError(f"no OSM highway named {street_name!r} in the window")
@@ -229,14 +232,14 @@ def segment_frame(window: CachedWindow) -> dict:
 
 
 def grid_from_geometry(window: CachedWindow, model: HeatModel, classes_1m: np.ndarray, subgrid_transform,
-                       block_residual_c: np.ndarray) -> StreetGrid:
-    """Build the street-aligned design grid for the window's street from its geometry and cross-section.
+                       block_residual_c: np.ndarray, street_name: str | None = None) -> StreetGrid:
+    """Build the street-aligned design grid for a street in the window from its geometry and cross-section.
 
     Surface classes come from the 1 m window classification (canopy from NDVI, buildings from merged
     footprints). Inside the right of way, cells that are not canopy or building take the surface of their
-    cross-section band. Allowed interventions follow the bands.
+    cross-section band. Allowed interventions follow the bands. `street_name` defaults to the window's own street.
     """
-    frame = segment_frame(window)
+    frame = segment_frame(window, street_name)
     length_m, width_m, cell_m = config.DESIGN_SEGMENT_LENGTH_M, config.DESIGN_CORRIDOR_WIDTH_M, config.DESIGN_CELL_SIZE_M
     origin, along, right = frame["origin"], frame["along"], frame["right"]
     rows, cols = round(length_m / cell_m), round(width_m / cell_m)

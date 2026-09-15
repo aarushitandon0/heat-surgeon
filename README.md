@@ -187,7 +187,7 @@ Open http://localhost:5173. The Vite dev server proxies `/api` and `/ws` to `127
 
 1. **Pick a street** (stage 00, Locate).
 2. **Diagnose it** (stage 01). The window thermal grid loads, the provenance readout resolves, and calibration returns its hold-out error.
-3. **Start the search** (stage 02, Optimize). The convergence curve streams over the WebSocket. With the defaults (trees only, population 120, 400 generations) the search takes about 63 s on an Intel Iris Xe laptop. "Short search" runs 150 generations in about 23 s.
+3. **Start the search** (stage 02, Optimize). The convergence curve streams over the WebSocket. With the defaults (trees only, population 120, 400 generations) the search took 116 s through the job runner on an Intel Iris Xe laptop, and up to 174 s when the machine was busy. "Short search" runs 150 generations in about 25 s and, at the default budget, reached the same layout value on all four fixture streets.
 4. **Read the result** (stage 03, Operate). It has:
    - the 3D scene, and a 2D before/after grid
    - the modelled change as a band, with the model error beside it
@@ -444,6 +444,7 @@ Base URL: `http://127.0.0.1:8000`. Every shape is defined in `backend/app/contra
 | Method | Path | Returns |
 |---|---|---|
 | `GET` | `/api/streets` | `StreetSummary[]` |
+| `GET` | `/api/ranking` | `StreetRanking`: streets in the calibrated windows ranked by modelled cooling per ₹1 lakh; `404` until `python -m app.ranking` has run |
 | `GET` | `/api/street/{id}/geometry` | `StreetGeometry`: buildings with height and footprint source, road, sidewalks, cross-section |
 | `GET` | `/api/street/{id}/thermal?scope=window\|street` | `ThermalGrid`: measured LST on Landsat's native grid, `null` where no valid observation survived |
 | `POST` | `/api/street/{id}/calibrate` | `CalibrationResult` |
@@ -579,6 +580,8 @@ npm run typecheck      # tsc -b
 npm run lint           # oxlint
 npm test               # node --test on tests/**/*.test.ts
 npm run check:design   # design rule scan
+npm run build:replay   # static build that replays frontend/public/snapshot/ and never calls a backend
+                       # (add -- --base=/your-path/ when hosting under a subpath)
 ```
 
 ---
@@ -599,6 +602,16 @@ python -m app.model.validate --street pune-fc-road [--holdout-fraction 0.2] [--s
 # Writes docs/figures/<street>-layouts.png.
 python -m app.optimizer.ga --street pune-fc-road [--trees 20] [--reflective-cells 150] \
     [--generations 400] [--population 120] [--ga-seeds 3] [--random-seeds 30]
+
+# Do coefficients transfer between windows? Hold-out error of borrowed, offset and pooled models.
+python -m app.model.transfer
+
+# Rank every eligible street in the cached windows by modelled cooling per ₹1 lakh (about 35 min, 4 workers).
+# Writes backend/fixtures/ranking/four-windows.json.
+python -m app.ranking [--workers 4]
+
+# Record every API response the app uses, per street, for the offline replay (frontend/public/snapshot/).
+python -m app.snapshot
 
 # Re-derive the footprint-area → storeys table from tagged OSM buildings.
 python -m app.data.heights

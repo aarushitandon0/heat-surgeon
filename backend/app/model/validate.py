@@ -83,11 +83,17 @@ class CalibrationRun:
     albedo_correlation: dict[str, tuple[int, float]]
 
 
-def calibrate(street_id: str, request: CalibrationRequest | None = None) -> CalibrationRun:
-    request = request or CalibrationRequest()
-    window = load_window(street_id)
-    cover, lst_c, albedo = calibration_cells(window)
+@dataclass
+class UsableCells:
+    """The 90 m calibration cells a fit may use, as flat arrays, and where each sits in the block grid."""
+    cells: dict[str, np.ndarray]
+    block_index: np.ndarray   # flat index into the block grid, row-major from the window's north-west corner
+    block_shape: tuple[int, int]
+    excluded: dict[str, int]
 
+
+def usable_cells(window: CachedWindow) -> UsableCells:
+    cover, lst_c, albedo = calibration_cells(window)
     measured = np.isfinite(lst_c) & np.isfinite(albedo)
     covered = cover.observed_fraction == 1.0
     dry = cover.water_fraction <= config.WATER_FRACTION_MAX_FOR_FIT
@@ -106,6 +112,14 @@ def calibrate(street_id: str, request: CalibrationRequest | None = None) -> Cali
         "albedo": albedo.ravel()[index],
         "lst_c": lst_c.ravel()[index],
     }
+    return UsableCells(cells=cells, block_index=index, block_shape=lst_c.shape, excluded=excluded)
+
+
+def calibrate(street_id: str, request: CalibrationRequest | None = None) -> CalibrationRun:
+    request = request or CalibrationRequest()
+    window = load_window(street_id)
+    usable = usable_cells(window)
+    cells, index, excluded = usable.cells, usable.block_index, usable.excluded
     observed = cells["lst_c"]
     fit_i, holdout_i = holdout_split(len(index), request.holdout_fraction, request.seed)
 
